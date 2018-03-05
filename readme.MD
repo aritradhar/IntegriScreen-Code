@@ -4,3 +4,5 @@ The goal of the project is to ensure the integrity of user’s communication wit
 using an untrusted client by relying on a trusted mobile device.
 The mobile device uses visual analysis of client’s screen and input devices to assert that user’s
 indented actions match the data received by the server.
+
+A nice tutorial about the real-time on-device Vision API in Android: https://developers.google.com/vision/
