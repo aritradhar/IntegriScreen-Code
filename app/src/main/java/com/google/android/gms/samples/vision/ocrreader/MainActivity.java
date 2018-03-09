@@ -52,7 +52,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
 
-        findViewById(R.id.read_text).setOnClickListener(this);
+        // UNCOMMENT THIS TO NOT START THE OCR IMMEDIATELY!
+        // findViewById(R.id.read_text).setOnClickListener(this);
+        onClick(findViewById(R.id.read_text));
     }
 
     /**
