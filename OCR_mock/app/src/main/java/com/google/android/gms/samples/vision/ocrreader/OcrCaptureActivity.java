@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -213,7 +212,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedPreviewSize(1280, 1024)
                 // This was originally 2.0f, we are testing to see if it helps to reduce it.
-                .setRequestedFps(2.0f)
+                .setRequestedFps(10.0f)
                 .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
                 .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
                 .build();
