@@ -17,6 +17,7 @@ package com.google.android.gms.samples.vision.ocrreader;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,6 +32,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -84,6 +86,19 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.ocr_capture);
+
+        // HIDING the Status Bar and Action Bar
+        View decorView = getWindow().getDecorView();
+        // Hide the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+        // Remember that you should never show the action bar if the
+        // status bar is hidden, so hide that too if necessary.
+
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
+        // -----------------------
+
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<OcrGraphic>) findViewById(R.id.graphicOverlay);
@@ -198,7 +213,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedPreviewSize(1280, 1024)
                 // This was originally 2.0f, we are testing to see if it helps to reduce it.
-                .setRequestedFps(0.5f)
+                .setRequestedFps(2.0f)
                 .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
                 .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
                 .build();

@@ -34,7 +34,7 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
 
     private int mId;
 
-    private static final int TEXT_COLOR = Color.WHITE;
+    private static final int TEXT_COLOR = Color.BLUE;
 
     private static Paint sRectPaint;
     private static Paint sTextPaint;
@@ -55,7 +55,7 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
         if (sTextPaint == null) {
             sTextPaint = new Paint();
             sTextPaint.setColor(TEXT_COLOR);
-            sTextPaint.setTextSize(54.0f);
+            sTextPaint.setTextSize(34.0f);
         }
         // Redraw the overlay, as this graphic has been added.
         postInvalidate();
