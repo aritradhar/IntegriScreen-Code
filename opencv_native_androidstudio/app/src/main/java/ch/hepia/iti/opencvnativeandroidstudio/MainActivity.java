@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
-    private Mat previousMat;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -72,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 1);
 
         _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
+        _cameraBridgeViewBase.setMaxFrameSize(1024, 768);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
     }
@@ -158,11 +158,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return dst;
     }
 
-    Mat matGray;
+    private Mat matGray;
+    private Mat previousMatGray;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        matGray = inputFrame.gray();
-        return computeCanny(matGray);
+        matGray = inputFrame.gray().clone();   // This should, hopefully, persist it after the function is done.
+        Mat outputMat = new Mat(matGray.size(), CvType.CV_8UC1);
+        // return computeCanny(matGray);
 
+        if (previousMatGray == null) {
+            Log.w("BBB", "null null");
+            previousMatGray = matGray;
+        }
+
+        compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
+        previousMatGray = matGray;
+        return outputMat;
 /*
         apply_median(matGray.getNativeObjAddr(), 5);
         Mat medianCurrent = matGray.clone();
@@ -183,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public native void salt(long matAddrGray, int nbrElem);
-    public native void subtract_from_previous(long matAddrGray, long previousAddrGray);
+    public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native void apply_median(long matAddrGray, int filterSize);
 }
 
