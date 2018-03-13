@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 1);
 
         _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
-        _cameraBridgeViewBase.setMaxFrameSize(1024, 768);
+        // Change camera resolution:
+        // _cameraBridgeViewBase.setMaxFrameSize(1024, 768);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
     }
@@ -173,27 +174,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
         previousMatGray = matGray;
         return outputMat;
-/*
-        apply_median(matGray.getNativeObjAddr(), 5);
-        Mat medianCurrent = matGray.clone();
-
-        // salt(matGray.getNativeObjAddr(), 2000);
-
-        // We just take the difference between two frames here
-        if (previousMat == null) {
-            Log.w("BBB", "null null");
-            previousMat = medianCurrent.clone();
-        }
-
-       // subtract_from_previous(matGray.getNativeObjAddr(), previousMat.getNativeObjAddr());
-
-        previousMat = medianCurrent.clone();
-        return matGray;
-*/
     }
 
     public native void salt(long matAddrGray, int nbrElem);
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native void apply_median(long matAddrGray, int filterSize);
+    public native void realign_perspective(long inputAddr, long outputAddr);
 }
 

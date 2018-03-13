@@ -20,60 +20,106 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_salt(JNIEn
     }
 }
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_apply_1median(JNIEnv *env, jobject instance,
-                                                                                   jlong matAddrGray,
-                                                                                   jint filterSize) {
+void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_apply_1median(
+        JNIEnv *env, jobject instance,
+        jlong matAddrGray,
+        jint filterSize) {
+
     Mat &mGr = *(Mat *) matAddrGray;
     medianBlur(mGr, mGr, filterSize);
 }
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1diff(JNIEnv *env,
-                                                                                     jobject instance,
-                                                                                     jlong matAddrFirst,
-                                                                                     jlong matAddrSecond,
-                                                                                     jlong matAddrDiff) {
+void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_realign_1perspective(
+        JNIEnv *env, jobject instance,
+        jlong inputAddr,
+        jlong outputAddr) {
+    // TODO: convert to normal Android calls?
+
+    Mat input = *(Mat *) inputAddr;
+    Mat output = *(Mat *) outputAddr;
+
+    // Input Quadilateral or Image plane coordinates
+    Point2f inputQuad[4];
+    // Output Quadilateral or World plane coordinates
+    Point2f outputQuad[4];
+
+    // Lambda Matrix
+    Mat lambda(2, 4, CV_32FC1);
+
+    // Set the lambda matrix the same type and size as input
+    lambda = Mat::zeros(input.rows, input.cols, input.type());
+
+    // The 4 points that select quadilateral on the input , from top-left in clockwise order
+    // These four pts are the sides of the rect box used as input
+    //    TODO: THESE I NEED TO COMPUTE!
+    inputQuad[0] = Point2f(-30, -60);
+    inputQuad[1] = Point2f(input.cols + 50, -50);
+    inputQuad[2] = Point2f(input.cols + 100, input.rows + 50);
+    inputQuad[3] = Point2f(-50, input.rows + 50);
+
+    // The 4 points where the mapping is to be done , from top-left in clockwise order
+    // THESE ARE CONSTANT!
+    outputQuad[0] = Point2f(0, 0);
+    outputQuad[1] = Point2f(input.cols - 1, 0);
+    outputQuad[2] = Point2f(input.cols - 1, input.rows - 1);
+    outputQuad[3] = Point2f(0, input.rows - 1);
+
+
+    // Get the Perspective Transform Matrix i.e. lambda
+    lambda = getPerspectiveTransform(inputQuad, outputQuad);
+    // Apply the Perspective Transform just found to the src image
+    warpPerspective(input, output, lambda, output.size());
+}
+
+void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1diff(
+         JNIEnv *env, jobject instance,
+         jlong matAddrFirst,
+         jlong matAddrSecond,
+         jlong matAddrOutput)   // used for output as well
+{
+    // When is a pixel considered black, and when white?
+    uchar black_white_threshold = 30;
+
     Mat &matFirst = *(Mat *) matAddrFirst;
     Mat &matSecond = *(Mat *) matAddrSecond;
-    Mat &matDiff = *(Mat *) matAddrDiff;
+    Mat &matOutput = *(Mat *) matAddrOutput;
 
-    Mat blurFirst(matFirst.size(), CV_8UC1);
-    Mat blurSecond(matFirst.size(), CV_8UC1);
+    // Two tables that I'll later need
+    Mat blurFirst(1, 1, CV_8UC1);
+    Mat blurSecond(1, 1, CV_8UC1);
 
+    // ---- Different tests ----
     // medianBlur(matFirst, blurFirst, 9);
     // medianBlur(matSecond, blurSecond, 9);
 
-    blur( matFirst, blurFirst, Size(3,3) );
-    blur( matSecond, blurSecond, Size(3,3) );
+    // blur( matFirst, blurFirst, Size(3,3) );
+    // blur( matSecond, blurSecond, Size(3,3) );
 
-    for(int i = 0; i < blurFirst.rows; ++i)
-        for(int j = 0; j < blurFirst.cols; ++j) {
-//             int int_diff = ((int)blurFirst.at<uchar>(i, j)) - blurSecond.at<uchar>(i, j);
-//             if (abs(int_diff) < 50)
-//                 int_diff = 0;
-//             else
-//                 int_diff = 255;   //    ako razlika < 0 stavi 0, inace 255?
-//             matDiff.at<uchar>(i, j) = (uchar)int_diff;
+    bool should_subsample = false;
+    if (should_subsample) {
+        pyrDown(matFirst, blurFirst, Size(matOutput.cols / 2, matOutput.rows / 2));
+        pyrDown(matSecond, blurSecond, Size(matSecond.cols / 2, matSecond.rows / 2));
+    }
+    else {
+        blurFirst = matFirst;
+        blurSecond = matSecond;
+    }
 
-            matDiff.at<uchar>(i, j) = blurFirst.at<uchar>(i, j) - blurSecond.at<uchar>(i, j);
-        }
-
-/*
-    % morfolosko zatvaranje
-    se = strel('disk', 7);
-    img(:,:,n) = imclose(img(:,:,n), se);
-
-    % morfolosko otvaranje, izbacujem male crne likove
-    img(:,:,n) = ~bwareaopen(~img(:,:,n), 500);
-*/
+    // Compute the distance between two frames, apply a threshold.
+    absdiff(blurFirst, blurSecond, blurSecond);
+    threshold(blurSecond, blurSecond, black_white_threshold, 255, CV_THRESH_BINARY);
 
     /// Apply the specified morphology operation
-    int morph_size = 3;
+    int morph_size = 1;
     Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
     // Morphological opening
-    morphologyEx( matDiff, matDiff, MORPH_OPEN, element );
+    morphologyEx( blurSecond, matOutput, MORPH_OPEN, element );
 
-    // Morphological closing
-    morphologyEx( matDiff, matDiff, MORPH_CLOSE, element );
+    // Morphological closing. It seems that we can live without it.
+    // morphologyEx( blurSecond, blurSecond, MORPH_CLOSE, element );
+
+    if (should_subsample)
+        resize(matOutput, matOutput, matFirst.size(),0,0,INTER_LINEAR);
 }
 }
