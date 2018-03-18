@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
+
 using namespace std;
 using namespace cv;
 
@@ -121,5 +122,35 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1d
 
     if (should_subsample)
         resize(matOutput, matOutput, matFirst.size(),0,0,INTER_LINEAR);
+}
+
+
+void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1aruco(
+        JNIEnv *env, jobject instance,
+        jlong matGrayAddr) {
+
+    /*
+    std::vector<int> ids;
+    std::vector<std::vector<cv::Point2f> > corners;
+    cv::aruco::detectMarkers(image, dictionary, corners, ids);
+
+    // if at least one marker detected
+    if (ids.size() > 0)
+        cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
+*/
+
+    
+    /*
+    aruco::MarkerDetector MDetector;
+//detect
+    std::vector<aruco::Marker> markers = MDetector.detect(image);
+//print info to console
+    for (size_t i = 0; i < markers.size(); i++)
+        std::cout << markers[i] << std::endl;
+//draw in the image
+    for (size_t i = 0; i < markers.size(); i++)
+        markers[i].draw(image);
+
+     */
 }
 }

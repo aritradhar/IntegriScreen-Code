@@ -10,8 +10,36 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ch.hepia.iti.opencvnativeandroidstudio.MainActivity">
 
+    <Button
+        android:id="@+id/canny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClickShowCanny"
+        android:text="Canny" />
+
+    <Button
+        android:id="@+id/diff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/canny"
+        android:onClick="onClickShowDiff"
+        android:text="Diff" />
+
+    <Button
+        android:id="@+id/aruco"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/diff"
+        android:onClick="onClickShowAruco"
+        android:text="Aruco" />
+
     <org.opencv.android.JavaCameraView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/main_surface" />
+
 </RelativeLayout>

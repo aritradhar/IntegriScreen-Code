@@ -2,6 +2,7 @@ package ch.hepia.iti.opencvnativeandroidstudio;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.icu.util.Output;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,10 @@ import static org.opencv.imgproc.Imgproc.blur;
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "OCVSample::Activity";
+
+    private enum OutputSelection { SEL_CANNY, SEL_DIFF, SEL_ARUCO };
+    private OutputSelection currentOutputSelection;
+
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -61,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         actionBar.hide();
         // -----------------------
 
+
+        currentOutputSelection = OutputSelection.SEL_CANNY;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -116,6 +123,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
+    public void onClickShowCanny(View view) {
+        currentOutputSelection = OutputSelection.SEL_CANNY;
+    }
+
+    public void onClickShowDiff(View view) {
+        currentOutputSelection = OutputSelection.SEL_DIFF;
+    }
+
+    public void onClickShowAruco(View view) {
+        currentOutputSelection = OutputSelection.SEL_ARUCO;
+    }
+
     public void onDestroy() {
         super.onDestroy();
         disableCamera();
@@ -163,21 +182,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Mat previousMatGray;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         matGray = inputFrame.gray().clone();   // This should, hopefully, persist it after the function is done.
-        Mat outputMat = new Mat(matGray.size(), CvType.CV_8UC1);
-        // return computeCanny(matGray);
 
-        if (previousMatGray == null) {
-            Log.w("BBB", "null null");
+        if (currentOutputSelection == OutputSelection.SEL_CANNY) {
+            return computeCanny(matGray);
+        } else if (currentOutputSelection == OutputSelection.SEL_DIFF) {
+            Mat outputMat = new Mat(matGray.size(), CvType.CV_8UC1);
+
+            if (previousMatGray == null) {
+                Log.w("BBB", "null null");
+                previousMatGray = matGray;
+            }
+
+            compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
             previousMatGray = matGray;
+            return outputMat;
+        } else if (currentOutputSelection == OutputSelection.SEL_ARUCO) {
+            compute_aruco(matGray.getNativeObjAddr());
+            return matGray;
         }
 
-        compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
-        previousMatGray = matGray;
-        return outputMat;
+        return matGray;
     }
 
     public native void salt(long matAddrGray, int nbrElem);
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
+    public native void compute_aruco(long matAddrGray);
     public native void apply_median(long matAddrGray, int filterSize);
     public native void realign_perspective(long inputAddr, long outputAddr);
 }
