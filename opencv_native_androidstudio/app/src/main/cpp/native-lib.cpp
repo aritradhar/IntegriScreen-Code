@@ -10,7 +10,7 @@ using namespace cv;
 
 extern "C"
 {
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_salt(JNIEnv *env, jobject instance,
+void JNICALL Java_com_example_integriscreen_MainActivity_salt(JNIEnv *env, jobject instance,
                                                                            jlong matAddrGray,
                                                                            jint nbrElem) {
     Mat &mGr = *(Mat *) matAddrGray;
@@ -21,7 +21,7 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_salt(JNIEn
     }
 }
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_apply_1median(
+void JNICALL Java_com_example_integriscreen_MainActivity_apply_1median(
         JNIEnv *env, jobject instance,
         jlong matAddrGray,
         jint filterSize) {
@@ -30,7 +30,7 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_apply_1med
     medianBlur(mGr, mGr, filterSize);
 }
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_realign_1perspective(
+void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
         jlong inputAddr,
         jlong outputAddr) {
@@ -72,7 +72,7 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_realign_1p
     warpPerspective(input, output, lambda, output.size());
 }
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1diff(
+void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          JNIEnv *env, jobject instance,
          jlong matAddrFirst,
          jlong matAddrSecond,
@@ -125,7 +125,7 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1d
 }
 
 
-void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1aruco(
+void JNICALL Java_com_example_integriscreen_MainActivity_compute_1aruco(
         JNIEnv *env, jobject instance,
         jlong matGrayAddr) {
 
@@ -139,7 +139,7 @@ void JNICALL Java_ch_hepia_iti_opencvnativeandroidstudio_MainActivity_compute_1a
         cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
 */
 
-    
+
     /*
     aruco::MarkerDetector MDetector;
 //detect

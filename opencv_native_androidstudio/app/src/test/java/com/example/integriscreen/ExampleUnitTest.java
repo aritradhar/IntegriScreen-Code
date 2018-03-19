@@ -1,4 +1,4 @@
-package ch.hepia.iti.opencvnativeandroidstudio;
+package com.example.integriscreen;
 
 import org.junit.Test;
 

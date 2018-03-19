@@ -1,8 +1,7 @@
-package ch.hepia.iti.opencvnativeandroidstudio;
+package com.example.integriscreen;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.icu.util.Output;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
