@@ -30,7 +30,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_apply_1median(
     medianBlur(mGr, mGr, filterSize);
 }
 
-void realign_perspective(Mat *inputMat) {
+void realign_perspective(Mat input) {
     // Input Quadilateral or Image plane coordinates
     Point2f inputQuad[4];
     // Output Quadilateral or World plane coordinates
@@ -61,7 +61,9 @@ void realign_perspective(Mat *inputMat) {
     // Get the Perspective Transform Matrix i.e. lambda
     lambda = getPerspectiveTransform(inputQuad, outputQuad);
     // Apply the Perspective Transform just found to the src image
+    Mat output(1, 1, CV_8UC1);
     warpPerspective(input, output, lambda, output.size());
+    output.copyTo(input);
 }
 
 void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
