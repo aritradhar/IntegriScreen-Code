@@ -30,15 +30,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_apply_1median(
     medianBlur(mGr, mGr, filterSize);
 }
 
-void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
-        JNIEnv *env, jobject instance,
-        jlong inputAddr,
-        jlong outputAddr) {
-    // TODO: convert to normal Android calls?
-
-    Mat input = *(Mat *) inputAddr;
-    Mat output = *(Mat *) outputAddr;
-
+void realign_perspective(Mat *inputMat) {
     // Input Quadilateral or Image plane coordinates
     Point2f inputQuad[4];
     // Output Quadilateral or World plane coordinates
@@ -125,32 +117,16 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 }
 
 
-void JNICALL Java_com_example_integriscreen_MainActivity_compute_1aruco(
+void JNICALL Java_com_example_integriscreen_MainActivity_green_1detector(
         JNIEnv *env, jobject instance,
         jlong matGrayAddr) {
 
-    /*
-    std::vector<int> ids;
-    std::vector<std::vector<cv::Point2f> > corners;
-    cv::aruco::detectMarkers(image, dictionary, corners, ids);
+    Mat &inputMat = *(Mat *)matGrayAddr;
+    Mat helperMat(1, 1, CV_8UC1);
 
-    // if at least one marker detected
-    if (ids.size() > 0)
-        cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
-*/
-
-
-    /*
-    aruco::MarkerDetector MDetector;
-//detect
-    std::vector<aruco::Marker> markers = MDetector.detect(image);
-//print info to console
-    for (size_t i = 0; i < markers.size(); i++)
-        std::cout << markers[i] << std::endl;
-//draw in the image
-    for (size_t i = 0; i < markers.size(); i++)
-        markers[i].draw(image);
-
-     */
+    cvtColor(inputMat, helperMat, COLOR_RGB2HSV);
+    inRange(helperMat, Scalar(65, 0, 0), Scalar(75, 255, 255), inputMat);
 }
+
+
 }

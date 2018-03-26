@@ -28,14 +28,24 @@
         android:text="Diff" />
 
     <Button
-        android:id="@+id/aruco"
+        android:id="@+id/green"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
         android:layout_toEndOf="@+id/diff"
-        android:onClick="onClickShowAruco"
+        android:onClick="onClickShowGreen"
         android:text="Aruco" />
+
+    <Button
+        android:id="@+id/raw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/green"
+        android:onClick="onClickShowRaw"
+        android:text="Raw" />
 
     <org.opencv.android.JavaCameraView
             android:layout_width="fill_parent"

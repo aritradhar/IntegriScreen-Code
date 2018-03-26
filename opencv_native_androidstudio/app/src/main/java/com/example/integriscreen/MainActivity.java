@@ -14,7 +14,9 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { SEL_CANNY, SEL_DIFF, SEL_ARUCO };
+    private enum OutputSelection { SEL_RAW, SEL_CANNY, SEL_DIFF, SEL_GREEN };
     private OutputSelection currentOutputSelection;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
@@ -130,8 +132,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.SEL_DIFF;
     }
 
-    public void onClickShowAruco(View view) {
-        currentOutputSelection = OutputSelection.SEL_ARUCO;
+    public void onClickShowGreen(View view) {
+        currentOutputSelection = OutputSelection.SEL_GREEN;
+    }
+
+    public void onClickShowRaw(View view) {
+        currentOutputSelection = OutputSelection.SEL_RAW;
     }
 
     public void onDestroy() {
@@ -150,62 +156,67 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onCameraViewStopped() {
     }
 
-    Mat dst, src_blurred, detected_edges;
     // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
+    // This is using Java-based openCV
     public Mat computeCanny(Mat src_gray) {
-        double lowThreshold = 30;   // TODO: ovo treba iterirati
+        double lowThreshold = 30;   // TODO: this threshold could be optimized
         double ratio = 2;
         int kernel_size = 3;
 
-        dst = new Mat(3, 3, CvType.CV_8UC4);
-        src_blurred = new Mat(3, 3, CvType.CV_8UC4);
-        detected_edges = new Mat(3, 3, CvType.CV_8UC4);
-
-        dst.create( src_gray.size(), src_gray.type() );
+        Mat src_blurred = new Mat(3, 3, CvType.CV_8UC4);
 
         /// Reduce noise with a kernel 3x3
         blur( src_gray, src_blurred, new Size(3,3) );
 
         /// Canny detector
-        Imgproc.Canny( src_blurred, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size, true );
+        Imgproc.Canny( src_blurred, src_gray, lowThreshold, lowThreshold*ratio, kernel_size, true );
 
-        /// Using Canny's output as a mask, we display our result
-        // TODO: mozda ovo stvara problem?
-        // dst = Scalar::all(0);
+        // This copies using the "detected_edges" as a mask
+        // src_gray.copyTo( dst, detected_edges);
 
-        src_gray.copyTo( dst, detected_edges);
-        return dst;
+
+        src_blurred.release();
+
+        return src_gray;
     }
 
+
+    // TODO: this still leaks memory from time to time. We need to fix it at some point.
     private Mat matGray;
     private Mat previousMatGray;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        matGray = inputFrame.gray().clone();   // This should, hopefully, persist it after the function is done.
 
         if (currentOutputSelection == OutputSelection.SEL_CANNY) {
-            return computeCanny(matGray);
-        } else if (currentOutputSelection == OutputSelection.SEL_DIFF) {
+            Mat matOut = inputFrame.gray();
+            return computeCanny(matOut);
+        }
+
+        if (currentOutputSelection == OutputSelection.SEL_DIFF) {
+            matGray = inputFrame.gray();
+
             Mat outputMat = new Mat(matGray.size(), CvType.CV_8UC1);
 
-            if (previousMatGray == null) {
-                Log.w("BBB", "null null");
+            if (previousMatGray == null)
                 previousMatGray = matGray;
-            }
 
             compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
             previousMatGray = matGray;
             return outputMat;
-        } else if (currentOutputSelection == OutputSelection.SEL_ARUCO) {
-            compute_aruco(matGray.getNativeObjAddr());
-            return matGray;
         }
 
-        return matGray;
+        if (currentOutputSelection == OutputSelection.SEL_GREEN) {
+            Mat currentFrame = inputFrame.rgba();
+            green_detector(currentFrame.getNativeObjAddr());
+            return currentFrame;
+        }
+
+        // currentOutputSelection == OutputSelection.SEL_RAW
+        return inputFrame.rgba();
     }
 
     public native void salt(long matAddrGray, int nbrElem);
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
-    public native void compute_aruco(long matAddrGray);
+    public native void green_detector(long matAddrRGB);
     public native void apply_median(long matAddrGray, int filterSize);
     public native void realign_perspective(long inputAddr, long outputAddr);
 }
