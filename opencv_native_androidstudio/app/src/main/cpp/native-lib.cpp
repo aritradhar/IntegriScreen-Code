@@ -10,6 +10,10 @@ using namespace cv;
 
 void detect_and_draw_circles(Mat &src_gray);
 
+// Input Quadilateral or Image plane coordinates
+Point2f inputQuad[4];
+bool initialized = false;
+
 extern "C"
 {
 void JNICALL Java_com_example_integriscreen_MainActivity_salt(JNIEnv *env, jobject instance,
@@ -38,10 +42,11 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         jlong outputAddr)
 {
     Mat &input = *(Mat *)inputAddr;
-    Mat &output = *(Mat *)outputAddr;
+    Mat output;
 
     // Input Quadilateral or Image plane coordinates
-    Point2f inputQuad[4];
+    // Point2f inputQuad[4];
+
     // Output Quadilateral or World plane coordinates
     Point2f outputQuad[4];
 
@@ -54,10 +59,14 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     // The 4 points that select quadilateral on the input , from top-left in clockwise order
     // These four pts are the sides of the rect box used as input
     //    TODO: THESE I NEED TO COMPUTE!
-    inputQuad[0] = Point2f(0, 100);
-    inputQuad[1] = Point2f(input.cols - 50, 100);
-    inputQuad[2] = Point2f(input.cols - 100, input.rows - 50);
-    inputQuad[3] = Point2f(200, input.rows - 50);
+
+    if (!initialized) {
+        inputQuad[0] = Point2f(0, 100);
+        inputQuad[1] = Point2f(input.cols - 50, 100);
+        inputQuad[2] = Point2f(input.cols - 100, input.rows - 50);
+        inputQuad[3] = Point2f(200, input.rows - 50);
+        initialized = true;
+    }
 
     // The 4 points where the mapping is to be done , from top-left in clockwise order
     // THESE ARE CONSTANT!
@@ -72,9 +81,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
 
     // Apply the Perspective Transform that I just computed to the src image
     warpPerspective(input, output, lambda, input.size());
-
-
-    // output.copyTo(input);
+    output.copyTo(input);
 }
 
 void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
@@ -132,7 +139,8 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 
 void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         JNIEnv *env, jobject instance,
-        jlong matRGBAddr, jlong hueCenter) {
+        jlong matRGBAddr,
+        jlong hueCenter) {
 
     Mat &inputMat = *(Mat *)matRGBAddr;
     Mat helperMat(1, 1, CV_8UC1);
@@ -172,6 +180,8 @@ void detect_and_draw_circles(Mat &src_gray)
     /// Apply the Hough Transform to find the circles
     HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/14, 35, 10, 0, 0 );
 
+    Point2f potentialPoints[4];
+
     int cnt_interesting = 0;
     /// Draw the circles detected
     for( size_t i = 0; i < circles.size(); i++ )
@@ -187,7 +197,14 @@ void detect_and_draw_circles(Mat &src_gray)
         // circle outline
         circle( src_gray, center, radius, Scalar(0,0,255), 3, 8, 0 );
 
+        potentialPoints[cnt_interesting] = Point2f(center.y, center.x);
         ++cnt_interesting;
+    }
+    if (cnt_interesting == 4) {
+        inputQuad[0] = potentialPoints[0];
+        inputQuad[1] = potentialPoints[1];
+        inputQuad[2] = potentialPoints[2];
+        inputQuad[3] = potentialPoints[3];
     }
     coef = coef + 1;
 }

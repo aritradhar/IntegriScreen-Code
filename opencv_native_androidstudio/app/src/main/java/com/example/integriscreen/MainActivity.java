@@ -240,15 +240,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.COLOR) {
-            Mat currentFrame = inputFrame.rgba();
+            Mat currentFrameMat = inputFrame.rgba();
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
-            color_detector(currentFrame.getNativeObjAddr(), hueCenter);
-            return currentFrame;
+            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter);
+            realign_perspective(currentFrameMat.getNativeObjAddr());
+            return currentFrameMat;
         }
 
         if (currentOutputSelection == OutputSelection.REALIGN) {
-            realign_perspective(inputFrame.rgba().getNativeObjAddr(), outputMat.getNativeObjAddr());
-            return outputMat;
+            Mat currentFrameMat = inputFrame.rgba();
+            realign_perspective(currentFrameMat.getNativeObjAddr());
+            return currentFrameMat;
         }
 
         // currentOutputSelection == OutputSelection.RAW
@@ -259,6 +261,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native void color_detector(long matAddrRGB, long hueCenter);
     public native void apply_median(long matAddrGray, int filterSize);
-    public native void realign_perspective(long inputAddr, long outputAddr);
+    public native void realign_perspective(long inputAddr);
 }
 
