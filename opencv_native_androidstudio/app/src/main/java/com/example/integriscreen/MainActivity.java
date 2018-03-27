@@ -127,15 +127,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowCanny(View view) {
         currentOutputSelection = OutputSelection.SEL_CANNY;
     }
-
     public void onClickShowDiff(View view) {
         currentOutputSelection = OutputSelection.SEL_DIFF;
     }
-
     public void onClickShowGreen(View view) {
         currentOutputSelection = OutputSelection.SEL_GREEN;
     }
-
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.SEL_RAW;
     }
@@ -200,7 +197,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 matGray.copyTo(previousMatGray);
 
             compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
-            matGray.copyTo(previousMatGray);
+            inputFrame.gray().copyTo(previousMatGray);
+
+            // This would show only the parts of the inputFrame that are actually changing
+            // inputFrame.rgba().copyTo(outputMat, outputMat);
             return outputMat;
         }
 
