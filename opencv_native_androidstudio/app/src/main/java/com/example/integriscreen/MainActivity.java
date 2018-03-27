@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { SEL_RAW, SEL_CANNY, SEL_DIFF, SEL_COLOR };
+    private enum OutputSelection { RAW, CANNY, DIFF, COLOR, REALIGN };
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         actionBar.hide();
         // -----------------------
 
-        currentOutputSelection = OutputSelection.SEL_CANNY;
+        currentOutputSelection = OutputSelection.COLOR;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -159,17 +159,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickShowCanny(View view) {
-        currentOutputSelection = OutputSelection.SEL_CANNY;
+        currentOutputSelection = OutputSelection.CANNY;
     }
     public void onClickShowDiff(View view) {
-        currentOutputSelection = OutputSelection.SEL_DIFF;
+        currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
-        currentOutputSelection = OutputSelection.SEL_COLOR;
+        currentOutputSelection = OutputSelection.COLOR;
     }
     public void onClickShowRaw(View view) {
-        currentOutputSelection = OutputSelection.SEL_RAW;
+        currentOutputSelection = OutputSelection.RAW;
     }
+    public void onClickShowRealign(View view) { currentOutputSelection = OutputSelection.REALIGN; }
 
     public void onDestroy() {
         super.onDestroy();
@@ -219,12 +220,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-        if (currentOutputSelection == OutputSelection.SEL_CANNY) {
+        if (currentOutputSelection == OutputSelection.CANNY) {
             Mat matOut = inputFrame.gray();
             return computeCanny(matOut);
         }
 
-        if (currentOutputSelection == OutputSelection.SEL_DIFF) {
+        if (currentOutputSelection == OutputSelection.DIFF) {
             Mat matGray = inputFrame.gray();
 
             if (previousMatGray.width() == 1)
@@ -238,14 +239,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return outputMat;
         }
 
-        if (currentOutputSelection == OutputSelection.SEL_COLOR) {
+        if (currentOutputSelection == OutputSelection.COLOR) {
             Mat currentFrame = inputFrame.rgba();
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
             color_detector(currentFrame.getNativeObjAddr(), hueCenter);
             return currentFrame;
         }
 
-        // currentOutputSelection == OutputSelection.SEL_RAW
+        if (currentOutputSelection == OutputSelection.REALIGN) {
+            realign_perspective(inputFrame.rgba().getNativeObjAddr(), outputMat.getNativeObjAddr());
+            return outputMat;
+        }
+
+        // currentOutputSelection == OutputSelection.RAW
         return inputFrame.rgba();
     }
 
@@ -253,5 +259,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native void color_detector(long matAddrRGB, long hueCenter);
     public native void apply_median(long matAddrGray, int filterSize);
+    public native void realign_perspective(long inputAddr, long outputAddr);
 }
 

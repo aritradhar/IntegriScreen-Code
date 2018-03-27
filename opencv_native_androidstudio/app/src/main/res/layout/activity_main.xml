@@ -63,7 +63,7 @@
         android:layout_below="@+id/color_detect"
         android:layout_marginTop="13dp"
         android:max="350"
-        android:progress="120" />
+        android:progress="130" />
 
     <TextView
         android:id="@+id/colorLabel"
@@ -74,7 +74,16 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/raw"
         android:background="@android:color/white"
-        android:text="120"
+        android:text="240"
         android:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/canny"
+        android:onClick="onClickShowRealign"
+        android:text="Realign" />
 
 </RelativeLayout>

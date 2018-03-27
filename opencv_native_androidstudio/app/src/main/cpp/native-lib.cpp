@@ -8,6 +8,8 @@
 using namespace std;
 using namespace cv;
 
+void detect_and_draw_circles(Mat &src_gray);
+
 extern "C"
 {
 void JNICALL Java_com_example_integriscreen_MainActivity_salt(JNIEnv *env, jobject instance,
@@ -30,7 +32,14 @@ void JNICALL Java_com_example_integriscreen_MainActivity_apply_1median(
     medianBlur(mGr, mGr, filterSize);
 }
 
-void realign_perspective(Mat input) {
+void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
+        JNIEnv *env, jobject instance,
+        jlong inputAddr,
+        jlong outputAddr)
+{
+    Mat &input = *(Mat *)inputAddr;
+    Mat &output = *(Mat *)outputAddr;
+
     // Input Quadilateral or Image plane coordinates
     Point2f inputQuad[4];
     // Output Quadilateral or World plane coordinates
@@ -45,10 +54,10 @@ void realign_perspective(Mat input) {
     // The 4 points that select quadilateral on the input , from top-left in clockwise order
     // These four pts are the sides of the rect box used as input
     //    TODO: THESE I NEED TO COMPUTE!
-    inputQuad[0] = Point2f(-30, -60);
-    inputQuad[1] = Point2f(input.cols + 50, -50);
-    inputQuad[2] = Point2f(input.cols + 100, input.rows + 50);
-    inputQuad[3] = Point2f(-50, input.rows + 50);
+    inputQuad[0] = Point2f(0, 100);
+    inputQuad[1] = Point2f(input.cols - 50, 100);
+    inputQuad[2] = Point2f(input.cols - 100, input.rows - 50);
+    inputQuad[3] = Point2f(200, input.rows - 50);
 
     // The 4 points where the mapping is to be done , from top-left in clockwise order
     // THESE ARE CONSTANT!
@@ -60,10 +69,12 @@ void realign_perspective(Mat input) {
 
     // Get the Perspective Transform Matrix i.e. lambda
     lambda = getPerspectiveTransform(inputQuad, outputQuad);
-    // Apply the Perspective Transform just found to the src image
-    Mat output(1, 1, CV_8UC1);
-    warpPerspective(input, output, lambda, output.size());
-    output.copyTo(input);
+
+    // Apply the Perspective Transform that I just computed to the src image
+    warpPerspective(input, output, lambda, input.size());
+
+
+    // output.copyTo(input);
 }
 
 void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
@@ -121,10 +132,12 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 
 void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         JNIEnv *env, jobject instance,
-        jlong matGrayAddr, jlong hueCenter) {
+        jlong matRGBAddr, jlong hueCenter) {
 
-    Mat &inputMat = *(Mat *)matGrayAddr;
+    Mat &inputMat = *(Mat *)matRGBAddr;
     Mat helperMat(1, 1, CV_8UC1);
+    Mat originalGray(1, 1, CV_8UC1);
+    cvtColor(inputMat, originalGray, COLOR_RGB2GRAY);
 
     // hue values need to be between 0 and 179
     int lower_hue = ( (int)hueCenter - 10 + 180 ) % 180;
@@ -132,9 +145,49 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
 
     cvtColor(inputMat, helperMat, COLOR_RGB2HSV);
 
-    // This is detecting blue color at the moment
-    inRange(helperMat, Scalar(lower_hue, 100, 100), Scalar(upper_hue, 255, 255), inputMat);
+    // Detect the specified color based on hueCenter
+    inRange(helperMat, Scalar(lower_hue, 50, 50), Scalar(upper_hue, 255, 255), inputMat);
+    // originalGray.copyTo(inputMat, inputMat);
+
+    detect_and_draw_circles(inputMat);
+
+//    originalGray.copyTo(inputMat);
+    // return inputMat;
 }
 
+} /// end of "extern C"
 
+
+
+void detect_and_draw_circles(Mat &src_gray)
+{
+    /// Reduce the noise so we avoid false circle detection
+    int coef = 1;
+//    pyrDown(orig_gray, src_gray, Size( src_gray.cols/coef, src_gray.rows/coef ) );
+
+    GaussianBlur( src_gray, src_gray, Size(7, 7), 2, 2 );
+
+    vector<Vec3f> circles;
+
+    /// Apply the Hough Transform to find the circles
+    HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/14, 35, 10, 0, 0 );
+
+    int cnt_interesting = 0;
+    /// Draw the circles detected
+    for( size_t i = 0; i < circles.size(); i++ )
+    {
+        Point center(cvRound(circles[i][0] * coef), cvRound(circles[i][1] * coef));
+        int radius = cvRound(circles[i][2] * coef);
+
+        if (radius < 15 || radius > 50) continue;
+        if (src_gray.at<uchar>(center.y, center.x) == 0) continue;
+
+        // circle center
+        circle( src_gray, center, 3, Scalar(0,255,0), -1, 8, 0 );
+        // circle outline
+        circle( src_gray, center, radius, Scalar(0,0,255), 3, 8, 0 );
+
+        ++cnt_interesting;
+    }
+    coef = coef + 1;
 }

@@ -29,8 +29,5 @@
     <ClCompile Include="IntegriScreenWin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OCR.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
