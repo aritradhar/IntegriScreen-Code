@@ -119,15 +119,21 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 }
 
 
-void JNICALL Java_com_example_integriscreen_MainActivity_green_1detector(
+void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         JNIEnv *env, jobject instance,
-        jlong matGrayAddr) {
+        jlong matGrayAddr, jlong hueCenter) {
 
     Mat &inputMat = *(Mat *)matGrayAddr;
     Mat helperMat(1, 1, CV_8UC1);
 
+    // hue values need to be between 0 and 179
+    int lower_hue = ( (int)hueCenter - 10 + 180 ) % 180;
+    int upper_hue = ( (int)hueCenter + 10 ) % 180;
+
     cvtColor(inputMat, helperMat, COLOR_RGB2HSV);
-    inRange(helperMat, Scalar(65, 0, 0), Scalar(75, 255, 255), inputMat);
+
+    // This is detecting blue color at the moment
+    inRange(helperMat, Scalar(lower_hue, 100, 100), Scalar(upper_hue, 255, 255), inputMat);
 }
 
 

@@ -2,6 +2,7 @@ package com.example.integriscreen;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,9 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -20,6 +24,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.w3c.dom.Text;
 
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -27,8 +32,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { SEL_RAW, SEL_CANNY, SEL_DIFF, SEL_GREEN };
+    private enum OutputSelection { SEL_RAW, SEL_CANNY, SEL_DIFF, SEL_COLOR };
     private OutputSelection currentOutputSelection;
+    private SeekBar huePicker;
+    private TextView colorLabel;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -67,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         actionBar.hide();
         // -----------------------
 
-
         currentOutputSelection = OutputSelection.SEL_CANNY;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -83,7 +89,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // _cameraBridgeViewBase.setMaxFrameSize(1024, 768);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
+
+
+        // Deal with the UI element bindings
+        colorLabel = (TextView)findViewById(R.id.colorLabel);
+        huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
+        huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float []hsv = new float[3];
+                hsv[0] = (float)progress;
+                hsv[1] = hsv[2] = 100f;
+
+                colorLabel.setBackgroundColor(Color.HSVToColor(hsv));
+                colorLabel.setText(Integer.toString(progress));
+            }
+        });
     }
+
 
     @Override
     public void onPause() {
@@ -130,8 +164,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowDiff(View view) {
         currentOutputSelection = OutputSelection.SEL_DIFF;
     }
-    public void onClickShowGreen(View view) {
-        currentOutputSelection = OutputSelection.SEL_GREEN;
+    public void onClickShowColor(View view) {
+        currentOutputSelection = OutputSelection.SEL_COLOR;
     }
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.SEL_RAW;
@@ -204,9 +238,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return outputMat;
         }
 
-        if (currentOutputSelection == OutputSelection.SEL_GREEN) {
+        if (currentOutputSelection == OutputSelection.SEL_COLOR) {
             Mat currentFrame = inputFrame.rgba();
-            green_detector(currentFrame.getNativeObjAddr());
+            int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+            color_detector(currentFrame.getNativeObjAddr(), hueCenter);
             return currentFrame;
         }
 
@@ -216,8 +251,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public native void salt(long matAddrGray, int nbrElem);
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
-    public native void green_detector(long matAddrRGB);
+    public native void color_detector(long matAddrRGB, long hueCenter);
     public native void apply_median(long matAddrGray, int filterSize);
-    public native void realign_perspective(long inputAddr, long outputAddr);
 }
 
