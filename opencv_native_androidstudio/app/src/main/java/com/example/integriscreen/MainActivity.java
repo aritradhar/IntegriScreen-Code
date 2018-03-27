@@ -150,10 +150,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             _cameraBridgeViewBase.disableView();
     }
 
+    private Mat previousMatGray;
+    private Mat outputMat;
     public void onCameraViewStarted(int width, int height) {
+        outputMat = new Mat(1, 1, CvType.CV_8UC4);
+        previousMatGray = new Mat(1, 1, CvType.CV_8UC4);
     }
 
     public void onCameraViewStopped() {
+        outputMat.release();
+        previousMatGray.release();
     }
 
     // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
@@ -180,10 +186,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return src_gray;
     }
 
-
-    // TODO: this still leaks memory from time to time. We need to fix it at some point.
-    private Mat matGray;
-    private Mat previousMatGray;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
         if (currentOutputSelection == OutputSelection.SEL_CANNY) {
@@ -192,15 +194,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.SEL_DIFF) {
-            matGray = inputFrame.gray();
+            Mat matGray = inputFrame.gray();
 
-            Mat outputMat = new Mat(matGray.size(), CvType.CV_8UC1);
-
-            if (previousMatGray == null)
-                previousMatGray = matGray;
+            if (previousMatGray.width() == 1)
+                matGray.copyTo(previousMatGray);
 
             compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
-            previousMatGray = matGray;
+            matGray.copyTo(previousMatGray);
             return outputMat;
         }
 

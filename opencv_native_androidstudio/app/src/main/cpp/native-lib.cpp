@@ -79,7 +79,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
     Mat &matSecond = *(Mat *) matAddrSecond;
     Mat &matOutput = *(Mat *) matAddrOutput;
 
-    // Two tables that I'll later need
+    // Two tables that I'll need later
     Mat blurFirst(1, 1, CV_8UC1);
     Mat blurSecond(1, 1, CV_8UC1);
 
