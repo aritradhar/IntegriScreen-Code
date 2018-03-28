@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/diff"
+        android:layout_toEndOf="@+id/raw"
         android:onClick="onClickShowColor"
         android:text="Color Detect" />
 
@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/color_detect"
+        android:layout_toEndOf="@+id/diff"
         android:onClick="onClickShowRaw"
         android:text="Raw" />
 
@@ -51,15 +51,15 @@
         android:id="@+id/main_surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/colorLabel"
         android:layout_alignParentTop="true" />
 
     <SeekBar
         android:id="@+id/colorSeekBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/raw"
-        android:layout_alignStart="@+id/color_detect"
+        android:layout_alignStart="@+id/raw"
+        android:layout_alignEnd="@+id/color_detect"
         android:layout_below="@+id/color_detect"
         android:layout_marginTop="13dp"
         android:max="350"
@@ -72,7 +72,7 @@
         android:layout_above="@+id/colorSeekBar"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/raw"
+        android:layout_toEndOf="@+id/color_detect"
         android:background="@android:color/white"
         android:text="240"
         android:textColor="@android:color/white" />
@@ -81,9 +81,22 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/canny"
+        android:layout_alignStart="@+id/diff"
+        android:layout_below="@+id/diff"
         android:onClick="onClickShowRealign"
         android:text="Realign" />
+
+    <SeekBar
+        android:id="@+id/detect_method"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/colorSeekBar"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/colorSeekBar"
+        android:layout_marginEnd="12dp"
+        android:layout_toEndOf="@+id/colorSeekBar"
+        android:max="2"
+        android:progress="0" />
 
 </RelativeLayout>

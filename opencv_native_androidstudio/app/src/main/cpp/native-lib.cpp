@@ -8,20 +8,22 @@
 using namespace std;
 using namespace cv;
 
-void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
-void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMat);
 void initialize_default_quads(int rows, int cols);
+void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
+bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols);
+vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat);
+vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat);
 double my_dist(Point2f A, Point2f B);
-void reorder_points(Point2f *points);
+void reorder_points(vector<Point2f> &points);
 
 // The 4 points that select quadilateral on the input , from top-left in clockwise order
 // These four pts are the sides of the rect box used as input
 // Input Quadilateral or Image plane coordinates
-Point2f inputQuad[4];
+vector<Point2f> inputQuad(4);
 
 // Output Quadilateral or World plane coordinates - they are usually constant
 // The 4 points where the mapping is to be done , from top-left in clockwise order
-Point2f outputQuad[4];
+vector<Point2f> outputQuad(4);
 
 bool quadsInitialized = false;
 
@@ -109,14 +111,31 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         JNIEnv *env, jobject instance,
         jlong matRGBAddr,
-        jlong hueCenter) {
+        jlong hueCenter,
+        jlong detectionMethod) {
 
     Mat &originalMat = *(Mat *)matRGBAddr;
 
     Mat colorMask;
     detect_specific_color(originalMat, colorMask, hueCenter);
-    // colorMask.copyTo(originalMat);
-    detect_circles_and_update_transformation(colorMask, originalMat);
+
+    vector<Point2i> potentialCorners;
+    switch (detectionMethod) {
+        case 0: { // do nothing else
+            colorMask.copyTo(originalMat);
+            break;
+        }
+        case 1: { // Rectangle
+            potentialCorners = detect_rectangle_corners(colorMask, originalMat);
+            break;
+        }
+        case 2: { // Circle
+            potentialCorners = detect_circles(colorMask, originalMat);
+            break;
+        }
+    }
+
+    update_transformation(potentialCorners, originalMat.rows, originalMat.cols);
 }
 
 } /// end of "extern C"
@@ -139,7 +158,7 @@ void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
 double my_dist(Point2f A, Point2f B) { double dx = A.x - B.x; double dy = A.y - B.y; return dx * dx + dy * dy; }
 
 // this function will reorder the input points so that points[0] is the one closest to output[0], etc.
-void reorder_points(Point2f *points)
+void reorder_points(vector<Point2i> &points)
 {
     for(int i = 0; i < 4; ++i) {
         int closest = i;
@@ -169,7 +188,40 @@ void initialize_default_quads(int rows, int cols)
 }
 
 
-void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMat)
+
+
+bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols) {
+    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
+        initialize_default_quads(rows, cols);
+
+    // The part that updates the 4 coordinates!
+    if ((int)potentialPoints.size() == 4) {
+        reorder_points(potentialPoints);
+        for(int i = 0; i < 4; ++i ) inputQuad[i] = potentialPoints[i];
+        return true;
+    }
+
+    return false;
+}
+
+vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat)
+{
+    /*
+    /// Apply the specified morphology operation
+    int morph_size = 1;
+    Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+    // Morphological opening
+    morphologyEx( inputMat, outputMat, MORPH_CLOSE, element );
+*/
+
+//    numCompotentns = connectedComponentsWithStats(inputMat, outputMat, OutputArray stats, OutputArray centroids, int connectivity=8, int ltype=CV_32S
+
+
+    //inputMat.copyTo(outputMat);
+    return vector<Point2i>(0);
+}
+
+vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat)
 {
     /// Reduce the noise so we avoid false circle detection
     GaussianBlur( inputMat, outputMat, Size(7, 7), 2, 2 );
@@ -179,9 +231,7 @@ void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMa
     /// Apply the Hough Transform to find the circles
     HoughCircles( outputMat, circles, CV_HOUGH_GRADIENT, 1, outputMat.rows/14, 35, 10, 0, 0 );
 
-    Point2f potentialPoints[4];
-
-    int cnt_interesting = 0;
+    vector<Point2i> interestingCenters;
     /// Draw the circles detected
     for( size_t i = 0; i < circles.size(); i++ )
     {
@@ -196,21 +246,8 @@ void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMa
         // Draw circle outline
         circle( outputMat, center, radius, Scalar(0,0,255), 3, 8, 0 );
 
-        ++cnt_interesting;
-        if (cnt_interesting <= 4) {
-            potentialPoints[cnt_interesting-1] = Point2f(center.x, center.y);
-        } else
-            break;
+        interestingCenters.push_back(center);
     }
 
-    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
-        initialize_default_quads(inputMat.rows, inputMat.cols);
-
-    // The part that updates the 4 coordinates!
-    if (cnt_interesting == 4) {
-        reorder_points(potentialPoints);
-        for(int i = 0; i < 4; ++i)
-            inputQuad[i] = potentialPoints[i];
-    }
-
+    return interestingCenters;
 }

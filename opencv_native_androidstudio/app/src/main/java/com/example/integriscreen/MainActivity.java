@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.opencv.android.BaseLoaderCallback;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
+    private SeekBar detectPicker;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
+        detectPicker = (SeekBar)findViewById(R.id.detect_method);
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -242,7 +245,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentOutputSelection == OutputSelection.COLOR) {
             Mat currentFrameMat = inputFrame.rgba();
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
-            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter);
+            int detection_option = detectPicker.getProgress();
+            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
 
             // realign_perspective(currentFrameMat.getNativeObjAddr());
             return currentFrameMat;
@@ -259,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
-    public native void color_detector(long matAddrRGB, long hueCenter);
+    public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
 }
 

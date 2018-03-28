@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">OpenCVNativeAndroidStudio</string>
+
+    <string-array name="detector_options">
+        <item>None</item>
+        <item>Circle</item>
+        <item>Rectangle</item>
+    </string-array>
 </resources>
