@@ -8,33 +8,25 @@
 using namespace std;
 using namespace cv;
 
-void detect_and_draw_circles(Mat &src_gray);
+void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
+void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMat);
+void initialize_default_quads(int rows, int cols);
+double my_dist(Point2f A, Point2f B);
+void reorder_points(Point2f *points);
 
+// The 4 points that select quadilateral on the input , from top-left in clockwise order
+// These four pts are the sides of the rect box used as input
 // Input Quadilateral or Image plane coordinates
 Point2f inputQuad[4];
-bool initialized = false;
+
+// Output Quadilateral or World plane coordinates - they are usually constant
+// The 4 points where the mapping is to be done , from top-left in clockwise order
+Point2f outputQuad[4];
+
+bool quadsInitialized = false;
 
 extern "C"
 {
-void JNICALL Java_com_example_integriscreen_MainActivity_salt(JNIEnv *env, jobject instance,
-                                                                           jlong matAddrGray,
-                                                                           jint nbrElem) {
-    Mat &mGr = *(Mat *) matAddrGray;
-    for (int k = 0; k < nbrElem; k++) {
-        int i = rand() % mGr.cols;
-        int j = rand() % mGr.rows;
-        mGr.at<uchar>(j, i) = 255;
-    }
-}
-
-void JNICALL Java_com_example_integriscreen_MainActivity_apply_1median(
-        JNIEnv *env, jobject instance,
-        jlong matAddrGray,
-        jint filterSize) {
-
-    Mat &mGr = *(Mat *) matAddrGray;
-    medianBlur(mGr, mGr, filterSize);
-}
 
 void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
@@ -44,37 +36,14 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     Mat &input = *(Mat *)inputAddr;
     Mat output;
 
-    // Input Quadilateral or Image plane coordinates
-    // Point2f inputQuad[4];
-
-    // Output Quadilateral or World plane coordinates
-    Point2f outputQuad[4];
-
     // Lambda Matrix
     Mat lambda(2, 4, CV_32FC1);
 
     // Set the lambda matrix the same type and size as input
     lambda = Mat::zeros(input.rows, input.cols, input.type());
 
-    // The 4 points that select quadilateral on the input , from top-left in clockwise order
-    // These four pts are the sides of the rect box used as input
-    //    TODO: THESE I NEED TO COMPUTE!
-
-    if (!initialized) {
-        inputQuad[0] = Point2f(0, 100);
-        inputQuad[1] = Point2f(input.cols - 50, 100);
-        inputQuad[2] = Point2f(input.cols - 100, input.rows - 50);
-        inputQuad[3] = Point2f(200, input.rows - 50);
-        initialized = true;
-    }
-
-    // The 4 points where the mapping is to be done , from top-left in clockwise order
-    // THESE ARE CONSTANT!
-    outputQuad[0] = Point2f(0, 0);
-    outputQuad[1] = Point2f(input.cols - 1, 0);
-    outputQuad[2] = Point2f(input.cols - 1, input.rows - 1);
-    outputQuad[3] = Point2f(0, input.rows - 1);
-
+    if (!quadsInitialized)
+        initialize_default_quads(input.rows, input.cols);
 
     // Get the Perspective Transform Matrix i.e. lambda
     lambda = getPerspectiveTransform(inputQuad, outputQuad);
@@ -142,43 +111,73 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         jlong matRGBAddr,
         jlong hueCenter) {
 
-    Mat &inputMat = *(Mat *)matRGBAddr;
-    Mat helperMat(1, 1, CV_8UC1);
-    Mat originalGray(1, 1, CV_8UC1);
-    cvtColor(inputMat, originalGray, COLOR_RGB2GRAY);
+    Mat &originalMat = *(Mat *)matRGBAddr;
+
+    Mat colorMask;
+    detect_specific_color(originalMat, colorMask, hueCenter);
+    // colorMask.copyTo(originalMat);
+    detect_circles_and_update_transformation(colorMask, originalMat);
+}
+
+} /// end of "extern C"
+
+void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
+{
+    Mat hsvMat(1, 1, CV_8UC1);
 
     // hue values need to be between 0 and 179
     int lower_hue = ( (int)hueCenter - 10 + 180 ) % 180;
     int upper_hue = ( (int)hueCenter + 10 ) % 180;
 
-    cvtColor(inputMat, helperMat, COLOR_RGB2HSV);
+    cvtColor(inputMat, hsvMat, COLOR_RGB2HSV);
 
     // Detect the specified color based on hueCenter
-    inRange(helperMat, Scalar(lower_hue, 50, 50), Scalar(upper_hue, 255, 255), inputMat);
-    // originalGray.copyTo(inputMat, inputMat);
-
-    detect_and_draw_circles(inputMat);
-
-//    originalGray.copyTo(inputMat);
-    // return inputMat;
+    inRange(hsvMat, Scalar(lower_hue, 50, 50), Scalar(upper_hue, 255, 255), outputMat);
 }
 
-} /// end of "extern C"
+
+double my_dist(Point2f A, Point2f B) { double dx = A.x - B.x; double dy = A.y - B.y; return dx * dx + dy * dy; }
+
+// this function will reorder the input points so that points[0] is the one closest to output[0], etc.
+void reorder_points(Point2f *points)
+{
+    for(int i = 0; i < 4; ++i) {
+        int closest = i;
+        for(int j = i + 1; j < 4; ++j) {
+            if (my_dist(points[j], outputQuad[i]) < my_dist(points[closest], outputQuad[i]))
+                closest = j;
+        }
+        swap(points[i], points[closest]);
+    }
+}
+
+void initialize_default_quads(int rows, int cols)
+{
+    // This is some random default...
+    inputQuad[0] = Point2f(0, 100);
+    inputQuad[1] = Point2f(cols - 50, 100);
+    inputQuad[2] = Point2f(cols - 100, rows - 50);
+    inputQuad[3] = Point2f(200, rows - 50);
+
+    // This stretches the across the whole screen for now
+    outputQuad[0] = Point2f(0, 0);
+    outputQuad[1] = Point2f(cols - 1, 0);
+    outputQuad[2] = Point2f(cols - 1, rows - 1);
+    outputQuad[3] = Point2f(0, rows - 1);
+
+    quadsInitialized = true;
+}
 
 
-
-void detect_and_draw_circles(Mat &src_gray)
+void detect_circles_and_update_transformation(const Mat &inputMat, Mat &outputMat)
 {
     /// Reduce the noise so we avoid false circle detection
-    int coef = 1;
-//    pyrDown(orig_gray, src_gray, Size( src_gray.cols/coef, src_gray.rows/coef ) );
-
-    GaussianBlur( src_gray, src_gray, Size(7, 7), 2, 2 );
+    GaussianBlur( inputMat, outputMat, Size(7, 7), 2, 2 );
 
     vector<Vec3f> circles;
 
     /// Apply the Hough Transform to find the circles
-    HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/14, 35, 10, 0, 0 );
+    HoughCircles( outputMat, circles, CV_HOUGH_GRADIENT, 1, outputMat.rows/14, 35, 10, 0, 0 );
 
     Point2f potentialPoints[4];
 
@@ -186,25 +185,32 @@ void detect_and_draw_circles(Mat &src_gray)
     /// Draw the circles detected
     for( size_t i = 0; i < circles.size(); i++ )
     {
-        Point center(cvRound(circles[i][0] * coef), cvRound(circles[i][1] * coef));
-        int radius = cvRound(circles[i][2] * coef);
+        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        int radius = cvRound(circles[i][2]);
 
         if (radius < 15 || radius > 50) continue;
-        if (src_gray.at<uchar>(center.y, center.x) == 0) continue;
+        if (outputMat.at<uchar>(center.y, center.x) == 0) continue;
 
-        // circle center
-        circle( src_gray, center, 3, Scalar(0,255,0), -1, 8, 0 );
-        // circle outline
-        circle( src_gray, center, radius, Scalar(0,0,255), 3, 8, 0 );
+        // Draw circle center
+        circle( outputMat, center, 3, Scalar(0,255,0), -1, 8, 0 );
+        // Draw circle outline
+        circle( outputMat, center, radius, Scalar(0,0,255), 3, 8, 0 );
 
-        potentialPoints[cnt_interesting] = Point2f(center.y, center.x);
         ++cnt_interesting;
+        if (cnt_interesting <= 4) {
+            potentialPoints[cnt_interesting-1] = Point2f(center.x, center.y);
+        } else
+            break;
     }
+
+    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
+        initialize_default_quads(inputMat.rows, inputMat.cols);
+
+    // The part that updates the 4 coordinates!
     if (cnt_interesting == 4) {
-        inputQuad[0] = potentialPoints[0];
-        inputQuad[1] = potentialPoints[1];
-        inputQuad[2] = potentialPoints[2];
-        inputQuad[3] = potentialPoints[3];
+        reorder_points(potentialPoints);
+        for(int i = 0; i < 4; ++i)
+            inputQuad[i] = potentialPoints[i];
     }
-    coef = coef + 1;
+
 }
