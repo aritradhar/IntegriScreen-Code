@@ -124,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         });
     }
 
+    private String detect_text(Mat currentFrame) {
+        return "OCR will happen soon";
+    }
 
     @Override
     public void onPause() {
