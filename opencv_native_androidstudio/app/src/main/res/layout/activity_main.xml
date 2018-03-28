@@ -78,7 +78,7 @@
         android:textColor="@android:color/white" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/realign_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/diff"
@@ -98,5 +98,15 @@
         android:layout_toEndOf="@+id/colorSeekBar"
         android:max="2"
         android:progress="0" />
+
+    <CheckBox
+        android:id="@+id/realichCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/realign_button"
+        android:layout_alignBottom="@+id/realign_button"
+        android:layout_toStartOf="@+id/diff"
+        android:background="@color/colorAccent"
+        android:text="Realign" />
 
 </RelativeLayout>

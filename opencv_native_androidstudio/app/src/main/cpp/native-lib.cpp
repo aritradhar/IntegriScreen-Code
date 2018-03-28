@@ -119,6 +119,9 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
     Mat colorMask;
     detect_specific_color(originalMat, colorMask, hueCenter);
 
+    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
+        initialize_default_quads(originalMat.rows, originalMat.cols);
+
     vector<Point2i> potentialCorners;
     switch (detectionMethod) {
         case 0: { // do nothing else
@@ -191,9 +194,6 @@ void initialize_default_quads(int rows, int cols)
 
 
 bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols) {
-    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
-        initialize_default_quads(rows, cols);
-
     // The part that updates the 4 coordinates!
     if ((int)potentialPoints.size() == 4) {
         reorder_points(potentialPoints);
@@ -204,8 +204,7 @@ bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols) 
     return false;
 }
 
-vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat)
-{
+vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
     /*
     /// Apply the specified morphology operation
     int morph_size = 1;
@@ -214,11 +213,62 @@ vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat)
     morphologyEx( inputMat, outputMat, MORPH_CLOSE, element );
 */
 
-//    numCompotentns = connectedComponentsWithStats(inputMat, outputMat, OutputArray stats, OutputArray centroids, int connectivity=8, int ltype=CV_32S
+    Mat labels;
+    Mat stats;
+    Mat centroids;
+    int numComponents = connectedComponentsWithStats(inputMat, labels, stats, centroids, 4, CV_16U);
 
+    /*
+        CC_STAT_LEFT The leftmost (x) coordinate which is the inclusive start of the bounding box in the horizontal direction.
+        CC_STAT_TOP The topmost (y) coordinate which is the inclusive start of the bounding box in the vertical direction.
+        CC_STAT_WIDTH The horizontal size of the bounding box
+        CC_STAT_HEIGHT The vertical size of the bounding box
+        CC_STAT_AREA The total area (in pixels) of the connected component
+     */
 
-    //inputMat.copyTo(outputMat);
-    return vector<Point2i>(0);
+    // find the largest component by enclosing area
+    int maxAreaIndex = 1;
+    int maxEnclosingIndex = 0, maxEnclosingArea = 0;
+    for (int i = 1; i < numComponents; ++i) { // crucial to start with 1 since 0 is the largest one?
+        int currentArea = stats.at<int>(i, CC_STAT_WIDTH) * stats.at<int>(i, CC_STAT_HEIGHT);
+
+        int width = stats.at<int>(i, CC_STAT_WIDTH);
+        int height = stats.at<int>(i, CC_STAT_HEIGHT);
+        if (currentArea > maxEnclosingArea) {
+            maxEnclosingIndex = i;
+            maxEnclosingArea = currentArea;
+        }
+    }
+
+    // From the largest component, find the 4 extremal points (closest to the edges)
+    vector<Point2i> points;
+    for (int i = 0; i < labels.cols; ++i)
+        for (int j = 0; j < labels.rows; ++j) {
+            if (labels.at<uint16_t>(j, i) != maxEnclosingIndex)
+                continue;
+
+            Point2i currentPoint(i, j);
+
+            if (points.size() == 0)
+                points = vector<Point2i>(4, currentPoint);
+
+            for (int k = 0; k < 4; ++k)
+                if (my_dist(currentPoint, outputQuad[k]) < my_dist(points[k], outputQuad[k]) )
+                    points[k] = currentPoint;
+        }
+
+    // This is just to showcase what I am finding
+    labels.convertTo(outputMat, CV_8UC1, 50.0);
+
+    for(int i = 0; i < 4; ++i) {
+        // Draw circle center
+        circle( outputMat, points[i], 3, Scalar(255,255,255), -1, 8, 0 );
+        // Draw circle outline
+        circle( outputMat, points[i], 10, Scalar(255,255,255), 3, 8, 0 );
+
+    }
+
+    return points;
 }
 
 vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat)

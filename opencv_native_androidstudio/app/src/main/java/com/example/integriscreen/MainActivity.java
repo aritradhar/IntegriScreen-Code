@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private SeekBar huePicker;
     private TextView colorLabel;
     private SeekBar detectPicker;
+    private CheckBox realignCheckBox;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
+        realignCheckBox = (CheckBox)findViewById(R.id.realichCheckBox);
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -248,7 +251,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             int detection_option = detectPicker.getProgress();
             color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
 
-            // realign_perspective(currentFrameMat.getNativeObjAddr());
+            if (realignCheckBox.isChecked())
+                realign_perspective(inputFrame.rgba().getNativeObjAddr());
+
+            // TODO: Enis, this is where you hook your code :)
+            String all_our_text = detect_text(currentFrameMat);
+            Log.d("our text: ", all_our_text);
+
             return currentFrameMat;
         }
 
