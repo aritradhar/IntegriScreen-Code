@@ -1,12 +1,16 @@
 package com.example.integriscreen;
 
 import android.Manifest;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,10 +20,16 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Scalar;
@@ -42,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox realignCheckBox;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
+
+    // TextRecognizer is the native vision API for text extraction
+    TextRecognizer textRecognizer;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -77,6 +90,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
         // -----------------------
+
+        // Initialize textRecognizer
+        textRecognizer = new TextRecognizer.Builder(this).build();
+
+        //check textRecognizer is operational
+        if (!textRecognizer.isOperational()) {
+            Log.w(TAG, "Detector dependencies are not yet available.");
+
+            // Check for low storage.  If there is low storage, the native library will not be
+            // downloaded, so detection will not become operational.
+            IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+            boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
+
+            if (hasLowStorage) {
+                Toast.makeText(this, "Low Storage!!!", Toast.LENGTH_LONG).show();
+                Log.w(TAG, "Low Storage!!!");
+            }
+        }
 
         currentOutputSelection = OutputSelection.COLOR;
 
@@ -122,10 +153,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 colorLabel.setText(Integer.toString(progress));
             }
         });
-    }
-
-    private String detect_text(Mat currentFrame) {
-        return "OCR will happen soon";
     }
 
     @Override
@@ -257,21 +284,41 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (realignCheckBox.isChecked())
                 realign_perspective(inputFrame.rgba().getNativeObjAddr());
 
-            // TODO: Enis, this is where you hook your code :)
-            String all_our_text = detect_text(currentFrameMat);
-            Log.d("our text: ", all_our_text);
-
             return currentFrameMat;
         }
 
         if (currentOutputSelection == OutputSelection.REALIGN) {
             Mat currentFrameMat = inputFrame.rgba();
             realign_perspective(currentFrameMat.getNativeObjAddr());
+
+            // extract texts from a frame and store in a SparseArray
+            SparseArray<TextBlock> texts = detect_text(currentFrameMat);
+
+            Log.d("TextDetected", texts.size()+" words");
+            for (int i = 0; i < texts.size(); ++i) {
+                TextBlock item = texts.valueAt(i);
+                if (item != null && item.getValue() != null) {
+                    Log.d("TextDetected", item.getValue());
+                }
+            }
+
             return currentFrameMat;
         }
 
         // currentOutputSelection == OutputSelection.RAW
         return inputFrame.rgba();
+    }
+
+    private SparseArray<TextBlock> detect_text(Mat matFrame) {
+        //convert Mat to Bitmap
+        Bitmap bmp = Bitmap.createBitmap(matFrame.cols(), matFrame.rows(),
+                Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matFrame, bmp);
+        //convert Bitmap to Frame. TODO: Optimize conversions
+        Frame frame = new Frame.Builder().setBitmap(bmp).build();
+
+        SparseArray<TextBlock> texts = textRecognizer.detect(frame);
+        return texts;
     }
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
