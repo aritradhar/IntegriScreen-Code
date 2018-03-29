@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
     }
-    public void onClickShowRealign(View view) { currentOutputSelection = OutputSelection.REALIGN; }
+    public void onClickDetectText(View view) { currentOutputSelection = OutputSelection.REALIGN; }
 
     public void onDestroy() {
         super.onDestroy();

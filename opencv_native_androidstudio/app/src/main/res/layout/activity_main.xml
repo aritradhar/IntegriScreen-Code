@@ -78,13 +78,13 @@
         android:textColor="@android:color/white" />
 
     <Button
-        android:id="@+id/realign_button"
+        android:id="@+id/detect_text_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/diff"
         android:layout_below="@+id/diff"
-        android:onClick="onClickShowRealign"
-        android:text="Realign" />
+        android:onClick="onClickDetectText"
+        android:text="Detect Text" />
 
     <SeekBar
         android:id="@+id/detect_method"
@@ -103,8 +103,8 @@
         android:id="@+id/realichCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/realign_button"
-        android:layout_alignBottom="@+id/realign_button"
+        android:layout_alignBaseline="@+id/detect_text_button"
+        android:layout_alignBottom="@+id/detect_text_button"
         android:layout_toStartOf="@+id/diff"
         android:background="@color/colorAccent"
         android:text="Realign" />
