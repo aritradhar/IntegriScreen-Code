@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
+    private TextView textOutput;
     private SeekBar detectPicker;
     private CheckBox realignCheckbox;
 
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
+        textOutput = (TextView)findViewById(R.id.textOutput);
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
@@ -317,19 +320,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
-//            Mat currentFrameMat = inputFrame.rgba();
-//             realign_perspective(currentFrameMat.getNativeObjAddr());
-
-            // extract texts from a frame and store in a SparseArray
             SparseArray<TextBlock> texts = detect_text(currentFrameMat);
 
+            String textConcat = "";
             Log.d("TextDetected", texts.size()+" words");
             for (int i = 0; i < texts.size(); ++i) {
                 TextBlock item = texts.valueAt(i);
                 if (item != null && item.getValue() != null) {
                     Log.d("TextDetected", item.getValue());
+                    textConcat += item.getValue() + " | ";
                 }
             }
+
+            // This is needed since we are not running on the UI thread usually
+            final String textToShow = textConcat;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textOutput.setText(textToShow);
+                }
+            });
 
             return currentFrameMat;
         }
