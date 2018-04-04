@@ -35,8 +35,7 @@ extern "C"
 
 void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
-        jlong inputAddr,
-        jlong outputAddr)
+        jlong inputAddr)
 {
     Mat &input = *(Mat *)inputAddr;
     Mat output;
@@ -58,14 +57,42 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     output.copyTo(input);
 }
 
-jint JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
+jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
+        JNIEnv *env, jobject instance,
+        jlong matInputAddr,
+        jlong matLabels,
+        jlong matStats,
+        jlong matCentroids)
+{
+
+    Mat &matInput = *(Mat *) matInputAddr;
+    Mat &labels = *(Mat *) matLabels;
+    Mat &stats = *(Mat *) matStats;
+    Mat &centroids = *(Mat *) matCentroids;
+    int numComponents = connectedComponentsWithStats(matInput, labels, stats, centroids, 4, CV_16U);
+
+    ALOG("|%d|", numComponents);
+
+    int large_components = 0;
+    // component 0 is the background
+    for (int i = 1; i < numComponents; ++i) {
+        int component_area = stats.at<int>(i, CC_STAT_AREA);
+
+        if (component_area > 30)
+            ++large_components;
+    }
+
+    // This is just to showcase what I am finding
+    labels.convertTo(labels, CV_8UC1, 50.0);
+
+    return large_components;
+}
+
+void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          JNIEnv *env, jobject instance,
          jlong matAddrFirst,
          jlong matAddrSecond,
-         jlong matAddrOutput,
-         jlong matLabels,
-         jlong matStats,
-         jlong matCentroids)
+         jlong matAddrOutput)
 {
     // When is a pixel considered black, and when white?
     uchar black_white_threshold = 30;
@@ -89,26 +116,6 @@ jint JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 
     // Morphological closing. It seems that we can live without it.
     // morphologyEx( blurSecond, blurSecond, MORPH_CLOSE, element );
-
-    Mat &labels = *(Mat *) matLabels;
-    Mat &stats = *(Mat *) matStats;
-    Mat &centroids = *(Mat *) matCentroids;
-    int numComponents = connectedComponentsWithStats(matOutput, labels, stats, centroids, 4, CV_16U);
-
-    ALOG("|%d|", numComponents);
-
-    int large_components = 0;
-    // component 0 is the background
-    for(int i = 1; i < numComponents; ++i) {
-        int component_area = stats.at<int>(i, CC_STAT_AREA);
-
-        if (component_area > 30)
-            ++large_components;
-    }
-
-    // This is just to showcase what I am finding
-    labels.convertTo(matOutput, CV_8UC1, 50.0);
-    return numComponents;
 }
 
 

@@ -15,9 +15,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,13 +28,10 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-import org.w3c.dom.Text;
 
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -44,12 +39,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { RAW, CANNY, DIFF, COLOR, REALIGN };
+    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, COUNT_DIFF};
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
     private SeekBar detectPicker;
-    private CheckBox realignCheckBox;
+    private CheckBox realignCheckbox;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -109,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-        currentOutputSelection = OutputSelection.COLOR;
+        currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -129,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
-        realignCheckBox = (CheckBox)findViewById(R.id.realichCheckBox);
+        realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -201,12 +196,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
-        currentOutputSelection = OutputSelection.COLOR;
+        currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
     }
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
     }
-    public void onClickDetectText(View view) { currentOutputSelection = OutputSelection.REALIGN; }
+    public void onClickDetectText(View view) { currentOutputSelection = OutputSelection.DETECT_TEXT; }
 
     public void onDestroy() {
         super.onDestroy();
@@ -220,92 +215,110 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private Mat previousMatGray;
     private Mat outputMat;
+    private Mat tmpMat;
     public void onCameraViewStarted(int width, int height) {
         outputMat = new Mat(1, 1, CvType.CV_8UC4);
         previousMatGray = new Mat(1, 1, CvType.CV_8UC4);
+        tmpMat = new Mat(1, 1, CvType.CV_8UC1);
     }
 
     public void onCameraViewStopped() {
         outputMat.release();
         previousMatGray.release();
+        tmpMat.release();
     }
 
     // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
     // This is using Java-based openCV
-    public Mat computeCanny(Mat src_gray) {
-        double lowThreshold = 30;   // TODO: this threshold could be optimized
+    public void applyCanny(Mat input_gray, Mat output_gray) {
+        double lowThreshold = 30;
         double ratio = 2;
         int kernel_size = 3;
 
         Mat src_blurred = new Mat(3, 3, CvType.CV_8UC4);
 
         /// Reduce noise with a kernel 3x3
-        blur( src_gray, src_blurred, new Size(3,3) );
+        blur( input_gray, src_blurred, new Size(3,3) );
 
         /// Canny detector
-        Imgproc.Canny( src_blurred, src_gray, lowThreshold, lowThreshold*ratio, kernel_size, true );
+        Imgproc.Canny( src_blurred, output_gray, lowThreshold, lowThreshold*ratio, kernel_size, true );
 
         // This copies using the "detected_edges" as a mask
         // src_gray.copyTo( dst, detected_edges);
 
 
         src_blurred.release();
-
-        return src_gray;
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat currentFrameMat = inputFrame.rgba();
 
-        if (currentOutputSelection == OutputSelection.CANNY) {
-            Mat matOut = inputFrame.gray();
-            return computeCanny(matOut);
+        // if detect_color -> apply sto treba
+        if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
+            // Mat currentFrameMat = inputFrame.rgba();
+            int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+            int detection_option = detectPicker.getProgress();
+            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
+
+            // return currentFrameMat;
+            return currentFrameMat;
         }
 
-        if (currentOutputSelection == OutputSelection.DIFF) {
-            Mat matGray = inputFrame.gray();
+        if (realignCheckbox.isChecked())
+            realign_perspective(currentFrameMat.getNativeObjAddr());
+
+        if (currentOutputSelection == OutputSelection.RAW)
+            return currentFrameMat;
+
+        if (currentOutputSelection == OutputSelection.CANNY) {
+            Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
+            applyCanny(tmpMat, currentFrameMat);
+        }
+
+         if (currentOutputSelection == OutputSelection.DIFF) {
+            Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
+
+            tmpMat.copyTo(currentFrameMat);
 
             if (previousMatGray.width() == 1)
-                matGray.copyTo(previousMatGray);
+                currentFrameMat.copyTo(previousMatGray);
 
+            compute_diff(currentFrameMat.getNativeObjAddr(),
+                    previousMatGray.getNativeObjAddr(),
+                    currentFrameMat.getNativeObjAddr());
+
+            // Store for next frame
+            tmpMat.copyTo(previousMatGray);
+
+            return currentFrameMat;
+        }
+
+        // Final results: detect text, compute the number of changes, etc.
+
+        if (currentOutputSelection == OutputSelection.COUNT_DIFF) {
             Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
             Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
             Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
 
-            int numComponents = compute_diff(matGray.getNativeObjAddr(),
-                                             previousMatGray.getNativeObjAddr(),
-                                             outputMat.getNativeObjAddr(),
-                                            matLabels.getNativeObjAddr(),
-                                            matStats.getNativeObjAddr(),
-                                            matCentroids.getNativeObjAddr());
-            // Store for next frame
-            inputFrame.gray().copyTo(previousMatGray);
+            int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
+                                                matLabels.getNativeObjAddr(),
+                                                matStats.getNativeObjAddr(),
+                                                matCentroids.getNativeObjAddr());
+            Log.d("num_comp", String.valueOf(numComponents));
+
+            // TODO: process components
 
             matLabels.release();
             matStats.release();
             matCentroids.release();
 
-            Log.d("num_comp", String.valueOf(numComponents));
-
-            // This would show only the parts of the inputFrame that are actually changing
-            // inputFrame.rgba().copyTo(outputMat, outputMat);
-            return outputMat;
-        }
-
-        if (currentOutputSelection == OutputSelection.COLOR) {
-            Mat currentFrameMat = inputFrame.rgba();
-            int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
-            int detection_option = detectPicker.getProgress();
-            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
-
-            if (realignCheckBox.isChecked())
-                realign_perspective(inputFrame.rgba().getNativeObjAddr());
-
             return currentFrameMat;
         }
 
-        if (currentOutputSelection == OutputSelection.REALIGN) {
-            Mat currentFrameMat = inputFrame.rgba();
-            realign_perspective(currentFrameMat.getNativeObjAddr());
+
+        if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
+//            Mat currentFrameMat = inputFrame.rgba();
+//             realign_perspective(currentFrameMat.getNativeObjAddr());
 
             // extract texts from a frame and store in a SparseArray
             SparseArray<TextBlock> texts = detect_text(currentFrameMat);
@@ -321,8 +334,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return currentFrameMat;
         }
 
-        // currentOutputSelection == OutputSelection.RAW
-        return inputFrame.rgba();
+        return currentFrameMat;
     }
 
     private SparseArray<TextBlock> detect_text(Mat matFrame) {
@@ -337,7 +349,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return texts;
     }
 
-    public native int compute_diff(long matFirst, long matSecond, long matDiff, long matLabels, long matStats, long matCentroids);
+    public native void compute_diff(long matFirst, long matSecond, long matDiff);
+    public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
 }

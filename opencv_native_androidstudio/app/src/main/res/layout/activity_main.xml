@@ -28,23 +28,23 @@
         android:text="Diff" />
 
     <Button
-        android:id="@+id/color_detect"
+        android:id="@+id/detect_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/raw"
+        android:layout_toEndOf="@+id/realignCheckBox"
         android:onClick="onClickShowColor"
-        android:text="Color Detect" />
+        android:text="Detect Frame" />
 
     <Button
         android:id="@+id/raw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/diff"
+        android:layout_toEndOf="@+id/detect_text_button"
         android:onClick="onClickShowRaw"
+        android:layout_below="@+id/canny"
         android:text="Raw" />
 
     <org.opencv.android.JavaCameraView
@@ -58,10 +58,11 @@
         android:id="@+id/colorSeekBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/raw"
-        android:layout_alignEnd="@+id/color_detect"
-        android:layout_below="@+id/color_detect"
+        android:layout_toEndOf="@+id/raw"
+        android:layout_alignEnd="@+id/detect_frame"
+        android:layout_below="@+id/detect_frame"
         android:layout_marginTop="13dp"
+        android:layout_marginStart="60dp"
         android:max="350"
         android:progress="130" />
 
@@ -69,11 +70,12 @@
         android:id="@+id/colorLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/detect_frame"
         android:layout_above="@+id/colorSeekBar"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/color_detect"
-        android:background="@android:color/white"
+        android:layout_margin="2dp"
+        android:background="@android:color/holo_green_light"
         android:text="240"
         android:textColor="@android:color/white" />
 
@@ -81,10 +83,10 @@
         android:id="@+id/detect_text_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/diff"
-        android:layout_below="@+id/diff"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/canny"
         android:onClick="onClickDetectText"
-        android:text="Detect Text" />
+        android:text="OCR" />
 
     <SeekBar
         android:id="@+id/detect_method"
@@ -94,19 +96,20 @@
         android:layout_alignBottom="@+id/colorSeekBar"
         android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/colorSeekBar"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="1dp"
         android:layout_toEndOf="@+id/colorSeekBar"
         android:max="2"
-        android:progress="0" />
+        android:progress="1" />
 
     <CheckBox
-        android:id="@+id/realichCheckBox"
+        android:id="@+id/realignCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/detect_text_button"
-        android:layout_alignBottom="@+id/detect_text_button"
-        android:layout_toStartOf="@+id/diff"
-        android:background="@color/colorAccent"
-        android:text="Real-time" />
+        android:layout_toEndOf="@+id/diff"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorPrimary"
+        android:checked="false"
+        android:text="Realign" />
 
 </RelativeLayout>
