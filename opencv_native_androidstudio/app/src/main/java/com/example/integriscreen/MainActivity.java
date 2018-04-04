@@ -267,8 +267,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (previousMatGray.width() == 1)
                 matGray.copyTo(previousMatGray);
 
-            compute_diff(matGray.getNativeObjAddr(), previousMatGray.getNativeObjAddr(), outputMat.getNativeObjAddr());
+            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+
+            int numComponents = compute_diff(matGray.getNativeObjAddr(),
+                                             previousMatGray.getNativeObjAddr(),
+                                             outputMat.getNativeObjAddr(),
+                                            matLabels.getNativeObjAddr(),
+                                            matStats.getNativeObjAddr(),
+                                            matCentroids.getNativeObjAddr());
+            // Store for next frame
             inputFrame.gray().copyTo(previousMatGray);
+
+            matLabels.release();
+            matStats.release();
+            matCentroids.release();
+
+            Log.d("num_comp", String.valueOf(numComponents));
 
             // This would show only the parts of the inputFrame that are actually changing
             // inputFrame.rgba().copyTo(outputMat, outputMat);
@@ -321,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return texts;
     }
 
-    public native void compute_diff(long matFirst, long matSecond, long matDiff);
+    public native int compute_diff(long matFirst, long matSecond, long matDiff, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
 }

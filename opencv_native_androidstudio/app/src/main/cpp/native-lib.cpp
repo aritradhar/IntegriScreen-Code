@@ -3,7 +3,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
+#include <android/log.h>
 
+#define LOG_TAG "jni_debug"
+#define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 using namespace std;
 using namespace cv;
@@ -55,11 +58,14 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     output.copyTo(input);
 }
 
-void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
+jint JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          JNIEnv *env, jobject instance,
          jlong matAddrFirst,
          jlong matAddrSecond,
-         jlong matAddrOutput)   // used for output as well
+         jlong matAddrOutput,
+         jlong matLabels,
+         jlong matStats,
+         jlong matCentroids)
 {
     // When is a pixel considered black, and when white?
     uchar black_white_threshold = 30;
@@ -68,43 +74,41 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
     Mat &matSecond = *(Mat *) matAddrSecond;
     Mat &matOutput = *(Mat *) matAddrOutput;
 
-    // Two tables that I'll need later
-    Mat blurFirst(1, 1, CV_8UC1);
-    Mat blurSecond(1, 1, CV_8UC1);
-
-    // ---- Different tests ----
-    // medianBlur(matFirst, blurFirst, 9);
-    // medianBlur(matSecond, blurSecond, 9);
-
-    // blur( matFirst, blurFirst, Size(3,3) );
-    // blur( matSecond, blurSecond, Size(3,3) );
-
-    bool should_subsample = false;
-    if (should_subsample) {
-        pyrDown(matFirst, blurFirst, Size(matOutput.cols / 2, matOutput.rows / 2));
-        pyrDown(matSecond, blurSecond, Size(matSecond.cols / 2, matSecond.rows / 2));
-    }
-    else {
-        blurFirst = matFirst;
-        blurSecond = matSecond;
-    }
+    Mat matDiff;
 
     // Compute the distance between two frames, apply a threshold.
-    absdiff(blurFirst, blurSecond, blurSecond);
-    threshold(blurSecond, blurSecond, black_white_threshold, 255, CV_THRESH_BINARY);
+    absdiff(matFirst, matSecond, matDiff);
+    threshold(matDiff, matDiff, black_white_threshold, 255, CV_THRESH_BINARY);
 
     /// Apply the specified morphology operation
     int morph_size = 1;
     Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
     // Morphological opening
-    morphologyEx( blurSecond, matOutput, MORPH_OPEN, element );
+    morphologyEx( matDiff, matOutput, MORPH_OPEN, element );
 
     // Morphological closing. It seems that we can live without it.
     // morphologyEx( blurSecond, blurSecond, MORPH_CLOSE, element );
 
-    if (should_subsample)
-        resize(matOutput, matOutput, matFirst.size(),0,0,INTER_LINEAR);
+    Mat &labels = *(Mat *) matLabels;
+    Mat &stats = *(Mat *) matStats;
+    Mat &centroids = *(Mat *) matCentroids;
+    int numComponents = connectedComponentsWithStats(matOutput, labels, stats, centroids, 4, CV_16U);
+
+    ALOG("|%d|", numComponents);
+
+    int large_components = 0;
+    // component 0 is the background
+    for(int i = 1; i < numComponents; ++i) {
+        int component_area = stats.at<int>(i, CC_STAT_AREA);
+
+        if (component_area > 30)
+            ++large_components;
+    }
+
+    // This is just to showcase what I am finding
+    labels.convertTo(matOutput, CV_8UC1, 50.0);
+    return numComponents;
 }
 
 
@@ -241,6 +245,7 @@ vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
     }
 
     // From the largest component, find the 4 extremal points (closest to the edges)
+    // TODO: this does not work ideally when there is rotation or large angles
     vector<Point2i> points;
     for (int i = 0; i < labels.cols; ++i)
         for (int j = 0; j < labels.rows; ++j) {
