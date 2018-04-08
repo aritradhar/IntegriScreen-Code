@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
@@ -38,8 +36,6 @@ import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.List;
-
 import static org.opencv.imgproc.Imgproc.blur;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
@@ -54,6 +50,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private SeekBar detectPicker;
     private CheckBox realignCheckbox;
     private CheckBox limitAreaCheckbox;
+
+    private int h_border_perc = 15;
+    private int v_border_perc = 46;
+    Point upper_left, lower_right;
+
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         currentOutputSelection = OutputSelection.RAW;
+
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -224,8 +226,42 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
     }
-    public void onClickDetectText(View view) { currentOutputSelection = OutputSelection.DETECT_TEXT; }
+    public void onClickDetectText(View view) {
+        // currentOutputSelection = OutputSelection.DETECT_TEXT;
+        detect_text_from_frame(previousFrameMat);
+    }
+    
+    private void detect_text_from_frame(Mat frameMat)
+    {
+        // Setup border parameters
+        Mat scanArea;
+        if (limitAreaCheckbox.isChecked()) {
+            scanArea = frameMat.submat(new Rect(upper_left, lower_right));
+        } else
+            scanArea = frameMat;
 
+        SparseArray<TextBlock> texts = detect_text(scanArea);
+
+        String textConcat = "";
+        Log.d("TextDetected", texts.size()+" words");
+        for (int i = 0; i < texts.size(); ++i) {
+            TextBlock item = texts.valueAt(i);
+            if (item != null && item.getValue() != null) {
+                Log.d("TextDetected", item.getValue());
+                textConcat += item.getValue() + " | ";
+            }
+        }
+
+        // This is needed since we are not running on the UI thread usually
+        final String textToShow = textConcat;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textOutput.setText(textToShow);
+            }
+        });
+    }
+    
     public void onDestroy() {
         super.onDestroy();
         disableCamera();
@@ -236,18 +272,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             _cameraBridgeViewBase.disableView();
     }
 
-    private Mat previousMatGray;
+    private Mat previousFrameMat;
     private Mat outputMat;
     private Mat tmpMat;
     public void onCameraViewStarted(int width, int height) {
         outputMat = new Mat(1, 1, CvType.CV_8UC4);
-        previousMatGray = new Mat(1, 1, CvType.CV_8UC4);
+        previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
         tmpMat = new Mat(1, 1, CvType.CV_8UC1);
     }
 
     public void onCameraViewStopped() {
         outputMat.release();
-        previousMatGray.release();
+        previousFrameMat.release();
         tmpMat.release();
     }
 
@@ -290,7 +326,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (realignCheckbox.isChecked())
             realign_perspective(currentFrameMat.getNativeObjAddr());
 
+
         if (currentOutputSelection == OutputSelection.RAW) {
+            currentFrameMat.copyTo(previousFrameMat);
+            if (limitAreaCheckbox.isChecked()) {
+                // Setup border parameters
+                int h_edge = (int) Math.round(currentFrameMat.width() * h_border_perc / 100.0); // horizontal edge
+                int v_edge = (int) Math.round(currentFrameMat.height() * v_border_perc / 100.0); // horizontal edge
+
+                upper_left = new Point(h_edge, v_edge);
+                lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
+
+                Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
+            }
+
             return currentFrameMat;
         }
 
@@ -305,15 +354,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             tmpMat.copyTo(currentFrameMat);
 
-            if (previousMatGray.width() == 1)
-                currentFrameMat.copyTo(previousMatGray);
+            if (previousFrameMat.width() == 1)
+                currentFrameMat.copyTo(previousFrameMat);
 
             compute_diff(currentFrameMat.getNativeObjAddr(),
-                    previousMatGray.getNativeObjAddr(),
+                    previousFrameMat.getNativeObjAddr(),
                     currentFrameMat.getNativeObjAddr());
 
             // Store for next frame
-            tmpMat.copyTo(previousMatGray);
+            tmpMat.copyTo(previousFrameMat);
 
             return currentFrameMat;
         }
@@ -341,40 +390,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
-            Mat scanArea = currentFrameMat;
-            if (limitAreaCheckbox.isChecked()) {
-                int h_border_perc = 15; // percentage of the horizontal border
-                int v_border_perc = 46; // percentage of the vertical border
-                int h_edge = (int) Math.round(currentFrameMat.width() * h_border_perc / 100.0); // horizontal edge
-                int v_edge = (int) Math.round(currentFrameMat.height() * v_border_perc / 100.0); // horizontal edge
-
-                Point upper_left = new Point(h_edge, v_edge);
-                Point lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
-
-                Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
-                scanArea = currentFrameMat.submat(new Rect(upper_left, lower_right));
-            }
-            SparseArray<TextBlock> texts = detect_text(scanArea);
-
-            String textConcat = "";
-            Log.d("TextDetected", texts.size()+" words");
-            for (int i = 0; i < texts.size(); ++i) {
-                TextBlock item = texts.valueAt(i);
-                if (item != null && item.getValue() != null) {
-                    Log.d("TextDetected", item.getValue());
-                    textConcat += item.getValue() + " | ";
-                }
-            }
-
-            // This is needed since we are not running on the UI thread usually
-            final String textToShow = textConcat;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    textOutput.setText(textToShow);
-                }
-            });
-
+            detect_text_from_frame(currentFrameMat);
             return currentFrameMat;
         }
 
