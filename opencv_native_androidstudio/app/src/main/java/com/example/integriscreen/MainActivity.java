@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
+        _cameraBridgeViewBase.enableFpsMeter();
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
