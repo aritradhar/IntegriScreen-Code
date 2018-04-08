@@ -124,8 +124,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 1);
 
         _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
-        // Change camera resolution:
-        // _cameraBridgeViewBase.setMaxFrameSize(1024, 768); // This sets an upper bound, which is also specified by the View size that is shown for preview
+        // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
+        // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
+        // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
+        _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
 
