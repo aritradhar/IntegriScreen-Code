@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,8 @@ import org.opencv.core.CvType;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -72,10 +75,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     };
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    private void hideActionBar() {
         // HIDE the Status Bar and Action Bar
         View decorView = getWindow().getDecorView();
         // Hide the status bar.
@@ -87,6 +87,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
         // -----------------------
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        hideActionBar();
 
         // Initialize textRecognizer
         textRecognizer = new TextRecognizer.Builder(this).build();
@@ -106,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-        currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
+        currentOutputSelection = OutputSelection.RAW;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -118,10 +125,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
         // Change camera resolution:
-        // _cameraBridgeViewBase.setMaxFrameSize(1024, 768);
+        // _cameraBridgeViewBase.setMaxFrameSize(1024, 768); // This sets an upper bound, which is also specified by the View size that is shown for preview
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
@@ -162,6 +168,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public void onResume() {
         super.onResume();
+
+        // For some reason the action bar tended to resurface so we hide it
+        // Otherwise, openCV would start using a different camera resolution
+        hideActionBar();
+
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, _baseLoaderCallback);
