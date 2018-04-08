@@ -31,6 +31,9 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private TextView textOutput;
     private SeekBar detectPicker;
     private CheckBox realignCheckbox;
+    private CheckBox limitAreaCheckbox;
 
     private CameraBridgeViewBase _cameraBridgeViewBase;
 
@@ -127,7 +131,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
-        _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
+        // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
+        _cameraBridgeViewBase.setMaxFrameSize(960, 540);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.enableFpsMeter();
@@ -137,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         textOutput = (TextView)findViewById(R.id.textOutput);
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
+        limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -284,12 +290,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (realignCheckbox.isChecked())
             realign_perspective(currentFrameMat.getNativeObjAddr());
 
-        if (currentOutputSelection == OutputSelection.RAW)
+        if (currentOutputSelection == OutputSelection.RAW) {
             return currentFrameMat;
+        }
 
         if (currentOutputSelection == OutputSelection.CANNY) {
             Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
             applyCanny(tmpMat, currentFrameMat);
+            return currentFrameMat;
         }
 
          if (currentOutputSelection == OutputSelection.DIFF) {
@@ -332,9 +340,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return currentFrameMat;
         }
 
-
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
-            SparseArray<TextBlock> texts = detect_text(currentFrameMat);
+            Mat scanArea = currentFrameMat;
+            if (limitAreaCheckbox.isChecked()) {
+                int h_border_perc = 15; // percentage of the horizontal border
+                int v_border_perc = 46; // percentage of the vertical border
+                int h_edge = (int) Math.round(currentFrameMat.width() * h_border_perc / 100.0); // horizontal edge
+                int v_edge = (int) Math.round(currentFrameMat.height() * v_border_perc / 100.0); // horizontal edge
+
+                Point upper_left = new Point(h_edge, v_edge);
+                Point lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
+
+                Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
+                scanArea = currentFrameMat.submat(new Rect(upper_left, lower_right));
+            }
+            SparseArray<TextBlock> texts = detect_text(scanArea);
 
             String textConcat = "";
             Log.d("TextDetected", texts.size()+" words");

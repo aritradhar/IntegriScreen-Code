@@ -104,11 +104,22 @@
         android:progress="1" />
 
     <CheckBox
-        android:id="@+id/realignCheckBox"
+        android:id="@+id/limitAreaCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/diff"
-        android:layout_marginStart="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorPrimary"
+        android:checked="false"
+        android:text="Limit" />
+
+    <CheckBox
+        android:id="@+id/realignCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/limitAreaCheckBox"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
         android:checked="false"
@@ -121,6 +132,8 @@
         android:layout_alignEnd="@+id/main_surface"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
+        android:background="@color/colorPrimary"
+        android:maxHeight="100dp"
         android:text="OCR not started" />
 
 </RelativeLayout>
