@@ -77,7 +77,6 @@
         android:layout_above="@+id/colorSeekBar"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
         android:background="@android:color/holo_green_light"
         android:text="240"
         android:textColor="@android:color/white" />
