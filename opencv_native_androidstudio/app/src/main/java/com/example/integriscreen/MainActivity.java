@@ -6,7 +6,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,6 +21,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -29,12 +32,16 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -56,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     Point upper_left, lower_right;
 
 
-    private CameraBridgeViewBase _cameraBridgeViewBase;
+//    private CameraBridgeViewBase _cameraBridgeViewBase;
+    private CustomCameraView _cameraBridgeViewBase;
 
     // TextRecognizer is the native vision API for text extraction
     TextRecognizer textRecognizer;
@@ -129,7 +137,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 new String[]{Manifest.permission.CAMERA},
                 1);
 
-        _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
+//        _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
+        _cameraBridgeViewBase = (CustomCameraView) findViewById(R.id.main_surface);
+
         // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
@@ -230,6 +240,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // currentOutputSelection = OutputSelection.DETECT_TEXT;
         detect_text_from_frame(previousFrameMat);
     }
+    public void onClickTakePic(View view) {
+        Log.d(TAG, "Take picture button clicled.");
+        takePicHighRes();
+    }
     
     private void detect_text_from_frame(Mat frameMat)
     {
@@ -260,6 +274,29 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 textOutput.setText(textToShow);
             }
         });
+    }
+
+    private void takePicHighRes() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String currentDateandTime = sdf.format(new Date());
+
+        String fileName = Environment.getExternalStorageDirectory().getPath() +
+                "/opencv_" + currentDateandTime + ".jpg";
+        Log.d(TAG, "Picture saved in: " + fileName);
+
+//        List<Camera.Size> res = _cameraBridgeViewBase.getResolutionList();
+//        for (int i=0; i<res.size(); i++) {
+//            Camera.Size r = res.get(i);
+//            Log.d(TAG, "Picture resolution #" + i + ": " + r.height + "x" + r.width);
+//        }
+//        Camera.Size tmpR = res.get(0);
+//        tmpR.width = 3264;
+//        tmpR.height = 1836;
+//        _cameraBridgeViewBase.setResolution(tmpR);
+
+        _cameraBridgeViewBase.takePicture(fileName);
+
+
     }
     
     public void onDestroy() {
@@ -311,6 +348,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
+        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         // if detect_color -> apply sto treba
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
@@ -408,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         SparseArray<TextBlock> texts = textRecognizer.detect(frame);
         return texts;
     }
+
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);

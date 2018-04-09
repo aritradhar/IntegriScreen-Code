@@ -50,7 +50,7 @@
         android:layout_below="@+id/canny"
         android:text="Raw" />
 
-    <org.opencv.android.JavaCameraView
+    <com.example.integriscreen.CustomCameraView
         android:id="@+id/main_surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -135,5 +135,14 @@
         android:background="@color/colorPrimary"
         android:maxHeight="100dp"
         android:text="OCR not started" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOutput"
+        android:layout_toStartOf="@+id/raw"
+        android:onClick="onClickTakePic"
+        android:text="TakePic" />
 
 </RelativeLayout>
