@@ -243,6 +243,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.CANNY;
     }
     public void onClickShowDiff(View view) {
+        previousFrameMat.release();
+        previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
         currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
@@ -404,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return currentFrameMat;
         }
 
-         if (currentOutputSelection == OutputSelection.DIFF) {
+        if (currentOutputSelection == OutputSelection.DIFF) {
             Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
 
             tmpMat.copyTo(currentFrameMat);
