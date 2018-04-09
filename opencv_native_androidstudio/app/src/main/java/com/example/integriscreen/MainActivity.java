@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.hardware.Camera;
+import android.icu.util.Output;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +18,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private SeekBar detectPicker;
     private CheckBox realignCheckbox;
     private CheckBox limitAreaCheckbox;
+    private CheckBox liveOCRCheckbox;
 
     private int h_border_perc = 15;
     private int v_border_perc = 46;
@@ -155,6 +158,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
+        liveOCRCheckbox = (CheckBox)findViewById(R.id.liveOCRCheckBox);
+        // Un-checking "live" should stop the OCR mode
+/*        liveOCRCheckbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ( !((CheckBox)v).isChecked() ) {
+                    currentOutputSelection = OutputSelection.RAW;
+                }
+            }
+        });*/
+
+
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -237,8 +252,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.RAW;
     }
     public void onClickDetectText(View view) {
-        // currentOutputSelection = OutputSelection.DETECT_TEXT;
-        detect_text_from_frame(previousFrameMat);
+        if (liveOCRCheckbox.isChecked())
+            currentOutputSelection = OutputSelection.DETECT_TEXT;
+        else
+            detect_text_from_frame(previousFrameMat);
     }
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
@@ -350,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat currentFrameMat = inputFrame.rgba();
         Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
-        // if detect_color -> apply sto treba
+        // if detect_color -> apply the transformation
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
             // Mat currentFrameMat = inputFrame.rgba();
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
@@ -428,6 +445,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
+            if (limitAreaCheckbox.isChecked()) {
+                // Setup border parameters
+                int h_edge = (int) Math.round(currentFrameMat.width() * h_border_perc / 100.0); // horizontal edge
+                int v_edge = (int) Math.round(currentFrameMat.height() * v_border_perc / 100.0); // horizontal edge
+
+                upper_left = new Point(h_edge, v_edge);
+                lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
+
+                Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
+            }
+
             detect_text_from_frame(currentFrameMat);
             return currentFrameMat;
         }

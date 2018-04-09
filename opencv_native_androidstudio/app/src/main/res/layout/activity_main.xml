@@ -104,6 +104,19 @@
         android:progress="1" />
 
     <CheckBox
+        android:id="@+id/liveOCRCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/raw"
+        android:layout_below="@+id/limitAreaCheckBox"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:checked="false"
+        android:text="Live" />
+
+    <CheckBox
         android:id="@+id/limitAreaCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -111,6 +124,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
         android:checked="false"
         android:text="Limit" />
 
@@ -122,6 +136,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
         android:checked="false"
         android:text="Realign" />
 
@@ -133,6 +148,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
         android:maxHeight="100dp"
         android:text="OCR not started" />
 
