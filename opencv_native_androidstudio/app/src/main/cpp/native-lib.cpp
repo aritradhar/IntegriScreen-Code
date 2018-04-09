@@ -18,6 +18,7 @@ vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat);
 vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat);
 double my_dist(Point2f A, Point2f B);
 void reorder_points(vector<Point2f> &points);
+Rect update_bounding_box(Rect A, Rect B);
 
 // The 4 points that select quadilateral on the input , from top-left in clockwise order
 // These four pts are the sides of the rect box used as input
@@ -73,17 +74,32 @@ jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
 
     ALOG("|%d|", numComponents);
 
+    int min_area_to_count = 20; // TODO: this should probably be relative to the screen resolution
+
+    Rect bounding_box(matInput.cols, matInput.rows, -matInput.cols, -matInput.rows);
+
     int large_components = 0;
     // component 0 is the background
     for (int i = 1; i < numComponents; ++i) {
         int component_area = stats.at<int>(i, CC_STAT_AREA);
 
-        if (component_area > 30)
+        Rect new_bound(stats.at<int>(i, CC_STAT_LEFT),
+                       stats.at<int>(i, CC_STAT_TOP),
+                       stats.at<int>(i, CC_STAT_WIDTH),
+                       stats.at<int>(i, CC_STAT_HEIGHT));
+
+        if (component_area > min_area_to_count) {
             ++large_components;
+
+            bounding_box = update_bounding_box(bounding_box, new_bound);
+        }
     }
 
     // This is just to showcase what I am finding
     labels.convertTo(labels, CV_8UC1, 50.0);
+
+    rectangle(matInput, bounding_box, Scalar(255, 0, 0), 2);
+
 
     return large_components;
 }
@@ -281,6 +297,18 @@ vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
     }
 
     return points;
+}
+
+Rect update_bounding_box(Rect A, Rect B)
+{
+    Rect U(min(A.x, B.x),
+           min(A.y, B.y),
+           max(A.x + A.width, B.x + B.width),
+           max(A.y + A.height, B.y + B.height));
+    // U has been calculated as upper-left and lower-right corner.
+
+    // Before returning, convert it to upper-left and width, height
+    return Rect(U.x, U.y, U.width - U.x, U.height - U.y);
 }
 
 vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat)

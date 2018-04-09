@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, COUNT_DIFF};
+    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT};
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
-        // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
-        _cameraBridgeViewBase.setMaxFrameSize(960, 540);
+        _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
+        //_cameraBridgeViewBase.setMaxFrameSize(960, 540);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.enableFpsMeter();
@@ -239,6 +239,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
+    private void display_text(final String textToShow) {
+//        final String textToShow = outputText;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textOutput.setText(textToShow);
+            }
+        });
+
+    }
+
     public void onClickShowCanny(View view) {
         currentOutputSelection = OutputSelection.CANNY;
     }
@@ -286,13 +297,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // This is needed since we are not running on the UI thread usually
-        final String textToShow = textConcat;
+        display_text(textConcat);
+/*        final String textToShow = textConcat;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 textOutput.setText(textToShow);
             }
-        });
+        });*/
     }
 
     private void takePicHighRes() {
@@ -407,6 +419,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.DIFF) {
+            // Convert to black and white
             Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
 
             tmpMat.copyTo(currentFrameMat);
@@ -421,30 +434,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Store for next frame
             tmpMat.copyTo(previousFrameMat);
 
+            // TODO: this kind of UI selection does not make too much sense logically, but it will be OK for now.
+            if (liveOCRCheckbox.isChecked()) {
+                Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
+                Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
+                Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+
+                int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
+                        matLabels.getNativeObjAddr(),
+                        matStats.getNativeObjAddr(),
+                        matCentroids.getNativeObjAddr());
+                Log.d("num_comp", String.valueOf(numComponents));
+
+                display_text(Integer.toString(numComponents));
+
+                matLabels.release();
+                matStats.release();
+                matCentroids.release();
+            }
+
+
+
+
             return currentFrameMat;
         }
 
         // Final results: detect text, compute the number of changes, etc.
 
-        if (currentOutputSelection == OutputSelection.COUNT_DIFF) {
-            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
-
-            int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
-                                                matLabels.getNativeObjAddr(),
-                                                matStats.getNativeObjAddr(),
-                                                matCentroids.getNativeObjAddr());
-            Log.d("num_comp", String.valueOf(numComponents));
-
-            // TODO: process components
-
-            matLabels.release();
-            matStats.release();
-            matCentroids.release();
-
-            return currentFrameMat;
-        }
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
             if (limitAreaCheckbox.isChecked()) {
