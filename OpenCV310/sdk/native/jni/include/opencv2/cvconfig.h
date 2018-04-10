@@ -1,5 +1,5 @@
 /* OpenCV compiled as static or dynamic libs */
-/* #undef BUILD_SHARED_LIBS */
+#define BUILD_SHARED_LIBS
 
 /* Compile for 'real' NVIDIA GPU architectures */
 #define CUDA_ARCH_BIN ""
@@ -20,7 +20,7 @@
 /* #undef HAVE_CAMV4L */
 
 /* V4L2 capturing support */
-/* #undef HAVE_CAMV4L2 */
+#define HAVE_CAMV4L2
 
 /* Carbon windowing environment */
 /* #undef HAVE_CARBON */
@@ -53,7 +53,7 @@
 /* #undef HAVE_DC1394 */
 
 /* IEEE1394 capturing support - libdc1394 v2.x */
-/* #undef HAVE_DC1394_2 */
+#define HAVE_DC1394_2
 
 /* DirectX */
 /* #undef HAVE_DIRECTX */
@@ -69,25 +69,25 @@
 /* #undef HAVE_EIGEN */
 
 /* FFMpeg video library */
-/* #undef HAVE_FFMPEG */
+#define HAVE_FFMPEG
 
 /* ffmpeg's libswscale */
-/* #undef HAVE_FFMPEG_SWSCALE */
+#define HAVE_FFMPEG_SWSCALE
 
 /* ffmpeg in Gentoo */
-/* #undef HAVE_GENTOO_FFMPEG */
+#define HAVE_GENTOO_FFMPEG
 
 /* Geospatial Data Abstraction Library */
 /* #undef HAVE_GDAL */
 
 /* GStreamer multimedia framework */
-/* #undef HAVE_GSTREAMER */
+#define HAVE_GSTREAMER
 
 /* GTK+ 2.0 Thread support */
-/* #undef HAVE_GTHREAD */
+#define HAVE_GTHREAD
 
 /* GTK+ 2.x toolkit */
-/* #undef HAVE_GTK */
+#define HAVE_GTK
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 /* #undef HAVE_INTTYPES_H */
@@ -96,8 +96,8 @@
 /* #undef HAVE_INTELPERC */
 
 /* Intel Integrated Performance Primitives */
-/* #undef HAVE_IPP */
-/* #undef HAVE_IPP_ICV_ONLY */
+#define HAVE_IPP
+#define HAVE_IPP_ICV_ONLY
 
 /* Intel IPP Async */
 /* #undef HAVE_IPP_A */
@@ -112,7 +112,7 @@
 /* #undef HAVE_LIBPNG_PNG_H */
 
 /* V4L/V4L2 capturing support via libv4l */
-/* #undef HAVE_LIBV4L */
+#define HAVE_LIBV4L
 
 /* Microsoft Media Foundation Capture library */
 /* #undef HAVE_MSMF */
@@ -121,7 +121,7 @@
 /* #undef HAVE_NVCUVID */
 
 /* OpenCL Support */
-/* #undef HAVE_OPENCL */
+#define HAVE_OPENCL
 /* #undef HAVE_OPENCL_STATIC */
 /* #undef HAVE_OPENCL_SVM */
 
@@ -159,7 +159,7 @@
 /* #undef HAVE_QTKIT */
 
 /* Intel Threading Building Blocks */
-#define HAVE_TBB
+/* #undef HAVE_TBB */
 
 /* TIFF codec */
 #define HAVE_TIFF
@@ -187,7 +187,7 @@
 /* #undef WORDS_BIGENDIAN */
 
 /* gPhoto2 library */
-/* #undef HAVE_GPHOTO2 */
+#define HAVE_GPHOTO2
 
 /* VA library (libva) */
 /* #undef HAVE_VA */
