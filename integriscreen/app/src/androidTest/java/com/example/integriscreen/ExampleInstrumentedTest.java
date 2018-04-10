@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("ch.hepia.iti.integriscreen", appContext.getPackageName());
+        assertEquals("com.example.integriscreen", appContext.getPackageName());
     }
 }

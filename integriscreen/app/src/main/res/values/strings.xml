@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OpenCVNativeAndroidStudio</string>
+    <string name="app_name">IntegriScreen</string>
 
     <string-array name="detector_options">
         <item>None</item>
