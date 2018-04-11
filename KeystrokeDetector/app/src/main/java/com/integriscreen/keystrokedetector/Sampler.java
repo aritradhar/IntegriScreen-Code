@@ -3,6 +3,8 @@ package com.integriscreen.keystrokedetector;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.paramsen.noise.Noise;
 import com.paramsen.noise.NoiseOptimized;
@@ -23,6 +25,7 @@ public class Sampler extends Thread {
     private AudioRecord recorder;
     private MainActivity mainActivity;
     private int sampleCount = 0;
+    private int keystrokeCount = 0;
     public Boolean isRunning;
 
     Sampler(MainActivity mA) {
@@ -31,11 +34,11 @@ public class Sampler extends Thread {
 
     public void run() {
 
-        fftInput = new float[RecordingParameters.SAMPLE_RATE];
+        fftInput = new float[RecordingParameters.WINDOW_SIZE];
 
         fft = Noise.real()
                 .optimized()
-                .init(RecordingParameters.WINDOW_SIZE, true);
+                .init(RecordingParameters.WINDOW_SIZE, false);
 
         recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, RecordingParameters.SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT, RecordingParameters.WINDOW_SIZE);
@@ -47,8 +50,8 @@ public class Sampler extends Thread {
         while (isRunning) {
             // Read data
             status = recorder.read(fftInput, 0, RecordingParameters.WINDOW_SIZE, AudioRecord.READ_BLOCKING);
-
-            fftOutput = fft.fft(fftInput);
+            fftOutput = new float[RecordingParameters.WINDOW_SIZE + 2];
+            fft.fft(fftInput, fftOutput);
             sampleCount += 1;
 
             double[] absOutput = new double[fftOutput.length / 2];
@@ -62,6 +65,7 @@ public class Sampler extends Thread {
             double energy = DoubleStream.of(absOutput).sum();
             mainActivity.updateXChart(energy);
             mainActivity.energySerie.add(energy);
+            mainActivity.runOnUiThread(() -> ((TextView) mainActivity.findViewById(R.id.threshold)).setText(String.valueOf(energy)));
 
             // TODO: we need a way to decide how much above BG noise to set the threshold
                 // A threshold exists &&
@@ -69,9 +73,11 @@ public class Sampler extends Thread {
                     // Current window energy is above threshold &&
                     energy > mainActivity.thresholdValue + 5 &&
                     // last event was enough milliseconds ago
-                    mainActivity.last_event_window + RecordingParameters.KEYSTROKE_MIN_DISTANCE <= sampleCount) {
+                    mainActivity.last_event_window + RecordingParameters.KEYSTROKE_MIN_WINDOW <= sampleCount) {
                 // event detected -- update label
-
+                mainActivity.last_event_window = sampleCount;
+                keystrokeCount += 1;
+                mainActivity.runOnUiThread(() -> ((Button) mainActivity.findViewById(R.id.count)).setText(String.valueOf(keystrokeCount)));
                 // calculate what time the event happened
             }
 

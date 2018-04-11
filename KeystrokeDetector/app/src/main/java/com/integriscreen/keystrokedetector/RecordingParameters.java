@@ -9,9 +9,15 @@ public class RecordingParameters {
 
     public static final int WINDOW_SIZE = 512;
     public static final int SAMPLE_RATE = 44100;
+    // Length of the BG noise window, in milliseconds
     public static final int BG_NOISE_LENGTH = 200;
-    public static final float WINDOW_LENGTH = 1.0f * WINDOW_SIZE / SAMPLE_RATE;
+    // Length of the FFT window, in milliseconds
+    public static final float WINDOW_LENGTH = 1000f * WINDOW_SIZE / SAMPLE_RATE;
+    // Length of the BG noise window, in samples
     public static final int BG_SAMPLES = Math.round(BG_NOISE_LENGTH / WINDOW_LENGTH);
-    public static final int KEYSTROKE_MIN_DISTANCE = Math.round(50 / WINDOW_LENGTH);
+    // Minimum distance between keystrokes, in milliseconds
+    public static final int KEYSTROKE_MIN_DISTANCE = 120;
+    // Minimum distance between keystrokes, in samples
+    public static final int KEYSTROKE_MIN_WINDOW = Math.round(KEYSTROKE_MIN_DISTANCE / WINDOW_LENGTH);
 
 }

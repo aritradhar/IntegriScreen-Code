@@ -60,10 +60,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         fftChart = findViewById(R.id.chart);
-        fftChart.setAutoScaleMinMaxEnabled(Boolean.TRUE);
+        fftChart.getAxisLeft().setAxisMaximum(60f); // the axis maximum is 100
+        // fftChart.setAutoScaleMinMaxEnabled(Boolean.TRUE);
 
         fftData = new LineDataSet(new ArrayList<Entry>(), "x");
-        fftData.setAxisDependency(YAxis.AxisDependency.LEFT);
+        // fftData.setAxisDependency(YAxis.AxisDependency.LEFT);
         fftData.setColor(Color.RED);
         fftData.addEntry(new Entry(0, 0));
 
