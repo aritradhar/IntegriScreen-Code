@@ -18,7 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onClickShowCanny"
-        android:text="Canny" />
+        android:text="Canny"
+        />
 
     <Button
         android:id="@+id/diff"
@@ -67,7 +68,7 @@
         android:layout_marginTop="13dp"
         android:layout_marginStart="60dp"
         android:max="350"
-        android:progress="130" />
+        android:progress="22" />
 
     <TextView
         android:id="@+id/colorLabel"
@@ -153,12 +154,21 @@
         android:text="OCR not started" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/takePictureButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOutput"
         android:layout_toStartOf="@+id/raw"
         android:onClick="onClickTakePic"
         android:text="TakePic" />
+
+    <Button
+        android:id="@+id/detectHands"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/takePictureButton"
+        android:layout_above="@+id/textOutput"
+        android:onClick="onClickDetectHands"
+        android:text="Hand D." />
 
 </RelativeLayout>
