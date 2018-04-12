@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+<body onload="calibrate()">
+
+<center>
+
+
+<div style="border: 20px solid #00ff00;" id="frameBox">
+
+<h2>email</h2>
+<form action="/action_page.php">email<br>
+<input type=textfield name =email value=bla@bla.com>
+subject<br>
+<input type=textfield name =subject value=blabla>
+body<br>
+<textarea rows="10" cols="50">
+Hi Bla, blabla. regards, Bla</textarea>
+
+  
+  
+  <input type="submit" value="Submit">
+
+  
+  </form>
+</div>
+
+
+</center>
+
+</body>
+
+<script type="text/javascript">
+  function calibrate()
+    {
+      // get current visible window size in different browsers
+      var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+      //scale down the green frame
+      url = new URL(location.href);
+      scale = url.searchParams.get("scale");
+      if (scale == null) {
+        scale = 0.7;  // default value
+        location = location+"?scale="+scale;
+      }
+      // add the scale in url to make it easier to change
+
+      y=scale*y;
+
+      // keep width:hight ratio to 16:9
+      x = (16*y)/9;
+
+      document.getElementById("frameBox").style.width = x+'px';
+      document.getElementById("frameBox").style.height = y+'px';
+    }
+</script>
+
+</html>

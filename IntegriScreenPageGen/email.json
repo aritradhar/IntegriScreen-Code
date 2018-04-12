@@ -1,0 +1,37 @@
+{
+  "ratio": "16:9",
+  "page": "email",
+  "order": "email:subject:body",
+  "elements": [
+    {
+      "id": "email",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "bla@bla.com",
+      "ulc_x": "10",
+      "ulc_y": "18",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    },
+    {
+      "id": "subject",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "blabla",
+      "ulc_x": "10",
+      "ulc_y": "18",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    },
+    {
+      "id": "body",
+      "type": "textarea",
+      "editable": "true",
+      "initialvalue": "Hi Bla, blabla. regards, Bla",
+      "ulc_x": "10",
+      "ulc_y": "18",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    }
+  ]
+}
