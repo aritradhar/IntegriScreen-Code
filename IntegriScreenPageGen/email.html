@@ -3,19 +3,25 @@
 <html>
 <body onload="calibrate()">
 
-<center>
 
 
-<div style="border: 20px solid #00ff00;" id="frameBox">
+
+<div style="border: 20px solid #00ff00;  margin-right: auto; margin-left: auto" id="frameBox">
 
 <h2>email</h2>
-<form action="/action_page.php">email<br>
-<input type=textfield name =email value=bla@bla.com>
-subject<br>
-<input type=textfield name =subject value=blabla>
-body<br>
+<form action="/action_page.php"><div style="position:relative" id="emptyspace1"> </div>
+<label style="left:10%; position:relative">email</label>
+<div></div>
+<input type=textfield name =email value=bla@bla.com style="left:10%;position:relative">
+<div style="position:relative" id="emptyspace2"> </div>
+<label style="left:10%; position:relative">subject</label>
+<div></div>
+<input type=textfield name =subject value=blabla style="left:10%;position:relative">
+<div style="position:relative" id="emptyspace3"> </div>
+<label style="left:10%; position:relative">body</label>
+<div></div>
 <textarea rows="10" cols="50">
-Hi Bla, blabla. regards, Bla</textarea>
+Hi Bla, blabla. regards, Bla style="left:10%;position:relative"</textarea>
 
   
   
@@ -26,7 +32,6 @@ Hi Bla, blabla. regards, Bla</textarea>
 </div>
 
 
-</center>
 
 </body>
 
@@ -57,6 +62,11 @@ Hi Bla, blabla. regards, Bla</textarea>
 
       document.getElementById("frameBox").style.width = x+'px';
       document.getElementById("frameBox").style.height = y+'px';
+	  
+	  document.getElementById("emptyspace1").style.height = (2/100)*y + 'px';
+document.getElementById("emptyspace2").style.height = (2/100)*y + 'px';
+document.getElementById("emptyspace3").style.height = (2/100)*y + 'px';
+
     }
 </script>
 

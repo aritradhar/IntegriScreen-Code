@@ -55,7 +55,10 @@ public class PageGen {
   		<br>
 
 		 */
+		int divCounter = 1;
 		StringBuffer elementHtmlString = new StringBuffer();
+		StringBuffer scriptString = new StringBuffer();
+		
 		for(int i = 0; i < elements.length(); i++)
 		{
 			JSONObject inObject = elements.getJSONObject(i);
@@ -63,19 +66,39 @@ public class PageGen {
 			String type = inObject.getString("type");
 			String editable = inObject.getString("editable");
 			String initialValue = inObject.getString("initialvalue");
-			System.out.println(initialValue);
+			String ulc_x = inObject.getString("ulc_x");
+			String ulc_y = inObject.getString("ulc_y");
+			System.out.println(id);
+			
+			
+			elementHtmlString.append("<div style=\"position:relative\" id=\"emptyspace" + (divCounter) +"\"> </div>\n");
+			elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + id + "</label>\n<div></div>\n");
 			
 			if(type.equalsIgnoreCase("textarea"))
-				elementHtmlString.append(id + "<br>\n<" + type + " rows=\"10\" cols=\"50\">\n" + initialValue + "</textarea>\n");
+				elementHtmlString.append("<" + type + " rows=\"10\" cols=\"50\">\n" + initialValue + " style=\"left:" + ulc_x + "%;position:relative\"</textarea>\n");
 							
 			else
-				elementHtmlString.append(id + "<br>\n<input type=" + type + " name =" + id + " value=" + initialValue + ">\n");
+				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue + " style=\"left:"+ ulc_x +"%;position:relative\">\n");
+			
+			
+			scriptString.append("document.getElementById(\"emptyspace" + divCounter +"\").style.height = (" + ulc_y + "/100)*y + 'px';\n");
+			
+			divCounter++;
+			
+			
 		}
 		
 		htmlFile = htmlFile.replaceAll("<form action=\"/action_page.php\">", "<form action=\"/action_page.php\">" + 
 				elementHtmlString.toString());
+		
+		
+
+		htmlFile = htmlFile.replace("!!SCRIPT_REPLACE!!", scriptString);
+		
 		fw.write(htmlFile);
 		fw.close();
+		
+		System.out.println("Page generated");
 		
 	}
 

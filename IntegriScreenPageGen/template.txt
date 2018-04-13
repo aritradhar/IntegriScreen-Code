@@ -3,10 +3,10 @@
 <html>
 <body onload="calibrate()">
 
-<center>
 
 
-<div style="border: 20px solid #00ff00;" id="frameBox">
+
+<div style="border: 20px solid #00ff00;  margin-right: auto; margin-left: auto" id="frameBox">
 
 <h2>!!page_name!!</h2>
 <form action="/action_page.php">
@@ -19,7 +19,6 @@
 </div>
 
 
-</center>
 
 </body>
 
@@ -50,6 +49,8 @@
 
       document.getElementById("frameBox").style.width = x+'px';
       document.getElementById("frameBox").style.height = y+'px';
+	  
+	  !!SCRIPT_REPLACE!!
     }
 </script>
 
