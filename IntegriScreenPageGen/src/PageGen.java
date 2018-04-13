@@ -75,7 +75,7 @@ public class PageGen {
 			elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + id + "</label>\n<div></div>\n");
 			
 			if(type.equalsIgnoreCase("textarea"))
-				elementHtmlString.append("<" + type + " rows=\"10\" cols=\"50\">\n" + initialValue + " style=\"left:" + ulc_x + "%;position:relative\"</textarea>\n");
+				elementHtmlString.append("<" + type + " rows=\"10\" cols=\"50\" style=\"left:" + ulc_x + "%;position:relative\">" + initialValue + "</textarea>\n");
 							
 			else
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue + " style=\"left:"+ ulc_x +"%;position:relative\">\n");
