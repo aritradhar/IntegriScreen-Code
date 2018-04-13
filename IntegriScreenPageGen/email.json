@@ -9,9 +9,7 @@
       "editable": "false",
       "initialvalue": "email",
       "ulc_x": "10",
-      "ulc_y": "2",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "2"
     },
     
      {
@@ -20,9 +18,7 @@
       "editable": "true",
       "initialvalue": "bla@bla.com",
       "ulc_x": "10",
-      "ulc_y": "2",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "2"
     },
    
     {
@@ -31,9 +27,7 @@
       "editable": "false",
       "initialvalue": "subject",
       "ulc_x": "10",
-      "ulc_y": "2",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "2"
     },
      
     {
@@ -42,9 +36,7 @@
       "editable": "true",
       "initialvalue": "blabla",
       "ulc_x": "10",
-      "ulc_y": "2",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "2"
     },
     {
       "id": "body_label",
@@ -52,9 +44,16 @@
       "editable": "false",
       "initialvalue": "body",
       "ulc_x": "10",
-      "ulc_y": "5",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "5"
+    },
+    
+     {
+      "id": "body_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "fuck this",
+      "ulc_x": "10",
+      "ulc_y": "5"
     },
 
     {
@@ -63,9 +62,7 @@
       "editable": "true",
       "initialvalue": "Hi Bla, blabla. regards, Bla",
       "ulc_x": "10",
-      "ulc_y": "5",
-      "lrc_x": "10",
-      "lrc_y": "12"
+      "ulc_y": "5"
     }
   ]
 }
