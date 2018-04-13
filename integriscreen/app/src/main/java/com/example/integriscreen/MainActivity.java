@@ -6,8 +6,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.Camera;
-import android.icu.util.Output;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -18,12 +16,10 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -44,7 +40,6 @@ import org.opencv.imgproc.Imgproc;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -288,6 +283,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
     }
+    public void onClickDownloadSpec(View view) {
+        Log.d(TAG, "Start downloading specs of TargetForm from server...");
+        String url = "http://enis.ulqinaku.com/rs/integri/json.php";
+        TargetForm targetForm = new TargetForm(getApplicationContext(), url);
+    }
     
     private void detect_text_from_frame(Mat frameMat)
     {
@@ -328,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         String fileName = Environment.getExternalStorageDirectory().getPath() +
                 "/opencv_" + currentDateandTime + ".jpg";
         Log.d(TAG, "Picture saved in: " + fileName);
-
 //        List<Camera.Size> res = _cameraBridgeViewBase.getResolutionList();
 //        for (int i=0; i<res.size(); i++) {
 //            Camera.Size r = res.get(i);
@@ -393,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
-        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
+//        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
             // namings assume portait orientation, so (0, 0) is upper right corner and (width, height) is lower left corner

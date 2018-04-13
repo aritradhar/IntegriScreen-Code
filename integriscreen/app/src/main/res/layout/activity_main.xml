@@ -171,4 +171,14 @@
         android:onClick="onClickDetectHands"
         android:text="Hand D." />
 
+
+    <Button 
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/detectHands"
+        android:layout_above="@+id/textOutput"
+        android:onClick="onClickDownloadSpec"
+        android:text="download" />
+
 </RelativeLayout>
