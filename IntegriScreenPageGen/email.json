@@ -4,6 +4,17 @@
   "order": "email:subject:body",
   "elements": [
     {
+      "id": "email_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "email",
+      "ulc_x": "10",
+      "ulc_y": "2",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    },
+    
+     {
       "id": "email",
       "type": "textfield",
       "editable": "true",
@@ -13,6 +24,18 @@
       "lrc_x": "10",
       "lrc_y": "12"
     },
+   
+    {
+      "id": "subject_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "subject",
+      "ulc_x": "10",
+      "ulc_y": "2",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    },
+     
     {
       "id": "subject",
       "type": "textfield",
@@ -23,6 +46,17 @@
       "lrc_x": "10",
       "lrc_y": "12"
     },
+    {
+      "id": "body_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "body",
+      "ulc_x": "10",
+      "ulc_y": "5",
+      "lrc_x": "10",
+      "lrc_y": "12"
+    },
+
     {
       "id": "body",
       "type": "textarea",

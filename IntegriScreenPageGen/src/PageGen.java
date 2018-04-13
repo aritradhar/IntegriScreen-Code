@@ -72,14 +72,16 @@ public class PageGen {
 			
 			
 			elementHtmlString.append("<div style=\"position:relative\" id=\"emptyspace" + (divCounter) +"\"> </div>\n");
-			elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + id + "</label>\n<div></div>\n");
+			
 			
 			if(type.equalsIgnoreCase("textarea"))
 				elementHtmlString.append("<" + type + " rows=\"10\" cols=\"50\" style=\"left:" + ulc_x + "%;position:relative\">" + initialValue + "</textarea>\n");
-							
-			else
+			
+			else if(type.equalsIgnoreCase("textfield"))
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue + " style=\"left:"+ ulc_x +"%;position:relative\">\n");
 			
+			else if(type.equalsIgnoreCase("label"))
+				elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + initialValue + "</label>\n<div></div>\n");
 			
 			scriptString.append("document.getElementById(\"emptyspace" + divCounter +"\").style.height = (" + ulc_y + "/100)*y + 'px';\n");
 			
