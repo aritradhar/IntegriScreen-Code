@@ -65,6 +65,10 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
         mCamera.setPreviewCallback(null);
 
+//        Camera.Parameters params = mCamera.getParameters();
+//        params.getPictureSize().width = 3264;
+//        params.getPictureSize().height = 1836;
+//        mCamera.setParameters(params);
         // PictureCallback is implemented by the current class
         mCamera.takePicture(null, null, this);
     }

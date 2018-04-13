@@ -58,6 +58,17 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     output.copyTo(input);
 }
 
+void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, jobject instance,
+                                                                  jlong inputAddr, jlong outputAddr)
+{
+    Mat &inputMat = *(Mat *)inputAddr;
+    Mat &outputMat = *(Mat *)outputAddr;
+
+    transpose(inputMat, outputMat);
+    flip(outputMat, outputMat, +1);
+    // rotate(inputMat, outputMat, 0); // rotateCode = 0 for 90 degree clockwise rotation
+}
+
 jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
         JNIEnv *env, jobject instance,
         jlong matInputAddr,

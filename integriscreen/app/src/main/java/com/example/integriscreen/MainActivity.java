@@ -6,8 +6,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.Camera;
-import android.icu.util.Output;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -18,12 +16,10 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -33,6 +29,7 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -43,15 +40,15 @@ import org.opencv.imgproc.Imgproc;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.blur;
+import static org.opencv.imgproc.Imgproc.line;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "OCVSample::Activity";
 
-    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT};
+    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, DETECT_HANDS};
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
@@ -61,9 +58,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox limitAreaCheckbox;
     private CheckBox liveOCRCheckbox;
 
+    // this is currently for "limited OCR"
     private int h_border_perc = 15;
     private int v_border_perc = 46;
     Point upper_left, lower_right;
+
+    int skin_hue_estimate = 22;
+    int color_border_hue = 120;
 
 
 //    private CameraBridgeViewBase _cameraBridgeViewBase;
@@ -146,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
-        _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
+        // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
         //_cameraBridgeViewBase.setMaxFrameSize(960, 540);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
@@ -260,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
     public void onClickShowColor(View view) {
         currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
+        huePicker.setProgress(color_border_hue, true);
     }
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
@@ -270,9 +272,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         else
             detect_text_from_frame(previousFrameMat);
     }
+
+    public void onClickDetectHands(View view) {
+        currentOutputSelection = OutputSelection.DETECT_HANDS;
+        huePicker.setProgress(skin_hue_estimate, true);
+    }
+
+
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
+    }
+    public void onClickDownloadSpec(View view) {
+        Log.d(TAG, "Start downloading specs of TargetForm from server...");
+        String url = "http://enis.ulqinaku.com/rs/integri/json.php";
+        TargetForm targetForm = new TargetForm(getApplicationContext(), url);
     }
     
     private void detect_text_from_frame(Mat frameMat)
@@ -314,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         String fileName = Environment.getExternalStorageDirectory().getPath() +
                 "/opencv_" + currentDateandTime + ".jpg";
         Log.d(TAG, "Picture saved in: " + fileName);
-
 //        List<Camera.Size> res = _cameraBridgeViewBase.getResolutionList();
 //        for (int i=0; i<res.size(); i++) {
 //            Camera.Size r = res.get(i);
@@ -379,7 +392,63 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
-        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
+//        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
+
+        if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
+            // namings assume portait orientation, so (0, 0) is upper right corner and (width, height) is lower left corner
+            Point mid_right = new Point(currentFrameMat.width() / 2, 0);
+            Point mid_left = new Point(currentFrameMat.width() / 2, currentFrameMat.height());
+
+            line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 4);
+
+            // TODO: on 1) upper part
+            // --- apply realign (that also rotates by 90 degrees?)
+            // --- apply diff or OCR
+            Rect screenBox = new Rect(new Point(0, 0), mid_left);
+            Mat screenPart = currentFrameMat.submat(screenBox);
+            if (realignCheckbox.isChecked()) {
+                realign_perspective(screenPart.getNativeObjAddr());
+            }
+
+
+            // If liveOCR is true, I run OCR on the whole upper part of the screen
+            if (liveOCRCheckbox.isChecked()) {
+                Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
+                rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+
+                // TODO: Enis, this is where you can plug your code for now
+
+                detect_text_from_frame(rotatedScreenPart);
+
+
+                rotatedScreenPart.release();
+            }
+
+            // TODO: on 2) lower part
+            // ---- apply detect_color(human_skin)
+            // TODO: ---- apply diff
+            Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
+            Mat handsPart = currentFrameMat.submat(handsBox);
+
+            // Get hue color from the progress bar, divide by 2 since this is what OpenCV expects
+            color_detector(handsPart.getNativeObjAddr(), huePicker.getProgress() / 2, 0);
+            // Connvert back to 4 channel colors
+            Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
+
+
+
+            // Combine the two parts
+            screenPart.copyTo(currentFrameMat.submat(screenBox));
+            // TODO: I shouldn't be recreating and then releasing, but re-using Mats
+            screenPart.release();
+
+            handsPart.copyTo(currentFrameMat.submat(handsBox));
+            handsPart.release();
+
+
+            return currentFrameMat;
+        }
+
 
         // if detect_color -> apply the transformation
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
@@ -498,5 +567,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
+    public native void rotate90(long inputAddr, long outputAddr);
+
 }
 
