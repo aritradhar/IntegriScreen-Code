@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -29,7 +30,6 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -66,8 +66,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     int skin_hue_estimate = 22;
     int color_border_hue = 120;
 
+    // the form created based on specs received from Server
+    TargetForm targetForm;
 
-//    private CameraBridgeViewBase _cameraBridgeViewBase;
+    //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
 
     // TextRecognizer is the native vision API for text extraction
@@ -261,7 +263,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
     public void onClickShowColor(View view) {
         currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
-        huePicker.setProgress(color_border_hue, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            huePicker.setProgress(color_border_hue, true);
+        }
     }
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
@@ -270,35 +274,57 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (liveOCRCheckbox.isChecked())
             currentOutputSelection = OutputSelection.DETECT_TEXT;
         else
-            detect_text_from_frame(previousFrameMat);
+            display_text_from_box(previousFrameMat, null);
     }
-
     public void onClickDetectHands(View view) {
         currentOutputSelection = OutputSelection.DETECT_HANDS;
-        huePicker.setProgress(skin_hue_estimate, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            huePicker.setProgress(skin_hue_estimate, true);
+        }
     }
 
-
+    //TODO: this method should be called automatically when a pic is neccessary
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
     }
+
+    //TODO: this method should be called automatically once the user navigates to a specific form
     public void onClickDownloadSpec(View view) {
         Log.d(TAG, "Start downloading specs of TargetForm from server...");
         String url = "http://enis.ulqinaku.com/rs/integri/json.php";
-        TargetForm targetForm = new TargetForm(getApplicationContext(), url);
+        targetForm = new TargetForm(getApplicationContext(), url);
     }
-    
-    private void detect_text_from_frame(Mat frameMat)
-    {
+
+    //TODO: this method should be called automatically when a 'stable' quality frame is received
+    //TODO: and the form is downloaded
+    public boolean onClickValidateForm(View view) {
+        // iterate through all elements
+        for (int i = 0; i < targetForm.getUIElNumber(); i++) {
+            UIElement tmpEl = targetForm.getElement(i);
+            Mat currentMat = null; //TODO this should be on the input of the function
+            String extractedText = concatTextBlocks(detect_text(currentMat, tmpEl.box));
+            if (extractedText.equals(tmpEl.currentVal)) {
+                tmpEl.found = true;
+            } else {
+                // raise an alarm flag
+                Log.d(TAG, "***Attention here*** Lock the door and stay safe :-) " +
+                        "Mismatch for element with ID: " + tmpEl.id);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void display_text_from_box(Mat frameMat, Rect box) {
         // Setup border parameters
         Mat scanArea;
-        if (limitAreaCheckbox.isChecked()) {
-            scanArea = frameMat.submat(new Rect(upper_left, lower_right));
+        if (limitAreaCheckbox.isChecked() && box != null) {
+            scanArea = frameMat.submat(box);
         } else
             scanArea = frameMat;
 
-        SparseArray<TextBlock> texts = detect_text(scanArea);
+        SparseArray<TextBlock> texts = detect_text(scanArea, null);
 
         String textConcat = "";
         Log.d("TextDetected", texts.size()+" words");
@@ -418,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                 // TODO: Enis, this is where you can plug your code for now
 
-                detect_text_from_frame(rotatedScreenPart);
+                display_text_from_box(rotatedScreenPart, null);
 
 
                 rotatedScreenPart.release();
@@ -543,18 +569,49 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
 
-            detect_text_from_frame(currentFrameMat);
+            display_text_from_box(currentFrameMat, null);
             return currentFrameMat;
         }
 
         return currentFrameMat;
     }
 
-    private SparseArray<TextBlock> detect_text(Mat matFrame) {
+    /**
+     * Returns the value of an UI element that includes a given point
+     */
+    public String readElementValueAtChange(Mat currentFrame, Point point) {
+        String output = "";
+        int index = targetForm.matchElFromChangesAt(point);
+        UIElement tmp = targetForm.getElement(index);
+        output = concatTextBlocks(detect_text(currentFrame, tmp.box));
+        return output;
+    }
+
+    /**
+     * Returns the value of an UI element that includes a given rectangle
+     */
+    public String readElementValueAtChange(Mat currentFrame, Rect box) {
+        String output = "";
+        int index = targetForm.matchElFromChangesAt(box);
+        UIElement tmp = targetForm.getElement(index);
+        output = concatTextBlocks(detect_text(currentFrame, tmp.box));
+        return output;
+    }
+
+    /**
+     * This method returns a SparseArry of TextBlocs found in a frame, or a subframe if box is not null
+     */
+    private SparseArray<TextBlock> detect_text(Mat matFrame, Rect box) {
+        // Setup border parameters
+        Mat scanArea = matFrame;
+        if (box != null) {
+            scanArea = matFrame.submat(box);
+        }
+
         //convert Mat to Bitmap
-        Bitmap bmp = Bitmap.createBitmap(matFrame.cols(), matFrame.rows(),
+        Bitmap bmp = Bitmap.createBitmap(scanArea.cols(), scanArea.rows(),
                 Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(matFrame, bmp);
+        Utils.matToBitmap(scanArea, bmp);
         //convert Bitmap to Frame. TODO: Optimize conversions
         Frame frame = new Frame.Builder().setBitmap(bmp).build();
 
@@ -562,6 +619,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return texts;
     }
 
+    private String concatTextBlocks (SparseArray<TextBlock> texts) {
+        String textConcat = "";
+        for (int i = 0; i < texts.size(); ++i) {
+            TextBlock item = texts.valueAt(i);
+            if (item != null && item.getValue() != null) {
+                textConcat += item.getValue() + " ";
+            }
+        }
+        return textConcat;
+    }
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);

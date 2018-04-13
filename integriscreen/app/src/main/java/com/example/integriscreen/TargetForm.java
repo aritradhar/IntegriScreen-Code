@@ -16,6 +16,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 
@@ -33,13 +35,66 @@ public class TargetForm {
     // store UI elements
     public ArrayList<UIElement> allElements;
 
+    // keeps track of active UI element
+    public String activEl;
+
+
     public TargetForm(Context context, String targetUrl) {
+        activEl = "";
         allElements = null;
         applicationContext = context;
         queue = Volley.newRequestQueue(applicationContext);
         makeJsonObjectRequest(targetUrl);
     }
 
+    /**
+     * This method finds the corresponding Element from a point of diff event
+     */
+    public int matchElFromChangesAt(Point point) {
+        int index = -1;
+        for (int i = 0; i < allElements.size(); i++) {
+            if (allElements.get(i).box.contains(point)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    public int matchElFromChangesAt(Rect rect) {
+        int index = -1;
+        Point tl = new Point(rect.x, rect.y);
+        Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
+        for (int i = 0; i < allElements.size(); i++) {
+            if (allElements.get(i).box.contains(tl) &&
+                    allElements.get(i).box.contains(rb)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Get UI Element with index i
+     */
+    public UIElement getElement(int index) {
+        return allElements.get(index);
+    }
+
+    /**
+     * Set an UI Element in a specific index
+     */
+    public void setElement(int index, UIElement element) {
+        allElements.set(index, element);
+    }
+
+    /**
+     * get number of UI Elements in the form
+     */
+    public int getUIElNumber() {
+        return allElements.size();
+    }
 
     /**
      * Method to make json object request where json response starts wtih {
@@ -96,4 +151,5 @@ public class TargetForm {
         // Adding request to request queue
         queue.add(jsonObjReq);
     }
+
 }
