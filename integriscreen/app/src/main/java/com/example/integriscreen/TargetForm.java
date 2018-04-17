@@ -37,10 +37,19 @@ public class TargetForm {
 
     // keeps track of active UI element
     public String activEl;
+    public double timeTurnedActive;
+
+    // form ratio
+    public String ratio;
+    // form page id
+    public String pageId;
 
 
     public TargetForm(Context context, String targetUrl) {
+        ratio = "16:9";     // default ratio
+        pageId = "";
         activEl = "";
+        timeTurnedActive = 0;
         allElements = null;
         applicationContext = context;
         queue = Volley.newRequestQueue(applicationContext);
@@ -48,10 +57,40 @@ public class TargetForm {
     }
 
     /**
+     * Set the active element based on the point where the diff happens
+     */
+    public void setActivElAtDiff(Point point) {
+        for (int i = 0; i < allElements.size(); i++) {
+            if (allElements.get(i).box.contains(point)) {
+                activEl = allElements.get(i).id;
+                timeTurnedActive = System.currentTimeMillis();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Set the active element based on the rectangle where the diff happens
+     */
+    public void setActivElAtDiff(Rect rect) {
+        Point tl = new Point(rect.x, rect.y);
+        Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
+
+        for (int i = 0; i < allElements.size(); i++) {
+            if (allElements.get(i).box.contains(tl) &&
+                    allElements.get(i).box.contains(rb)) {
+                activEl = allElements.get(i).id;
+                timeTurnedActive = System.currentTimeMillis();
+                break;
+            }
+        }
+    }
+
+    /**
      * This method finds the corresponding Element from a point of diff event
      */
-    public int matchElFromChangesAt(Point point) {
-        int index = -1;
+    public int matchElFromDiffAt(Point point) {
+        int index = -1; // -1 represents no element is found on the diff location
         for (int i = 0; i < allElements.size(); i++) {
             if (allElements.get(i).box.contains(point)) {
                 index = i;
@@ -61,8 +100,11 @@ public class TargetForm {
         return index;
     }
 
-    public int matchElFromChangesAt(Rect rect) {
-        int index = -1;
+    /**
+     * This method finds the corresponding Element from a rectangle where diff happens
+     */
+    public int matchElFromDiffAt(Rect rect) {
+        int index = -1; // -1 represents no element is found on the diff location
         Point tl = new Point(rect.x, rect.y);
         Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
         for (int i = 0; i < allElements.size(); i++) {
@@ -108,6 +150,8 @@ public class TargetForm {
                 Log.d(TAG, response.toString());
 
                 try {
+                    ratio = response.getString("ratio");
+                    pageId = response.getString("page");
                     // Parsing json object response
                     JSONArray allElements = response.getJSONArray("elements");
                     Log.d(TAG,allElements.toString());

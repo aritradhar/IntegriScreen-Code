@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // the form created based on specs received from Server
     TargetForm targetForm;
+    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -283,20 +284,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    //TODO: this method should be called automatically when a pic is neccessary
+    //TODO: this method should be called programmatically when a pic is neccessary
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
     }
 
-    //TODO: this method should be called automatically once the user navigates to a specific form
+    //TODO: this method should be called programmatically once the user navigates to a specific form
     public void onClickDownloadSpec(View view) {
         Log.d(TAG, "Start downloading specs of TargetForm from server...");
-        String url = "http://enis.ulqinaku.com/rs/integri/json.php";
-        targetForm = new TargetForm(getApplicationContext(), url);
+        targetForm = new TargetForm(getApplicationContext(), formURL);
     }
 
-    //TODO: this method should be called automatically when a 'stable' quality frame is received
+    //TODO: this method should be called programmatically when a 'stable' quality frame is received
     //TODO: and the form is downloaded
     public boolean onClickValidateForm(View view) {
         // iterate through all elements
@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 tmpEl.found = true;
             } else {
                 // raise an alarm flag
-                Log.d(TAG, "***Attention here*** Lock the door and stay safe :-) " +
+                Log.d(TAG, "***Attack*** Take things seriously :-) " +
                         "Mismatch for element with ID: " + tmpEl.id);
                 return false;
             }
@@ -579,9 +579,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /**
      * Returns the value of an UI element that includes a given point
      */
-    public String readElementValueAtChange(Mat currentFrame, Point point) {
+    public String readElementValueAtDiff(Mat currentFrame, Point point) {
         String output = "";
-        int index = targetForm.matchElFromChangesAt(point);
+        int index = targetForm.matchElFromDiffAt(point);
         UIElement tmp = targetForm.getElement(index);
         output = concatTextBlocks(detect_text(currentFrame, tmp.box));
         return output;
@@ -590,12 +590,26 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /**
      * Returns the value of an UI element that includes a given rectangle
      */
-    public String readElementValueAtChange(Mat currentFrame, Rect box) {
+    public String readElementValueAtDiff(Mat currentFrame, Rect box) {
         String output = "";
-        int index = targetForm.matchElFromChangesAt(box);
+        int index = targetForm.matchElFromDiffAt(box);
         UIElement tmp = targetForm.getElement(index);
         output = concatTextBlocks(detect_text(currentFrame, tmp.box));
         return output;
+    }
+
+    public void updateUIElement(int i, String text) {
+        // check if the element is active, TODO: does time since active help?
+        if (targetForm.getElement(i).id.equals(targetForm.activEl)) {
+            targetForm.getElement(i).currentVal = text;
+            targetForm.getElement(i).lastUpdated = System.currentTimeMillis();
+        }
+        else {
+            // raise an alarm flag
+            Log.d(TAG, "***Attack*** Take things seriously :-) " +
+                    "Trying to modify element with ID: " + targetForm.getElement(i).id
+                    + ", while active is: " + targetForm.activEl);
+        }
     }
 
     /**
