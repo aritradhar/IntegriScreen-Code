@@ -3,7 +3,15 @@
 <html>
 <body onload="calibrate()">
 
-
+<style>
+label {
+  width : !!label_width!!%;
+  overflow:hidden;
+  display:inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
 
 
 <div style="border: 20px solid #00ff00;  margin-right: auto; margin-left: auto" id="frameBox">

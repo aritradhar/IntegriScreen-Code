@@ -3,27 +3,35 @@
 <html>
 <body onload="calibrate()">
 
-
+<style>
+label {
+  width : !!label_width!!%;
+  overflow:hidden;
+  display:inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
 
 
 <div style="border: 20px solid #00ff00;  margin-right: auto; margin-left: auto" id="frameBox">
 
 <h2>email</h2>
 <form action="/action_page.php"><div style="position:relative" id="emptyspace1"> </div>
-<label style="left:10%; position:relative">email</label>
+<label style="width:10%;left:10%; position:relative">email</label>
 <div></div>
 <div style="position:relative" id="emptyspace2"> </div>
 <input type=textfield name =email value=bla@bla.com style="width:50%;left:10%;position:relative">
 <div style="position:relative" id="emptyspace3"> </div>
-<label style="left:10%; position:relative">subject</label>
+<label style="width:10%;left:10%; position:relative">subject</label>
 <div></div>
 <div style="position:relative" id="emptyspace4"> </div>
 <input type=textfield name =subject value=blabla style="width:20%;left:10%;position:relative">
 <div style="position:relative" id="emptyspace5"> </div>
-<label style="left:10%; position:relative">body</label>
+<label style="width:10%;left:10%; position:relative">body</label>
 <div></div>
 <div style="position:relative" id="emptyspace6"> </div>
-<label style="left:10%; position:relative">fuck this</label>
+<label style="width:10%;left:10%; position:relative">fuck this</label>
 <div></div>
 <div style="position:relative" id="emptyspace7"> </div>
 <textarea rows="10" cols="50" style="left:10%;position:relative">Hi Bla, blabla. regards, Bla</textarea>

@@ -89,8 +89,10 @@ public class PageGen {
 			}
 			
 			else if(type.equalsIgnoreCase("label"))
-				elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + initialValue + "</label>\n<div></div>\n");
-			
+			{
+				String width = inObject.getString("width");
+				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%; position:relative\">" + initialValue + "</label>\n<div></div>\n");
+			}
 			scriptString.append("document.getElementById(\"emptyspace" + divCounter +"\").style.height = (" + ulc_y + "/100)*y + 'px';\n");
 			
 			divCounter++;

@@ -9,7 +9,8 @@
       "editable": "false",
       "initialvalue": "email",
       "ulc_x": "10",
-      "ulc_y": "2"
+      "ulc_y": "2",
+      "width": "10"
     },
     
      {
@@ -28,7 +29,8 @@
       "editable": "false",
       "initialvalue": "subject",
       "ulc_x": "10",
-      "ulc_y": "2"
+      "ulc_y": "2",
+      "width": "10"
     },
      
     {
@@ -46,7 +48,8 @@
       "editable": "false",
       "initialvalue": "body",
       "ulc_x": "10",
-      "ulc_y": "5"
+      "ulc_y": "5",
+      "width": "10"
     },
     
      {
@@ -55,7 +58,8 @@
       "editable": "false",
       "initialvalue": "fuck this",
       "ulc_x": "10",
-      "ulc_y": "5"
+      "ulc_y": "5",
+      "width": "10"
     },
 
     {
