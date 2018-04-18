@@ -33,6 +33,7 @@ public class MainServer extends HttpServlet {
 		File[] currentFiles = new File(".").listFiles();
 		for(File file : currentFiles)
 		{
+			System.out.println(file);
 			if(file.getName().contains(".json"))
 				fileString.add(file.getName().replaceAll(".json", ""));
 		}

@@ -75,10 +75,18 @@ public class PageGen {
 			
 			
 			if(type.equalsIgnoreCase("textarea"))
-				elementHtmlString.append("<" + type + " rows=\"10\" cols=\"50\" style=\"left:" + ulc_x + "%;position:relative\">" + initialValue + "</textarea>\n");
+			{
+				String row = inObject.getString("row");
+				String col = inObject.getString("col");
+				elementHtmlString.append("<" + type + " rows=\"" + row + "\" cols=\"" + col + "\" style=\"left:" + ulc_x + "%;position:relative\">" + 																			initialValue + "</textarea>\n");
+			
+			}
 			
 			else if(type.equalsIgnoreCase("textfield"))
-				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue + " style=\"left:"+ ulc_x +"%;position:relative\">\n");
+			{
+				String width = inObject.getString("width");
+				elementHtmlString.append("<input type=" + type + " name =" + id +" value=" + initialValue + " style=\"width:" + width + "%;left:"+ ulc_x +"%;position:relative\">\n");
+			}
 			
 			else if(type.equalsIgnoreCase("label"))
 				elementHtmlString.append("<label style=\"left:" + ulc_x + "%; position:relative\">" + initialValue + "</label>\n<div></div>\n");

@@ -17,6 +17,7 @@
       "type": "textfield",
       "editable": "true",
       "initialvalue": "bla@bla.com",
+      "width": "50",
       "ulc_x": "10",
       "ulc_y": "2"
     },
@@ -35,6 +36,7 @@
       "type": "textfield",
       "editable": "true",
       "initialvalue": "blabla",
+      "width": "20",
       "ulc_x": "10",
       "ulc_y": "2"
     },
@@ -61,6 +63,8 @@
       "type": "textarea",
       "editable": "true",
       "initialvalue": "Hi Bla, blabla. regards, Bla",
+      "row": "10",
+      "col": "50",
       "ulc_x": "10",
       "ulc_y": "5"
     }
