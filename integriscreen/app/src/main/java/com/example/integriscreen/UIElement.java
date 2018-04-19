@@ -24,11 +24,11 @@ public class UIElement {
 //    public int certainity;      // store the confidence
 
 
-    public UIElement(String i, String ed, String tp, int x1, int y1, int x2, int y2, String dV) {
+    public UIElement(String i, String ed, String tp, Rect bounding_box, String dV) {
         id = i;
         editable = ed;
         type = tp;
-        box = new Rect(x1, y1, x2-x1, y2-y1);
+        box = bounding_box;
         defaultVal = dV;
         currentVal = defaultVal;
         found = false;

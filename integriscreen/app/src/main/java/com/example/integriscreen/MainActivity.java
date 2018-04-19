@@ -30,6 +30,7 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -38,15 +39,17 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
+import static org.opencv.imgproc.Imgproc.rectangle;
 
-public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener {
 
-    private static final String TAG = "OCVSample::Activity";
+    private static final String TAG = "MainActivity";
 
     private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, DETECT_HANDS};
     private OutputSelection currentOutputSelection;
@@ -68,7 +71,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // the form created based on specs received from Server
     TargetForm targetForm;
-    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
+
+    String formURL = "https://drive.google.com/uc?id=1TGu6WZ5j-5HRrJCjg1cIxea_TRzZLrAr&export=download";
+    //    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -274,9 +279,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickDetectText(View view) {
         if (liveOCRCheckbox.isChecked())
             currentOutputSelection = OutputSelection.DETECT_TEXT;
-        else
-            display_text_from_box(previousFrameMat, null);
+        else {
+            if (limitAreaCheckbox.isChecked())
+                display_text_from_box(previousFrameMat, new Rect(upper_left, lower_right));
+            else
+                display_text_from_box(previousFrameMat, null);
+        }
     }
+
     public void onClickDetectHands(View view) {
         currentOutputSelection = OutputSelection.DETECT_HANDS;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -293,8 +303,44 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     //TODO: this method should be called programmatically once the user navigates to a specific form
     public void onClickDownloadSpec(View view) {
         Log.d(TAG, "Start downloading specs of TargetForm from server...");
-        targetForm = new TargetForm(getApplicationContext(), formURL);
+        targetForm = new TargetForm(getApplicationContext(), formURL, this);
+        Log.d(TAG, targetForm.toString());
     }
+
+    // Callback which is called by TargetForm class once the data is ready.
+    public void onFormLoaded() {
+        Log.d(TAG, "Form loaded!" + targetForm.toString());
+    }
+
+    void plotForm(Mat currentFrameMat, TargetForm form) {
+
+        for(int i = 0; i < form.allElements.size(); ++i) {
+            UIElement element = form.allElements.get(i);
+
+            // TODO: determine the area where to draw this.
+            int frame_h = currentFrameMat.height();
+//            int frame_w = currentFrameMat.width();
+            // TODO: it could happen in some cases that this gives us too large width!
+            int frame_w = (int)Math.round(frame_h * form.ratio_w / (double)form.ratio_h);
+
+            long x = Math.round(element.box.x * frame_w / (double)form.resolution);
+            long y = Math.round(element.box.y * frame_h / (double)form.resolution);
+            long width = Math.round(element.box.width * frame_w / (double)form.resolution);
+            long height = Math.round(element.box.height * frame_h / (double)form.resolution);
+
+            Point P1 = new Point(x, y);
+            Point P2 = new Point(x + width, y + height);
+
+            // Plot the borders of the UI elements
+            Imgproc.rectangle(currentFrameMat, P1, P2, new Scalar(255, 0, 0), 4);
+
+            // Output the text on the UI elements
+            int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
+            Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
+                    Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(0,255,0));
+        }
+    }
+
 
     //TODO: this method should be called programmatically when a 'stable' quality frame is received
     //TODO: and the form is downloaded
@@ -421,9 +467,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
-            // namings assume portait orientation, so (0, 0) is upper right corner and (width, height) is lower left corner
-            Point mid_right = new Point(currentFrameMat.width() / 2, 0);
-            Point mid_left = new Point(currentFrameMat.width() / 2, currentFrameMat.height());
+            // At the moment, namings assume portait orientation, so (0, 0) is upper right corner and (width, height) is lower left corner
+
+            // double ratio = 1.5; // 3:2 --> this should be the same as the ratio of the form
+            // int mid_delim = (int)Math.round(currentFrameMat.height() / ratio);
+
+            int mid_delim = currentFrameMat.width() / 2;
+
+            Point mid_right = new Point(mid_delim, 0);
+            Point mid_left = new Point(mid_delim, currentFrameMat.height());
 
             line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 4);
 
@@ -442,10 +494,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
                 rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-                // TODO: Enis, this is where you can plug your code for now
-
                 display_text_from_box(rotatedScreenPart, null);
-
 
                 rotatedScreenPart.release();
             }
@@ -502,6 +551,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
 
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
+            }
+            if (liveOCRCheckbox.isChecked()) {
+                if (targetForm.isLoaded)
+                    plotForm(currentFrameMat, targetForm);
             }
 
             return currentFrameMat;
@@ -581,7 +634,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     public String readElementValueAtDiff(Mat currentFrame, Point point) {
         String output = "";
-        int index = targetForm.matchElFromDiffAt(point);
+        int index = targetForm.matchElFromPoint(point);
         UIElement tmp = targetForm.getElement(index);
         output = concatTextBlocks(detect_text(currentFrame, tmp.box));
         return output;
@@ -592,7 +645,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     public String readElementValueAtDiff(Mat currentFrame, Rect box) {
         String output = "";
-        int index = targetForm.matchElFromDiffAt(box);
+        int index = targetForm.matchElFromRect(box);
         UIElement tmp = targetForm.getElement(index);
         output = concatTextBlocks(detect_text(currentFrame, tmp.box));
         return output;
@@ -651,4 +704,3 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void rotate90(long inputAddr, long outputAddr);
 
 }
-

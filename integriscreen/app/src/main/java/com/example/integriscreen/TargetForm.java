@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class TargetForm {
     private String TAG = "TargetForm";
     Context applicationContext;
+    public String formUrl;
 
     // Instantiate the RequestQueue.
     RequestQueue queue;
@@ -39,15 +40,25 @@ public class TargetForm {
     public String activEl;
     public double timeTurnedActive;
 
+    // This defines the max values of the coordinates
+    public int resolution = 10000;
+
     // form ratio
-    public String ratio;
+    public int ratio_w, ratio_h;
+
+    public int horizontal_denom;
     // form page id
     public String pageId;
 
+    public boolean isLoaded;
 
-    public TargetForm(Context context, String targetUrl) {
-        ratio = "16:9";     // default ratio
+    private OnDataLoadedEventListener parentActivity;
+
+    public TargetForm(Context context, String targetUrl, OnDataLoadedEventListener parent) {
+        parentActivity = parent;
         pageId = "";
+        formUrl = targetUrl;
+        isLoaded = false;
         activEl = "";
         timeTurnedActive = 0;
         allElements = null;
@@ -89,7 +100,7 @@ public class TargetForm {
     /**
      * This method finds the corresponding Element from a point of diff event
      */
-    public int matchElFromDiffAt(Point point) {
+    public int matchElFromPoint(Point point) {
         int index = -1; // -1 represents no element is found on the diff location
         for (int i = 0; i < allElements.size(); i++) {
             if (allElements.get(i).box.contains(point)) {
@@ -100,11 +111,10 @@ public class TargetForm {
         return index;
     }
 
-    /**
-     * This method finds the corresponding Element from a rectangle where diff happens
-     */
-    public int matchElFromDiffAt(Rect rect) {
-        int index = -1; // -1 represents no element is found on the diff location
+    // Returns the index of an element that *fully* contains rect
+    public int matchElFromRect(Rect rect) {
+        int index = -1;
+
         Point tl = new Point(rect.x, rect.y);
         Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
         for (int i = 0; i < allElements.size(); i++) {
@@ -131,6 +141,16 @@ public class TargetForm {
         allElements.set(index, element);
     }
 
+
+    public String toString() {
+        String outputString = "formUrl: " + formUrl;
+        if (allElements != null) {
+            for (int i = 0; i < allElements.size(); ++i)
+                outputString = outputString + "|" + allElements.get(i).toString();
+        }
+
+        return outputString;
+    }
     /**
      * get number of UI Elements in the form
      */
@@ -150,31 +170,45 @@ public class TargetForm {
                 Log.d(TAG, response.toString());
 
                 try {
-                    ratio = response.getString("ratio");
+                    String ratio = response.getString("ratio");
+                    String[] parts = ratio.split(":");  // ATM 3:2 means width:height
+                    ratio_w = Integer.parseInt(parts[0]);
+                    ratio_h = Integer.parseInt(parts[1]);
+
                     pageId = response.getString("page");
+
                     // Parsing json object response
-                    JSONArray allElements = response.getJSONArray("elements");
-                    Log.d(TAG,allElements.toString());
+                    JSONArray JSONElements = response.getJSONArray("elements");
+                    Log.d(TAG, JSONElements.toString());
+
+                    allElements = new ArrayList<UIElement>();
 
                     // iterate through all elements
-                    int totalElements = allElements.length();
-                    for (int i = 0; i < totalElements; i++) {
-                        JSONObject tmpObject = allElements.getJSONObject(i);
+                    for (int i = 0; i < JSONElements.length(); i++) {
+                        JSONObject tmpObject = JSONElements.getJSONObject(i);
 //                        Log.d(TAG, "Parsing JSONObject: " + tmpObject.toString());
                         String id = tmpObject.getString("id");
                         String editable = tmpObject.getString("editable");
                         String type = tmpObject.getString("type");
-                        int x1 = tmpObject.getInt("ulc_x");
-                        int y1 = tmpObject.getInt("ulc_y");
-                        int x2 = tmpObject.getInt("lrc_x");
-                        int y2 = tmpObject.getInt("lrc_y");
+
+                        int res_scale = resolution / 100;
+                        int x1 = (int)Math.round(res_scale * tmpObject.getDouble("ulc_x"));
+                        int y1 = (int)Math.round(res_scale * tmpObject.getDouble("ulc_y"));
+                        int width = (int)Math.round(res_scale * tmpObject.getDouble("width"));
+                        int height = (int)Math.round(res_scale * tmpObject.getDouble("height"));
                         String defaultVal = tmpObject.getString("initialvalue");
 
-                        UIElement tmpElement = new UIElement(id, editable, type, x1, y1, x2, y2, defaultVal);
+                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(x1, y1, width, height), defaultVal);
                         Log.d(TAG, tmpElement.toString());
+
                         // add the element in the arraylist
-                        allElements.put(tmpElement);
+                        allElements.add(tmpElement);
                     }
+
+                    // TODO: process data
+                    // Set the form as isLoaded.
+                    isLoaded = true;
+                    parentActivity.onFormLoaded();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
