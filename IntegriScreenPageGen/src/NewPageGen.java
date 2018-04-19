@@ -48,6 +48,8 @@ public class NewPageGen {
 		int widthtInt = Integer.parseInt(rarioWidth);
 		String form_action = jObject.getString("form_action");
 		
+		String border_thickness = jObject.getString("border_thickness");
+		
 		System.out.println(htmlFile.contains("!!page_name!!"));
 		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", rarioHeight).replaceAll("!!width!!", rarioWidth);
 		
@@ -68,7 +70,7 @@ public class NewPageGen {
 		int vspaceInt = Integer.parseInt(vspace);
 		
 		//border
-		elementHtmlString.append("<div style=\"border: 3vh solid #00ff00; height:" + vspace + "vh; width:" + 
+		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:" + vspace + "vh; width:" + 
 					new Integer(vspaceInt/widthtInt * heightInt).toString() + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
 		
 		int titleCounter = 0;

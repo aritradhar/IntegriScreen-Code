@@ -2,6 +2,7 @@
   "ratio": "3:2",
   "vspace": "60",
   "page": "email",
+  "border_thickness":"3",
   "form_action":"/action_page.php",
   "elements": [
     {
