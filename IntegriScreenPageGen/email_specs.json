@@ -1,0 +1,77 @@
+{
+    "vspace": "60", 
+    "elements": [
+        {
+            "ulc_x": "2", 
+            "ulc_y": 3.3333333333333335, 
+            "content": "email", 
+            "width": "10", 
+            "height": 13.333333333333334, 
+            "type": "h2", 
+            "id": "form_title"
+        }, 
+        {
+            "initialvalue": "email", 
+            "editable": "false", 
+            "ulc_x": "10", 
+            "ulc_y": 16.666666666666668, 
+            "width": "10", 
+            "height": 10.0, 
+            "type": "label", 
+            "id": "email_label"
+        }, 
+        {
+            "initialvalue": "bla@bla.com", 
+            "editable": "true", 
+            "ulc_x": "20", 
+            "ulc_y": 16.666666666666668, 
+            "width": "50", 
+            "height": 10.0, 
+            "type": "textfield", 
+            "id": "email"
+        }, 
+        {
+            "initialvalue": "subject", 
+            "editable": "false", 
+            "ulc_x": "10", 
+            "ulc_y": 26.666666666666668, 
+            "width": "10", 
+            "height": 11.666666666666668, 
+            "type": "label", 
+            "id": "subject_label"
+        }, 
+        {
+            "initialvalue": "blabla", 
+            "editable": "true", 
+            "ulc_x": "20", 
+            "ulc_y": 26.666666666666668, 
+            "width": "20", 
+            "height": 11.666666666666668, 
+            "type": "textfield", 
+            "id": "subject"
+        }, 
+        {
+            "initialvalue": "body", 
+            "editable": "false", 
+            "ulc_x": "10", 
+            "ulc_y": 38.333333333333336, 
+            "width": "10", 
+            "height": 5.0, 
+            "type": "label", 
+            "id": "body_label"
+        }, 
+        {
+            "initialvalue": "Hi Bla, blabla. regards, Bla", 
+            "editable": "true", 
+            "ulc_x": "10", 
+            "ulc_y": 43.333333333333336, 
+            "width": "40", 
+            "height": 25.0, 
+            "type": "textarea", 
+            "id": "body"
+        }
+    ], 
+    "ratio": "3:2", 
+    "page": "email", 
+    "order": "email:subject:body"
+}

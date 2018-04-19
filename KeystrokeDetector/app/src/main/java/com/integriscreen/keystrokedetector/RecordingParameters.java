@@ -7,7 +7,7 @@ package com.integriscreen.keystrokedetector;
  */
 public class RecordingParameters {
 
-    public static final int WINDOW_SIZE = 512;
+    public static final int WINDOW_SIZE = 2048;
     public static final int SAMPLE_RATE = 44100;
     // Length of the BG noise window, in milliseconds
     public static final int BG_NOISE_LENGTH = 200;
