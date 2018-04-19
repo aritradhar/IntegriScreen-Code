@@ -6,7 +6,7 @@
             "ulc_y": 3.3333333333333335,
             "initialvalue": "Compose Email",
             "editable": "false",
-            "width": "10",
+            "width": "30",
             "height": 13.333333333333334,
             "type": "h2",
             "id": "form_title"
