@@ -2,11 +2,12 @@
   "ratio": "3:2",
   "vspace": "60",
   "page": "email",
+  "form_action":"/action_page.php",
   "elements": [
     {
       "id": "form_title",
       "type": "title",
-      "content": "email",
+      "initialvalue": "email",
       "ulc_x": "2",
       "ulc_y": "2",
       "width": "10",

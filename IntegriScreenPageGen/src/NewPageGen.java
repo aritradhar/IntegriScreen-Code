@@ -24,11 +24,16 @@ import org.json.JSONObject;
  * @author Aritra
  *
  */
-public class PageGen {
+public class NewPageGen {
+	
 	
 	public static void main(String[] args) throws IOException {
-		
-		String pageFileName = "email";
+		pageGen("email");
+	}
+	
+	
+	public static void pageGen(String pageFileName) throws IOException
+	{
 		String jsonData = new String(Files.readAllBytes(new File(pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
 		String htmlFile = new String(Files.readAllBytes(new File("template.txt").toPath()), StandardCharsets.UTF_8);
 		
@@ -38,14 +43,15 @@ public class PageGen {
 		String pageName = jObject.getString("page");
 		String ratioString = jObject.getString("ratio");
 		String rarioHeight = ratioString.split(":")[0];
+		int heightInt = Integer.parseInt(rarioHeight);
 		String rarioWidth = ratioString.split(":")[1];
+		int widthtInt = Integer.parseInt(rarioWidth);
+		String form_action = jObject.getString("form_action");
 		
 		System.out.println(htmlFile.contains("!!page_name!!"));
 		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", rarioHeight).replaceAll("!!width!!", rarioWidth);
 		
-		
-		String orderString = jObject.getString("order");
-		String[] orderElements = orderString.split(":");
+	
 		JSONArray elements = jObject.getJSONArray("elements");
 		
 		
@@ -57,55 +63,76 @@ public class PageGen {
 		 */
 		int divCounter = 1;
 		StringBuffer elementHtmlString = new StringBuffer();
-		StringBuffer scriptString = new StringBuffer();
+		
+		String vspace = jObject.getString("vspace");
+		int vspaceInt = Integer.parseInt(vspace);
+		
+		//border
+		elementHtmlString.append("<div style=\"border: 3vh solid #00ff00; height:" + vspace + "vh; width:" + 
+					new Integer(vspaceInt/widthtInt * heightInt).toString() + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		
+		int titleCounter = 0;
 		
 		for(int i = 0; i < elements.length(); i++)
 		{
 			JSONObject inObject = elements.getJSONObject(i);
 			String id = inObject.getString("id");
 			String type = inObject.getString("type");
-			String editable = inObject.getString("editable");
+			//String editable = inObject.getString("editable");
 			String initialValue = inObject.getString("initialvalue");
 			String ulc_x = inObject.getString("ulc_x");
 			String ulc_y = inObject.getString("ulc_y");
+			
+			String width = inObject.getString("width");
+			String height = inObject.getString("height");
+			
 			System.out.println(id);
 			
-			
-			elementHtmlString.append("<div style=\"position:relative\" id=\"emptyspace" + (divCounter) +"\"> </div>\n");
-			
-			
-			if(type.equalsIgnoreCase("textarea"))
+					
+			if(type.equalsIgnoreCase("title"))
 			{
-				String row = inObject.getString("row");
-				String col = inObject.getString("col");
-				elementHtmlString.append("<" + type + " rows=\"" + row + "\" cols=\"" + col + "\" style=\"left:" + ulc_x + "%;position:relative\">" + 																			initialValue + "</textarea>\n");
+				if(titleCounter == 1)
+				{
+					System.err.println("Error! More than 1 HTML title. Exiting");
+					System.exit(1);
+				}
+				
+				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"vh; position:absolute\">" + initialValue + "</h2>\n");
+				
+				//form action
+				elementHtmlString.append("<form action=\""+ form_action + "\">");
+				titleCounter++;
+			}
+			
+			else if(type.equalsIgnoreCase("textarea"))
+			{
+				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "vh;\">" + initialValue + "</textarea>\n");
 			
 			}
 			
 			else if(type.equalsIgnoreCase("textfield"))
 			{
-				String width = inObject.getString("width");
-				elementHtmlString.append("<input type=" + type + " name =" + id +" value=" + initialValue + " style=\"width:" + width + "%;left:"+ ulc_x +"%;position:relative\">\n");
+
+				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue 
+						+ " style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute\">\n");
 			}
 			
 			else if(type.equalsIgnoreCase("label"))
 			{
-				String width = inObject.getString("width");
-				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%; position:relative\">" + initialValue + "</label>\n<div></div>\n");
+
+				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;\">" + initialValue + "</label>\n");
 			}
-			scriptString.append("document.getElementById(\"emptyspace" + divCounter +"\").style.height = (" + ulc_y + "/100)*y + 'px';\n");
 			
 			divCounter++;
 			
 			
 		}
-		
-		htmlFile = htmlFile.replaceAll("<form action=\"/action_page.php\">", "<form action=\"/action_page.php\">" + 
-				elementHtmlString.toString());
+		elementHtmlString.append("</form>\n</div>");
 		
 		
+		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
 
-		htmlFile = htmlFile.replace("!!SCRIPT_REPLACE!!", scriptString);
+
 		
 		fw.write(htmlFile);
 		fw.close();
@@ -115,3 +142,4 @@ public class PageGen {
 	}
 
 }
+
