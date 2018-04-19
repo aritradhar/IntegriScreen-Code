@@ -2,11 +2,10 @@
   "ratio": "3:2",
   "vspace": "60",
   "page": "email",
-  "order": "email:subject:body",
   "elements": [
     {
       "id": "form_title",
-      "type": "h2",
+      "type": "title",
       "content": "email",
       "ulc_x": "2",
       "ulc_y": "2",
