@@ -25,33 +25,32 @@ import org.json.JSONObject;
  *
  */
 public class NewPageGen {
-	
-	
 	public static void main(String[] args) throws IOException {
+		// This will load email.json as input and generate email.html as output
 		pageGen("email");
 	}
-	
-	
+
 	public static void pageGen(String pageFileName) throws IOException
 	{
 		String jsonData = new String(Files.readAllBytes(new File(pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
 		String htmlFile = new String(Files.readAllBytes(new File("template.txt").toPath()), StandardCharsets.UTF_8);
 		
+		System.out.println("Opening File: " + pageFileName + ".html");
 		FileWriter fw = new FileWriter(pageFileName + ".html");
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page");
 		String ratioString = jObject.getString("ratio");
-		String rarioHeight = ratioString.split(":")[0];
-		int heightInt = Integer.parseInt(rarioHeight);
-		String rarioWidth = ratioString.split(":")[1];
-		int widthtInt = Integer.parseInt(rarioWidth);
+		String ratioHeight = ratioString.split(":")[0];
+		int heightInt = Integer.parseInt(ratioHeight);
+		String ratioWidth = ratioString.split(":")[1];
+		int widthtInt = Integer.parseInt(ratioWidth);
 		String form_action = jObject.getString("form_action");
 		
 		String border_thickness = jObject.getString("border_thickness");
 		
 		System.out.println(htmlFile.contains("!!page_name!!"));
-		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", rarioHeight).replaceAll("!!width!!", rarioWidth);
+		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", ratioHeight).replaceAll("!!width!!", ratioWidth);
 		
 	
 		JSONArray elements = jObject.getJSONArray("elements");
@@ -70,8 +69,7 @@ public class NewPageGen {
 		int vspaceInt = Integer.parseInt(vspace);
 		
 		//border
-		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:" + vspace + "vh; width:" + 
-					new Integer(vspaceInt/widthtInt * heightInt).toString() + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthtInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
 		
 		int titleCounter = 0;
 		
@@ -108,7 +106,7 @@ public class NewPageGen {
 			
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "vh;\">" + initialValue + "</textarea>\n");
+				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "%;\">" + initialValue + "</textarea>\n");
 			
 			}
 			
@@ -144,4 +142,3 @@ public class NewPageGen {
 	}
 
 }
-

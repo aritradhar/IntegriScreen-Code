@@ -1,6 +1,6 @@
 {
-  "ratio": "3:2",
-  "vspace": "60",
+  "ratio": "1920:1080",
+  "vspace": "51",
   "page": "email",
   "border_thickness":"3",
   "form_action":"/action_page.php",
@@ -8,19 +8,19 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "email",
+      "initialvalue": "Compose Email",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "2",
-      "width": "10",
+      "width": "40",
       "height": "8"
     },
 
     {
-      "id": "email_label",
+      "id": "label_recipient",
       "type": "label",
       "editable": "false",
-      "initialvalue": "email",
+      "initialvalue": "To",
       "ulc_x": "10",
       "ulc_y": "10",
       "width": "10",
@@ -31,8 +31,8 @@
       "id": "email",
       "type": "textfield",
       "editable": "true",
-      "initialvalue": "bla@bla.com",
-      "width": "50",
+      "initialvalue": "recipient@bla.com",
+      "width": "40",
       "ulc_x": "20",
       "ulc_y": "10",
       "height": "6"
@@ -42,7 +42,7 @@
       "id": "subject_label",
       "type": "label",
       "editable": "false",
-      "initialvalue": "subject",
+      "initialvalue": "Subject",
       "ulc_x": "10",
       "ulc_y": "16",
       "width": "10",
@@ -53,8 +53,8 @@
       "id": "subject",
       "type": "textfield",
       "editable": "true",
-      "initialvalue": "blabla",
-      "width": "20",
+      "initialvalue": "Initial subject",
+      "width": "40",
       "ulc_x": "20",
       "ulc_y": "16",
       "height": "7"
@@ -63,7 +63,7 @@
       "id": "body_label",
       "type": "label",
       "editable": "false",
-      "initialvalue": "body",
+      "initialvalue": "Body",
       "ulc_x": "10",
       "ulc_y": "23",
       "width": "10",
@@ -74,11 +74,45 @@
       "id": "body",
       "type": "textarea",
       "editable": "true",
-      "initialvalue": "Hi Bla, blabla. regards, Bla",
+      "initialvalue": "Hi Bla, blabla. Regards, Bla",
       "ulc_x": "10",
       "ulc_y": "26",
-      "width": "40",
+      "width": "50",
       "height": "15"
+    },
+
+
+    {
+      "id": "test_label_LR",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "LR 1234.abcdefgh",
+      "ulc_x": "80",
+      "ulc_y": "45",
+      "width": "20",
+      "height": "3"
+    },
+
+    {
+      "id": "test_label_UR",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "UR 1234.abcdefgh",
+      "ulc_x": "80",
+      "ulc_y": "2",
+      "width": "20",
+      "height": "3"
+    },
+
+    {
+      "id": "test_label_LL",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "LL 1234.abcdefgh",
+      "ulc_x": "2",
+      "ulc_y": "45",
+      "width": "20",
+      "height": "3"
     }
   ]
 }
