@@ -10,7 +10,7 @@ import org.json.JSONObject;
 //*************************************************************************************
 //*********************************************************************************** *
 //author Aritra Dhar 																* *
-//PhD Researcher																  	* *
+//Beautiful Life Specialist														  	* *
 //ETH Zurich													   				    * *
 //Zurich, Switzerland															    * *
 //--------------------------------------------------------------------------------- * * 
@@ -68,8 +68,10 @@ public class NewPageGen {
 		String vspace = jObject.getString("vspace");
 		int vspaceInt = Integer.parseInt(vspace);
 		
-		//border
-		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		//container div
+		elementHtmlString.append("<div style=\"height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		// green border overlay
+		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
 		
 		int titleCounter = 0;
 		
