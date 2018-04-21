@@ -68,8 +68,9 @@ void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, j
     Mat &inputMat = *(Mat *)inputAddr;
     Mat &outputMat = *(Mat *)outputAddr;
 
-    transpose(inputMat, outputMat);
-    flip(outputMat, outputMat, +1);
+    Mat transposedMat;
+    transpose(inputMat, transposedMat);
+    flip(transposedMat, outputMat, +1);
     // rotate(inputMat, outputMat, 0); // rotateCode = 0 for 90 degree clockwise rotation
 }
 

@@ -470,81 +470,85 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
-            // At the moment, namings assume portait orientation, so (0, 0) is upper right corner and (width, height) is lower left corner
+            // Use the whole height, take the proper amount of width based on the form ratio
+            long mid_delim = Math.round((double)currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
 
-            // double ratio = 1.5; // 3:2 --> this should be the same as the ratio of the form
-            // int mid_delim = (int)Math.round(currentFrameMat.height() / ratio);
-
-            int mid_delim = currentFrameMat.width() / 2;
-
+            // Compute the points that define the division line
             Point mid_right = new Point(mid_delim, 0);
             Point mid_left = new Point(mid_delim, currentFrameMat.height());
 
-            line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 4);
+            // line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 8);
 
-            // TODO: on 1) upper part
-            // --- apply realign (that also rotates by 90 degrees?)
-            // --- apply diff or OCR
+            // ==== 1) Handle the upper part of the screen:
+            // -- Rotate by 90
+            // -- Detect the transformation
+            // -- Realign
+            // -- Validate the form
+            // -- Rotate back
+
             Rect screenBox = new Rect(new Point(0, 0), mid_left);
             Mat screenPart = currentFrameMat.submat(screenBox);
-            if (realignCheckbox.isChecked()) {
-                realign_perspective(screenPart.getNativeObjAddr());
-            }
 
+            Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
+            rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+
+            if (realignCheckbox.isChecked()) {
+                color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+                realign_perspective(rotatedScreenPart.getNativeObjAddr());
+            }
 
             // If liveOCR is true, I run OCR on the whole upper part of the screen
             if (liveOCRCheckbox.isChecked()) {
-                Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
-                rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
-
-                extractAndDisplayTextFromFrame(rotatedScreenPart);
-
-                rotatedScreenPart.release();
+                validateAndPlotForm(rotatedScreenPart, targetForm);
+                // extractAndDisplayTextFromFrame(rotatedScreenPart);
             }
 
-            // TODO: on 2) lower part
-            // ---- apply detect_color(human_skin)
-            // TODO: ---- apply diff
+            // TODO PERF: if we need it, implement a faster 270 degree rotation!
+            rotate90(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
+            rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+            rotate90(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
+
+            rotatedScreenPart.release();
+
+
+
+            // ===== 2) Handle the lower part
+            // -- apply detect_color(human_skin)
+            // TODO: -- apply diff to detect human skin
+            // TODO: -- detect if changes are happening
             Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
             Mat handsPart = currentFrameMat.submat(handsBox);
 
-            // Get hue color from the progress bar, divide by 2 since this is what OpenCV expects
-            // TODO: I call color_detector here and accidentally set the transformation parameters
-            //    for realignment properly. This should be somehow explicitly set!
             color_detector(handsPart.getNativeObjAddr(), huePicker.getProgress() / 2, 0);
-            // Connvert back to 4 channel colors
+            // Convert back to 4 channel colors
             Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
 
 
 
             // Combine the two parts
             screenPart.copyTo(currentFrameMat.submat(screenBox));
-            // TODO: I shouldn't be recreating and then releasing, but re-using Mats
+            // TODO PERF: I shouldn't be recreating and then releasing, but re-using Mats
             screenPart.release();
 
             handsPart.copyTo(currentFrameMat.submat(handsBox));
             handsPart.release();
 
-
             return currentFrameMat;
         }
 
-
-        // if detect_color -> apply the transformation
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
-            // Mat currentFrameMat = inputFrame.rgba();
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
             int detection_option = detectPicker.getProgress();
             color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
 
-            // return currentFrameMat;
             return currentFrameMat;
         }
 
         if (realignCheckbox.isChecked()) {
-            // Mat currentFrameMat = inputFrame.rgba();
-            int hueCenter = color_border_hue / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
-            color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
+            if (liveOCRCheckbox.isChecked()) { // Only constantly realign if live is turned on?
+                int hueCenter = color_border_hue / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+                color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
+            }
 
             realign_perspective(currentFrameMat.getNativeObjAddr());
         }
@@ -610,13 +614,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 matCentroids.release();
             }
 
-
-
-
             return currentFrameMat;
         }
-
-        // Final results: detect text, compute the number of changes, etc.
 
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
@@ -710,5 +709,4 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
     public native void rotate90(long inputAddr, long outputAddr);
-
 }
