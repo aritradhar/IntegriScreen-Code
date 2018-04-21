@@ -1,109 +1,109 @@
 {
-    "elements": [
-        {
-            "initialvalue": "Compose Email", 
-            "editable": "false", 
-            "ulc_x": "2", 
-            "ulc_y": 4.0, 
-            "width": "40", 
-            "height": 12.0, 
-            "type": "title", 
-            "id": "form_title"
-        }, 
-        {
-            "initialvalue": "To", 
-            "editable": "false", 
-            "ulc_x": "10", 
-            "ulc_y": 20.0, 
-            "width": "10", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "label_recipient"
-        }, 
-        {
-            "initialvalue": "recipient@bla.com", 
-            "editable": "true", 
-            "ulc_x": "20", 
-            "ulc_y": 20.0, 
-            "width": "40", 
-            "height": 6.0, 
-            "type": "textfield", 
-            "id": "email"
-        }, 
-        {
-            "initialvalue": "Subject", 
-            "editable": "false", 
-            "ulc_x": "10", 
-            "ulc_y": 32.0, 
-            "width": "10", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "subject_label"
-        }, 
-        {
-            "initialvalue": "Initial Subject", 
-            "editable": "true", 
-            "ulc_x": "20", 
-            "ulc_y": 32.0, 
-            "width": "40", 
-            "height": 6.0, 
-            "type": "textfield", 
-            "id": "subject"
-        }, 
-        {
-            "initialvalue": "Body", 
-            "editable": "false", 
-            "ulc_x": "10", 
-            "ulc_y": 46.0, 
-            "width": "10", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "body_label"
-        }, 
-        {
-            "initialvalue": "Hi Bla, blabla. Regards, Bla", 
-            "editable": "true", 
-            "ulc_x": "10", 
-            "ulc_y": 52.0, 
-            "width": "50", 
-            "height": 30.0, 
-            "type": "textarea", 
-            "id": "body"
-        }, 
-        {
-            "initialvalue": "LR 1234.abcdefgh", 
-            "editable": "false", 
-            "ulc_x": "80", 
-            "ulc_y": 90.0, 
-            "width": "20", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "test_label_LR"
-        }, 
-        {
-            "initialvalue": "UR 1234.abcdefgh", 
-            "editable": "false", 
-            "ulc_x": "80", 
-            "ulc_y": 4.0, 
-            "width": "20", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "test_label_UR"
-        }, 
-        {
-            "initialvalue": "LL 1234.abcdefgh", 
-            "editable": "false", 
-            "ulc_x": "2", 
-            "ulc_y": 90.0, 
-            "width": "20", 
-            "height": 6.0, 
-            "type": "label", 
-            "id": "test_label_LL"
-        }
-    ], 
-    "ratio": "1920:1080", 
-    "form_action": "/action_page.php", 
-    "vspace": "50", 
-    "border_thickness": "1", 
-    "page": "email"
+  "form_action": "/action_page.php",
+  "vspace": "50",
+  "elements": [
+    {
+      "ulc_y": "4.0",
+      "editable": "false",
+      "ulc_x": "2",
+      "width": "40",
+      "id": "form_title",
+      "type": "title",
+      "initialvalue": "Compose Email",
+      "height": "12.0"
+    },
+    {
+      "ulc_y": "20.0",
+      "editable": "false",
+      "ulc_x": "10",
+      "width": "10",
+      "id": "label_recipient",
+      "type": "label",
+      "initialvalue": "To",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "20.0",
+      "editable": "true",
+      "ulc_x": "20",
+      "width": "40",
+      "id": "email",
+      "type": "textfield",
+      "initialvalue": "recipient@bla.com",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "32.0",
+      "editable": "false",
+      "ulc_x": "10",
+      "width": "10",
+      "id": "subject_label",
+      "type": "label",
+      "initialvalue": "Subject",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "32.0",
+      "editable": "true",
+      "ulc_x": "20",
+      "width": "40",
+      "id": "subject",
+      "type": "textfield",
+      "initialvalue": "Initial Subject",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "46.0",
+      "editable": "false",
+      "ulc_x": "10",
+      "width": "10",
+      "id": "body_label",
+      "type": "label",
+      "initialvalue": "Body",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "52.0",
+      "editable": "true",
+      "ulc_x": "10",
+      "width": "50",
+      "id": "body",
+      "type": "textarea",
+      "initialvalue": "Hi Bla, blabla. Regards, Bla",
+      "height": "30.0"
+    },
+    {
+      "ulc_y": "90.0",
+      "editable": "false",
+      "ulc_x": "80",
+      "width": "20",
+      "id": "test_label_LR",
+      "type": "label",
+      "initialvalue": "LR 1234.abcdefgh",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "4.0",
+      "editable": "false",
+      "ulc_x": "80",
+      "width": "20",
+      "id": "test_label_UR",
+      "type": "label",
+      "initialvalue": "UR 1234.abcdefgh",
+      "height": "6.0"
+    },
+    {
+      "ulc_y": "90.0",
+      "editable": "false",
+      "ulc_x": "2",
+      "width": "20",
+      "id": "test_label_LL",
+      "type": "label",
+      "initialvalue": "LL 1234.abcdefgh",
+      "height": "6.0"
+    }
+  ],
+  "page": "email",
+  "border_thickness": "1",
+  "ratio": "1920:1080"
 }

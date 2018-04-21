@@ -24,7 +24,7 @@ import org.json.JSONObject;
  * @author Aritra
  *
  */
-public class NewPageGen {
+public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load email.json as input and generate email.html as output
 		pageGen("email");
@@ -38,6 +38,7 @@ public class NewPageGen {
 		System.out.println("Opening File: " + pageFileName + ".html");
 		FileWriter fw = new FileWriter(pageFileName + ".html");
 		FileWriter fwu = new FileWriter(pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+		FileWriter jsonSpecsFile = new FileWriter(pageFileName + "_specs.json");
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page");
@@ -129,20 +130,35 @@ public class NewPageGen {
 			divCounter++;
 			
 			
+		    Double vert_mul = 100.0 / vspaceInt;
+	        // Convert vspace and height from vh to percentage relative to the green border
+			Double ulc_y_d = Double.parseDouble(ulc_y) * vert_mul;
+			Double height_d = Double.parseDouble(height) * vert_mul;
+			
+			
+			inObject.put("ulc_y", String.valueOf(ulc_y_d));
+			inObject.put("height", String.valueOf(height_d));
+
 		}
 		elementHtmlString.append("</form>\n</div>");
+
 		
-		
+		// ----- Generate the main .html file		
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
 		// Write out both files
 		fw.write(htmlFile);    fw.close();
 		
+		// ----- Generate the _unicorn.html file		
 		// Add the additional styling to make the UI elements colored
 		htmlFile = htmlFile.replaceAll("<!--place-for-unicorn-styling-->",
 				"label {background: #ffbdbd;} "
 				+ "h1, h2, h3, h4, h5, h6 {background: #c9c9ff;}"
 				+ "input {background: #e1f7d5;}");		
 		fwu.write(htmlFile);  fwu.close();
+		
+		
+		// --- Generate the _specs.json file
+		jsonSpecsFile.write(jObject.toString(2)); jsonSpecsFile.close();
 		
 		System.out.println("Page generated");
 		
