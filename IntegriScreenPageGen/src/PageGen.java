@@ -27,7 +27,8 @@ import org.json.JSONObject;
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load email.json as input and generate email.html as output
-		pageGen("email");
+		pageGen("email_1080_920");
+		pageGen("email_1920_1080");
 	}
 
 	public static void pageGen(String pageFileName) throws IOException
@@ -36,9 +37,11 @@ public class PageGen {
 		String htmlFile = new String(Files.readAllBytes(new File("template.txt").toPath()), StandardCharsets.UTF_8);
 		
 		System.out.println("Opening File: " + pageFileName + ".html");
-		FileWriter fw = new FileWriter(pageFileName + ".html");
-		FileWriter fwu = new FileWriter(pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
-		FileWriter jsonSpecsFile = new FileWriter(pageFileName + "_specs.json");
+		
+		String genFolder = "./generated/";
+		FileWriter fw = new FileWriter(genFolder + pageFileName + ".html");
+		FileWriter fwu = new FileWriter(genFolder + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+		FileWriter jsonSpecsFile = new FileWriter(genFolder + pageFileName + "_specs.json");
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page");
