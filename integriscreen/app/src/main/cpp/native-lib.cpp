@@ -11,9 +11,10 @@
 using namespace std;
 using namespace cv;
 
-void initialize_default_quads(int rows, int cols);
+void set_mock_input_quads(int rows, int cols);
+void set_output_quads(int rows, int cols);
 void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
-bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols);
+bool update_input_quads(vector<Point2i> potentialPoints);
 vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat);
 vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat);
 double my_dist(Point2f A, Point2f B);
@@ -47,8 +48,11 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     // Set the lambda matrix the same type and size as input
     lambda = Mat::zeros(input.rows, input.cols, input.type());
 
-    if (!quadsInitialized)
-        initialize_default_quads(input.rows, input.cols);
+    if (!quadsInitialized) {
+        // I need to set both here since detect has not been called and I want to make sure we don't crash
+        set_mock_input_quads(input.rows, input.cols);
+        set_output_quads(input.rows, input.cols);
+    }
 
     // Get the Perspective Transform Matrix i.e. lambda
     lambda = getPerspectiveTransform(inputQuad, outputQuad);
@@ -157,8 +161,10 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
     Mat colorMask;
     detect_specific_color(originalMat, colorMask, hueCenter);
 
-    if (!quadsInitialized)   // For now, set them to some mock values if I have never set them before
-        initialize_default_quads(originalMat.rows, originalMat.cols);
+    set_output_quads(originalMat.rows, originalMat.cols);
+    if (!quadsInitialized) {  // For now, set them to some mock values if I have never set them before
+        set_mock_input_quads(originalMat.rows, originalMat.cols);
+    }
 
     vector<Point2i> potentialCorners;
     switch (detectionMethod) {
@@ -176,7 +182,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         }
     }
 
-    update_transformation(potentialCorners, originalMat.rows, originalMat.cols);
+    update_input_quads(potentialCorners);
 }
 
 } /// end of "extern C"
@@ -211,7 +217,7 @@ void reorder_points(vector<Point2i> &points)
     }
 }
 
-void initialize_default_quads(int rows, int cols)
+void set_mock_input_quads(int rows, int cols)
 {
     // This is some random default...
     inputQuad[0] = Point2f(0, 100);
@@ -219,23 +225,25 @@ void initialize_default_quads(int rows, int cols)
     inputQuad[2] = Point2f(cols - 100, rows - 50);
     inputQuad[3] = Point2f(200, rows - 50);
 
-    // This stretches the across the whole screen for now
+    quadsInitialized = true;
+}
+
+void set_output_quads(int rows, int cols)
+{
+    // This stretches the across the whole frame
     outputQuad[0] = Point2f(0, 0);
     outputQuad[1] = Point2f(cols - 1, 0);
     outputQuad[2] = Point2f(cols - 1, rows - 1);
     outputQuad[3] = Point2f(0, rows - 1);
-
-    quadsInitialized = true;
 }
 
 
 
-
-bool update_transformation(vector<Point2i> potentialPoints, int rows, int cols) {
+bool update_input_quads(vector<Point2i> potentialPoints) {
     // The part that updates the 4 coordinates!
     if ((int)potentialPoints.size() == 4) {
         reorder_points(potentialPoints);
-        for(int i = 0; i < 4; ++i ) inputQuad[i] = potentialPoints[i];
+        for(int i = 0; i < 4; ++i ) inputQuad[i] = potentialPoints[i];\
         return true;
     }
 

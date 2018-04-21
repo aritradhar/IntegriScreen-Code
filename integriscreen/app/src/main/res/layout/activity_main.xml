@@ -18,7 +18,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
-        android:layout_alignParentStart="true"
         android:onClick="onClickDetectText"
         android:text="OCR" />
 
@@ -34,7 +33,6 @@
         android:id="@+id/detect_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/liveOCRCheckBox"
         android:onClick="onClickShowColor"
         android:text="Detect Frame" />
@@ -43,8 +41,7 @@
     <com.example.integriscreen.CustomCameraView
         android:id="@+id/main_surface"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentTop="true" />
+        android:layout_height="fill_parent" />
 
     <SeekBar
         android:id="@+id/colorSeekBar"
@@ -83,7 +80,8 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/realignCheckBox"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
+        android:padding="8dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"
@@ -95,7 +93,8 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/raw"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:layout_marginTop="6dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"
@@ -107,7 +106,8 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/limitAreaCheckBox"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:layout_marginTop="6dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"

@@ -336,13 +336,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             long height = Math.round(element.box.height * frame_h / (double)form.resolution);
 
             // --- Add offsets ---
-            long mofs = 5; // Offset to ensure that OCR does not fail due to tight limits on rectangles
+            long offset = 5; // Offset to ensure that OCR does not fail due to tight limits on rectangles
             Point P1 = new Point(
-                    Math.max(x - mofs, 0),    // make sure its not negative
-                    Math.max(y - mofs, 0));
+                    Math.max(x - offset, 0),    // make sure its not negative
+                    Math.max(y - offset, 0));
             Point P2 = new Point(
-                    Math.min(x + width + mofs, currentFrameMat.width()),   // prevent overflows
-                    Math.min(y + height + mofs, currentFrameMat.height()));
+                    Math.min(x + width + offset, currentFrameMat.width()),   // prevent overflows
+                    Math.min(y + height + offset, currentFrameMat.height()));
 
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(new Rect(P1, P2)));
 
@@ -631,9 +631,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                 limitRect = new Rect(upper_left, lower_right);
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
-            }
 
-            extractAndDisplayTextFromFrame(currentFrameMat.submat(limitRect));
+                extractAndDisplayTextFromFrame(currentFrameMat.submat(limitRect));
+            }
+            else
+                extractAndDisplayTextFromFrame(currentFrameMat);
+
             return currentFrameMat;
         }
 
