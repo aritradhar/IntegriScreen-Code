@@ -113,8 +113,8 @@ public class NewPageGen {
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type=" + type + " name =" + id + " value=" + initialValue 
-						+ " style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute\">\n");
+				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
+						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute\">\n");
 			}
 			
 			else if(type.equalsIgnoreCase("label"))
