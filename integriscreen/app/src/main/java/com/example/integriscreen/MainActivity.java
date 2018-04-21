@@ -39,7 +39,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // the form created based on specs received from Server
     TargetForm targetForm;
 
-    String formURL = "https://drive.google.com/uc?id=1TGu6WZ5j-5HRrJCjg1cIxea_TRzZLrAr&export=download";
+    String formURL = "https://drive.google.com/uc?id=17IO-6GgLFSuUaQd4Cx47b_y9EGosOjSJ&export=download";
     //    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
@@ -248,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void display_text(final String textToShow) {
+    private void UI_label_output(final String textToShow) {
 //        final String textToShow = outputText;
         runOnUiThread(new Runnable() {
             @Override
@@ -310,6 +309,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // Callback which is called by TargetForm class once the data is ready.
     public void onFormLoaded() {
         Log.d(TAG, "Form loaded!" + targetForm.toString());
+        Toast.makeText(getApplicationContext(),
+                targetForm.toString(), Toast.LENGTH_SHORT).show();
     }
 
     void plotForm(Mat currentFrameMat, TargetForm form) {
@@ -331,13 +332,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Point P1 = new Point(x, y);
             Point P2 = new Point(x + width, y + height);
 
-            // Plot the borders of the UI elements
-            Imgproc.rectangle(currentFrameMat, P1, P2, new Scalar(255, 0, 0), 4);
+            String detected = display_text_from_box(currentFrameMat, new Rect(P1, P2));
 
-            // Output the text on the UI elements
-            int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
-            Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
-                    Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(0,255,0));
+            Scalar rectangle_color;
+            if (detected.equals(element.defaultVal)) {
+                rectangle_color = new Scalar(255, 255, 0);
+            } else {
+                rectangle_color = new Scalar( 255, 0, 0);
+                // Output the text on the UI elements
+                int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
+                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
+                        Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
+            }
+
+            // Plot the borders of the UI elements
+            Imgproc.rectangle(currentFrameMat, P1, P2, rectangle_color, 4);
         }
     }
 
@@ -362,35 +371,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return true;
     }
 
-    private void display_text_from_box(Mat frameMat, Rect box) {
+    private String display_text_from_box(Mat frameMat, Rect box) {
         // Setup border parameters
         Mat scanArea;
-        if (limitAreaCheckbox.isChecked() && box != null) {
-            scanArea = frameMat.submat(box);
-        } else
-            scanArea = frameMat;
+        SparseArray<TextBlock> texts;
+        texts = detect_text(frameMat, box);
 
-        SparseArray<TextBlock> texts = detect_text(scanArea, null);
-
+        String delim = "";
         String textConcat = "";
         Log.d("TextDetected", texts.size()+" words");
         for (int i = 0; i < texts.size(); ++i) {
             TextBlock item = texts.valueAt(i);
+            android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
+
             if (item != null && item.getValue() != null) {
+                int textHeight = (int) Imgproc.getTextSize(item.getValue(), Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
+                Mat whereToPutText = frameMat;
+                if (box != null) whereToPutText = frameMat.submat(box);
+
+                Imgproc.putText(whereToPutText, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
+                        Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0,255,0), 2);
+
                 Log.d("TextDetected", item.getValue());
-                textConcat += item.getValue() + " | ";
+                textConcat += item.getValue() + delim;
             }
         }
 
         // This is needed since we are not running on the UI thread usually
-        display_text(textConcat);
-/*        final String textToShow = textConcat;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                textOutput.setText(textToShow);
-            }
-        });*/
+        UI_label_output(textConcat);
+        return textConcat;
     }
 
     private void takePicHighRes() {
@@ -506,6 +515,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Mat handsPart = currentFrameMat.submat(handsBox);
 
             // Get hue color from the progress bar, divide by 2 since this is what OpenCV expects
+            // TODO: I call color_detector here and accidentally set the transformation parameters
+            //    for realignment properly. This should be somehow explicitly set!
             color_detector(handsPart.getNativeObjAddr(), huePicker.getProgress() / 2, 0);
             // Connvert back to 4 channel colors
             Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
@@ -553,7 +564,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
             if (liveOCRCheckbox.isChecked()) {
-                if (targetForm.isLoaded)
+                if (targetForm != null && targetForm.isLoaded)
                     plotForm(currentFrameMat, targetForm);
             }
 
@@ -594,7 +605,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         matCentroids.getNativeObjAddr());
                 Log.d("num_comp", String.valueOf(numComponents));
 
-                display_text(Integer.toString(numComponents));
+                UI_label_output(Integer.toString(numComponents));
 
                 matLabels.release();
                 matStats.release();
@@ -611,6 +622,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         if (currentOutputSelection == OutputSelection.DETECT_TEXT) {
+            Rect limitRect = null;
             if (limitAreaCheckbox.isChecked()) {
                 // Setup border parameters
                 int h_edge = (int) Math.round(currentFrameMat.width() * h_border_perc / 100.0); // horizontal edge
@@ -619,10 +631,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 upper_left = new Point(h_edge, v_edge);
                 lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
 
+                limitRect = new Rect(upper_left, lower_right);
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
 
-            display_text_from_box(currentFrameMat, null);
+            display_text_from_box(currentFrameMat, limitRect);
             return currentFrameMat;
         }
 

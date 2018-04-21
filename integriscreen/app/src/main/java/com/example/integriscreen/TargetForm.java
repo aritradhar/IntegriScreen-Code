@@ -43,6 +43,9 @@ public class TargetForm {
     // This defines the max values of the coordinates
     public int resolution = 10000;
 
+    public int inner_h, inner_w;
+    public int border;
+
     // form ratio
     public int ratio_w, ratio_h;
 
@@ -171,9 +174,21 @@ public class TargetForm {
 
                 try {
                     String ratio = response.getString("ratio");
+
                     String[] parts = ratio.split(":");  // ATM 3:2 means width:height
                     ratio_w = Integer.parseInt(parts[0]);
                     ratio_h = Integer.parseInt(parts[1]);
+
+                    // TODO: sto su stvarni ratio_w i ratio_h
+
+                    // This is a factor by which I multiply all values that are based on vx or percentages
+                    int res_scale = resolution / 100;
+
+                    // vspace and border are in the same unit!
+                    inner_h = res_scale * response.getInt("vspace");
+                    border = res_scale * response.getInt("border_thickness");
+                    inner_w = (int)Math.round((double)inner_h * ratio_w / ratio_h);
+
 
                     pageId = response.getString("page");
 
@@ -191,23 +206,46 @@ public class TargetForm {
                         String editable = tmpObject.getString("editable");
                         String type = tmpObject.getString("type");
 
-                        int res_scale = resolution / 100;
-                        int x1 = (int)Math.round(res_scale * tmpObject.getDouble("ulc_x"));
-                        int y1 = (int)Math.round(res_scale * tmpObject.getDouble("ulc_y"));
-                        int width = (int)Math.round(res_scale * tmpObject.getDouble("width"));
-                        int height = (int)Math.round(res_scale * tmpObject.getDouble("height"));
                         String defaultVal = tmpObject.getString("initialvalue");
 
-                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(x1, y1, width, height), defaultVal);
+                        double x1 = res_scale * tmpObject.getDouble("ulc_x");
+                        double y1 = res_scale * tmpObject.getDouble("ulc_y");
+                        double w1 = res_scale * tmpObject.getDouble("width");
+                        double h1 = res_scale * tmpObject.getDouble("height");
+
+                        /*
+                        // Coefficients to convert from the coordinate system in which (0,0) is in
+                        //   the internal corner of the green border to the coord. system
+                        //   in which (0, 0) is in the external corner of the green border.
+                        double x_coef = ((double)border + inner_w) / (2 * border + inner_w);
+                        // delta values need to be in percentages
+                        double x_delta = (double)100 * res_scale * border / (2 * border + inner_w);
+                        double y_coef = ((double)border + inner_h) / (2 * border + inner_h);;
+                        double y_delta = (double)100 * res_scale * border / (2 * border + inner_h);
+                        double w_coef = (double)inner_w / (2 * border + inner_w);
+                        double h_coef = (double)inner_h / (2 * border + inner_h);
+
+                        int x = (int)Math.round(x_delta + x1 * x_coef);
+                        int y = (int)Math.round(y_delta + y1 * y_coef) ;
+                        int h = (int)Math.round(h1 * h_coef);
+                        int w = (int)Math.round(w1 * w_coef);
+*/
+                        int x = (int)Math.round(x1);
+                        int y = (int)Math.round(y1) ;
+                        int h = (int)Math.round(h1);
+                        int w = (int)Math.round(w1);
+
+
+                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(x, y, w, h), defaultVal);
                         Log.d(TAG, tmpElement.toString());
 
-                        // add the element in the arraylist
+                        // add the element in the arraylist of all UI elements
                         allElements.add(tmpElement);
                     }
 
-                    // TODO: process data
                     // Set the form as isLoaded.
                     isLoaded = true;
+                    // Notify the callback in the main activity
                     parentActivity.onFormLoaded();
 
                 } catch (JSONException e) {

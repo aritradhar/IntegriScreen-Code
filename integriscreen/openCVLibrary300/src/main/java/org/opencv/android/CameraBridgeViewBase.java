@@ -491,8 +491,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
 
         // If we want to hardcode the resolution, this is where we do it:
-        calcWidth = 1920;
-        calcHeight = 1080;
+//        calcWidth = 1920;
+  //      calcHeight = 1080;
         return new Size(calcWidth, calcHeight);
     }
 }
