@@ -14,42 +14,31 @@
 -->
 
     <Button
-        android:id="@+id/canny"
+        android:id="@+id/detect_text_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onClickShowCanny"
-        android:text="Canny"
-        />
+        android:layout_marginStart="60dp"
+        android:layout_alignParentStart="true"
+        android:onClick="onClickDetectText"
+        android:text="OCR" />
 
     <Button
-        android:id="@+id/diff"
+        android:id="@+id/raw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/canny"
-        android:onClick="onClickShowDiff"
-        android:text="Diff" />
+        android:layout_toEndOf="@+id/detect_text_button"
+        android:onClick="onClickShowRaw"
+        android:text="Raw" />
 
     <Button
         android:id="@+id/detect_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/realignCheckBox"
+        android:layout_toEndOf="@+id/liveOCRCheckBox"
         android:onClick="onClickShowColor"
         android:text="Detect Frame" />
 
-    <Button
-        android:id="@+id/raw"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/detect_text_button"
-        android:onClick="onClickShowRaw"
-        android:layout_below="@+id/canny"
-        android:text="Raw" />
 
     <com.example.integriscreen.CustomCameraView
         android:id="@+id/main_surface"
@@ -59,13 +48,11 @@
 
     <SeekBar
         android:id="@+id/colorSeekBar"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/raw"
         android:layout_alignEnd="@+id/detect_frame"
-        android:layout_below="@+id/detect_frame"
+        android:layout_below="@+id/colorLabel"
         android:layout_marginTop="13dp"
-        android:layout_marginStart="60dp"
         android:max="350"
         android:progress="22" />
 
@@ -73,29 +60,17 @@
         android:id="@+id/colorLabel"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/detect_frame"
-        android:layout_above="@+id/colorSeekBar"
-        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/liveOCRCheckBox"
+        android:layout_below="@id/detect_frame"
         android:background="@android:color/holo_green_light"
         android:text="240"
         android:textColor="@android:color/white" />
 
-    <Button
-        android:id="@+id/detect_text_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/canny"
-        android:onClick="onClickDetectText"
-        android:text="OCR" />
-
     <SeekBar
         android:id="@+id/detect_method"
         style="@style/Widget.AppCompat.SeekBar.Discrete"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/colorSeekBar"
-        android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/colorSeekBar"
         android:layout_marginEnd="1dp"
         android:layout_toEndOf="@+id/colorSeekBar"
@@ -106,10 +81,9 @@
         android:id="@+id/liveOCRCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/raw"
-        android:layout_below="@+id/limitAreaCheckBox"
+        android:layout_toEndOf="@+id/realignCheckBox"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"
@@ -119,7 +93,7 @@
         android:id="@+id/limitAreaCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/diff"
+        android:layout_toEndOf="@+id/raw"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
@@ -161,15 +135,33 @@
         android:onClick="onClickTakePic"
         android:text="TakePic" />
 -->
-
     <Button
         android:id="@+id/detectHands"
+        android:layout_marginStart="200dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/takePictureButton"
         android:layout_above="@+id/textOutput"
         android:onClick="onClickDetectHands"
         android:text="Hand D." />
+
+    <Button
+        android:id="@+id/diff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOutput"
+        android:layout_toEndOf="@+id/detectHands"
+        android:onClick="onClickShowDiff"
+        android:text="Diff" />
+
+    <Button
+        android:id="@+id/canny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOutput"
+        android:layout_toEndOf="@+id/diff"
+        android:onClick="onClickShowCanny"
+        android:text="Canny"
+        />
 
 <!--
     <Button 
