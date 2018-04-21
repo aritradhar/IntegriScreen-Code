@@ -8,13 +8,28 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Compose Email",
+      "initialvalue": "Compose Email 1080x960",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "2",
-      "width": "40",
+      "width": "50",
       "height": "6"
     },
+
+
+
+    {
+      "id": "form_url",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "https://tinyurl.com/y7mwg5e3",
+      "ulc_x": "55",
+      "ulc_y": "2",
+      "width": "40",
+      "height": "3"
+    },
+
+
 
     {
       "id": "label_recipient",
@@ -89,17 +104,6 @@
       "initialvalue": "LR 1234.abcdefgh",
       "ulc_x": "75",
       "ulc_y": "55",
-      "width": "22",
-      "height": "3"
-    },
-
-    {
-      "id": "test_label_UR",
-      "type": "label",
-      "editable": "false",
-      "initialvalue": "UR 1234.abcdefgh",
-      "ulc_x": "75",
-      "ulc_y": "2",
       "width": "22",
       "height": "3"
     },

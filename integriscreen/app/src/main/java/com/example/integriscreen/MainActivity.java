@@ -71,7 +71,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // the form created based on specs received from Server
     TargetForm targetForm;
 
-    String formURL = "https://drive.google.com/uc?id=10lC35oOTiTI_kdwoKwR6hSsi8c5bOMdc&export=download";
+//    String formURL = "https://drive.google.com/uc?id=10lC35oOTiTI_kdwoKwR6hSsi8c5bOMdc&export=download";
+    // String formURL = "https://tinyurl.com/y8uu2r5t"; // 1920x1080
+    String formURL = "https://tinyurl.com/y7mwg5e3"; // 1080x960
+
     //    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;

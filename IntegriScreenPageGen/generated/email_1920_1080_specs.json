@@ -6,11 +6,21 @@
       "ulc_y": "4.0",
       "editable": "false",
       "ulc_x": "2",
-      "width": "40",
+      "width": "50",
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Compose Email",
+      "initialvalue": "Compose Email 1920x1080",
       "height": "12.0"
+    },
+    {
+      "ulc_y": "4.0",
+      "editable": "false",
+      "ulc_x": "55",
+      "width": "40",
+      "id": "form_url",
+      "type": "label",
+      "initialvalue": "https://tinyurl.com/y8uu2r5t",
+      "height": "6.0"
     },
     {
       "ulc_y": "20.0",
@@ -80,16 +90,6 @@
       "id": "test_label_LR",
       "type": "label",
       "initialvalue": "LR 1234.abcdefgh",
-      "height": "6.0"
-    },
-    {
-      "ulc_y": "4.0",
-      "editable": "false",
-      "ulc_x": "80",
-      "width": "20",
-      "id": "test_label_UR",
-      "type": "label",
-      "initialvalue": "UR 1234.abcdefgh",
       "height": "6.0"
     },
     {

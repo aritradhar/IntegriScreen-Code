@@ -27,7 +27,7 @@ import org.json.JSONObject;
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load email.json as input and generate email.html as output
-		pageGen("email_1080_920");
+		pageGen("email_1080_960");
 		pageGen("email_1920_1080");
 	}
 
