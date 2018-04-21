@@ -37,7 +37,7 @@ public class NewPageGen {
 		
 		System.out.println("Opening File: " + pageFileName + ".html");
 		FileWriter fw = new FileWriter(pageFileName + ".html");
-		FileWriter fwu = new FileWriter(pageFileName + "_unicorn.html");
+		FileWriter fwu = new FileWriter(pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page");
@@ -133,17 +133,16 @@ public class NewPageGen {
 		elementHtmlString.append("</form>\n</div>");
 		
 		
-		String htmlFileU = htmlFile.copy();
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
-		elementHtmlString.append("label {background: #ffbdbd;}h1, h2, h3, h4, h5, h6 {background: #c9c9ff;}input {background: #e1f7d5;}");
-		htmlFileU = htmlFileU.replaceAll("!!body!!", elementHtmlString.toString());
-
-
+		// Write out both files
+		fw.write(htmlFile);    fw.close();
 		
-		fw.write(htmlFile);
-		fw.close();
-		fwu.write(htmlFileU);
-		fwu.close();
+		// Add the additional styling to make the UI elements colored
+		htmlFile = htmlFile.replaceAll("<!--place-for-unicorn-styling-->",
+				"label {background: #ffbdbd;} "
+				+ "h1, h2, h3, h4, h5, h6 {background: #c9c9ff;}"
+				+ "input {background: #e1f7d5;}");		
+		fwu.write(htmlFile);  fwu.close();
 		
 		System.out.println("Page generated");
 		
