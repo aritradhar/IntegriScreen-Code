@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.integriscreen.MainActivity">
 
-    <!-- This used to be in the RelativeLayour tag:
+    <!-- This used to be in the RelativeLayout tag:
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -55,7 +55,6 @@
         android:id="@+id/main_surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignEnd="@+id/colorLabel"
         android:layout_alignParentTop="true" />
 
     <SeekBar
@@ -72,11 +71,10 @@
 
     <TextView
         android:id="@+id/colorLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/detect_frame"
         android:layout_above="@+id/colorSeekBar"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:background="@android:color/holo_green_light"
         android:text="240"
@@ -153,6 +151,7 @@
         android:maxHeight="100dp"
         android:text="OCR not started" />
 
+    <!--
     <Button
         android:id="@+id/takePictureButton"
         android:layout_width="wrap_content"
@@ -161,6 +160,7 @@
         android:layout_toStartOf="@+id/raw"
         android:onClick="onClickTakePic"
         android:text="TakePic" />
+-->
 
     <Button
         android:id="@+id/detectHands"
@@ -171,7 +171,7 @@
         android:onClick="onClickDetectHands"
         android:text="Hand D." />
 
-
+<!--
     <Button 
         android:id="@+id/button3"
         android:layout_width="wrap_content"
@@ -180,5 +180,6 @@
         android:layout_above="@+id/textOutput"
         android:onClick="onClickDownloadSpec"
         android:text="download" />
+   -->
 
 </RelativeLayout>

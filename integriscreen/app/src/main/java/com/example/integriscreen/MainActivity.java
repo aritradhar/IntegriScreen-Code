@@ -137,6 +137,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
+
+        // Download the target form values
+        targetForm = new TargetForm(getApplicationContext(), formURL, this);
+
         currentOutputSelection = OutputSelection.RAW;
 
 
@@ -155,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
         // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
-        //_cameraBridgeViewBase.setMaxFrameSize(960, 540);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.enableFpsMeter();
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void UI_label_output(final String textToShow) {
+    private void outputOnUILabel(final String textToShow) {
 //        final String textToShow = outputText;
         runOnUiThread(new Runnable() {
             @Override
@@ -280,9 +283,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             currentOutputSelection = OutputSelection.DETECT_TEXT;
         else {
             if (limitAreaCheckbox.isChecked())
-                display_text_from_box(previousFrameMat, new Rect(upper_left, lower_right));
+                extractAndDisplayTextFromFrame(previousFrameMat.submat(new Rect(upper_left, lower_right)));
             else
-                display_text_from_box(previousFrameMat, null);
+                extractAndDisplayTextFromFrame(previousFrameMat);
         }
     }
 
@@ -293,13 +296,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    //TODO: this method should be called programmatically when a pic is neccessary
+    // Button callback to handle taking a picture
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
     }
 
-    //TODO: this method should be called programmatically once the user navigates to a specific form
+    // Button callback to handle downloading raw data
     public void onClickDownloadSpec(View view) {
         Log.d(TAG, "Start downloading specs of TargetForm from server...");
         targetForm = new TargetForm(getApplicationContext(), formURL, this);
@@ -310,10 +313,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onFormLoaded() {
         Log.d(TAG, "Form loaded!" + targetForm.toString());
         Toast.makeText(getApplicationContext(),
-                targetForm.toString(), Toast.LENGTH_SHORT).show();
+                targetForm.formUrl, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(),
+//                targetForm.toString(), Toast.LENGTH_SHORT).show();
     }
 
-    void plotForm(Mat currentFrameMat, TargetForm form) {
+
+    void validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
 
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
@@ -329,10 +335,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             long width = Math.round(element.box.width * frame_w / (double)form.resolution);
             long height = Math.round(element.box.height * frame_h / (double)form.resolution);
 
-            Point P1 = new Point(x, y);
-            Point P2 = new Point(x + width, y + height);
+            // --- Add offsets ---
+            long mofs = 5; // Offset to ensure that OCR does not fail due to tight limits on rectangles
+            Point P1 = new Point(
+                    Math.max(x - mofs, 0),    // make sure its not negative
+                    Math.max(y - mofs, 0));
+            Point P2 = new Point(
+                    Math.min(x + width + mofs, currentFrameMat.width()),   // prevent overflows
+                    Math.min(y + height + mofs, currentFrameMat.height()));
 
-            String detected = display_text_from_box(currentFrameMat, new Rect(P1, P2));
+            String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(new Rect(P1, P2)));
 
             Scalar rectangle_color;
             if (detected.equals(element.defaultVal)) {
@@ -351,34 +363,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
 
-    //TODO: this method should be called programmatically when a 'stable' quality frame is received
-    //TODO: and the form is downloaded
-    public boolean onClickValidateForm(View view) {
-        // iterate through all elements
-        for (int i = 0; i < targetForm.getUIElNumber(); i++) {
-            UIElement tmpEl = targetForm.getElement(i);
-            Mat currentMat = null; //TODO this should be on the input of the function
-            String extractedText = concatTextBlocks(detect_text(currentMat, tmpEl.box));
-            if (extractedText.equals(tmpEl.currentVal)) {
-                tmpEl.found = true;
-            } else {
-                // raise an alarm flag
-                Log.d(TAG, "***Attack*** Take things seriously :-) " +
-                        "Mismatch for element with ID: " + tmpEl.id);
-                return false;
-            }
-        }
-        return true;
-    }
+    // This method:
+    // 1) extracts all the text from a (specific part of) frame
+    // 2) concatenates it
+    // 3) draws it on the screen
+    // 4) displays it on an UI label
+    // 5) returns the concatenated text
+    private String extractAndDisplayTextFromFrame(Mat frameMat) {
 
-    private String display_text_from_box(Mat frameMat, Rect box) {
-        // Setup border parameters
-        Mat scanArea;
-        SparseArray<TextBlock> texts;
-        texts = detect_text(frameMat, box);
+        SparseArray<TextBlock> texts = detect_text(frameMat);
 
-        String delim = "";
-        String textConcat = "";
+        String concatDelim = "";
+        String concatenatedText = "";
         Log.d("TextDetected", texts.size()+" words");
         for (int i = 0; i < texts.size(); ++i) {
             TextBlock item = texts.valueAt(i);
@@ -386,20 +382,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             if (item != null && item.getValue() != null) {
                 int textHeight = (int) Imgproc.getTextSize(item.getValue(), Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
-                Mat whereToPutText = frameMat;
-                if (box != null) whereToPutText = frameMat.submat(box);
-
-                Imgproc.putText(whereToPutText, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
+                Imgproc.putText(frameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
                         Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0,255,0), 2);
 
                 Log.d("TextDetected", item.getValue());
-                textConcat += item.getValue() + delim;
+                concatenatedText += item.getValue() + concatDelim;
             }
         }
 
-        // This is needed since we are not running on the UI thread usually
-        UI_label_output(textConcat);
-        return textConcat;
+        // Also, output on the UI label
+        outputOnUILabel(concatenatedText);
+
+        return concatenatedText;
     }
 
     private void takePicHighRes() {
@@ -503,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
                 rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-                display_text_from_box(rotatedScreenPart, null);
+                extractAndDisplayTextFromFrame(rotatedScreenPart);
 
                 rotatedScreenPart.release();
             }
@@ -547,9 +541,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return currentFrameMat;
         }
 
-        if (realignCheckbox.isChecked())
-            realign_perspective(currentFrameMat.getNativeObjAddr());
+        if (realignCheckbox.isChecked()) {
+            // Mat currentFrameMat = inputFrame.rgba();
+            int hueCenter = color_border_hue / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+            color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
 
+            realign_perspective(currentFrameMat.getNativeObjAddr());
+        }
 
         if (currentOutputSelection == OutputSelection.RAW) {
             currentFrameMat.copyTo(previousFrameMat);
@@ -565,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
             if (liveOCRCheckbox.isChecked()) {
                 if (targetForm != null && targetForm.isLoaded)
-                    plotForm(currentFrameMat, targetForm);
+                    validateAndPlotForm(currentFrameMat, targetForm);
             }
 
             return currentFrameMat;
@@ -605,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         matCentroids.getNativeObjAddr());
                 Log.d("num_comp", String.valueOf(numComponents));
 
-                UI_label_output(Integer.toString(numComponents));
+                outputOnUILabel(Integer.toString(numComponents));
 
                 matLabels.release();
                 matStats.release();
@@ -635,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
 
-            display_text_from_box(currentFrameMat, limitRect);
+            extractAndDisplayTextFromFrame(currentFrameMat.submat(limitRect));
             return currentFrameMat;
         }
 
@@ -649,7 +647,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         String output = "";
         int index = targetForm.matchElFromPoint(point);
         UIElement tmp = targetForm.getElement(index);
-        output = concatTextBlocks(detect_text(currentFrame, tmp.box));
+        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
         return output;
     }
 
@@ -660,7 +658,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         String output = "";
         int index = targetForm.matchElFromRect(box);
         UIElement tmp = targetForm.getElement(index);
-        output = concatTextBlocks(detect_text(currentFrame, tmp.box));
+        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
         return output;
     }
 
@@ -681,18 +679,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /**
      * This method returns a SparseArry of TextBlocs found in a frame, or a subframe if box is not null
      */
-    private SparseArray<TextBlock> detect_text(Mat matFrame, Rect box) {
-        // Setup border parameters
-        Mat scanArea = matFrame;
-        if (box != null) {
-            scanArea = matFrame.submat(box);
-        }
-
+    private SparseArray<TextBlock> detect_text(Mat matFrame) {
         //convert Mat to Bitmap
-        Bitmap bmp = Bitmap.createBitmap(scanArea.cols(), scanArea.rows(),
+        Bitmap bmp = Bitmap.createBitmap(matFrame.cols(), matFrame.rows(),
                 Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(scanArea, bmp);
-        //convert Bitmap to Frame. TODO: Optimize conversions
+        Utils.matToBitmap(matFrame, bmp);
+        //convert Bitmap to Frame. TODO: Optimize conversions if we need more FPS
         Frame frame = new Frame.Builder().setBitmap(bmp).build();
 
         SparseArray<TextBlock> texts = textRecognizer.detect(frame);
