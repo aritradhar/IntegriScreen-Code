@@ -37,6 +37,7 @@ public class NewPageGen {
 		
 		System.out.println("Opening File: " + pageFileName + ".html");
 		FileWriter fw = new FileWriter(pageFileName + ".html");
+		FileWriter fwu = new FileWriter(pageFileName + "_unicorn.html");
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page");
@@ -132,12 +133,17 @@ public class NewPageGen {
 		elementHtmlString.append("</form>\n</div>");
 		
 		
+		String htmlFileU = htmlFile.copy();
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
+		elementHtmlString.append("label {background: #ffbdbd;}h1, h2, h3, h4, h5, h6 {background: #c9c9ff;}input {background: #e1f7d5;}");
+		htmlFileU = htmlFileU.replaceAll("!!body!!", elementHtmlString.toString());
 
 
 		
 		fw.write(htmlFile);
 		fw.close();
+		fwu.write(htmlFileU);
+		fwu.close();
 		
 		System.out.println("Page generated");
 		
