@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox liveOCRCheckbox;
 
     // this is currently for "limited OCR"
-    private int h_border_perc = 15;
-    private int v_border_perc = 46;
+    private int h_border_perc = 30;
+    private int v_border_perc = 47;
     Point upper_left, lower_right;
 
     int skin_hue_estimate = 22;
@@ -140,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         currentOutputSelection = OutputSelection.RAW;
-
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -239,6 +238,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
+    private void outputOnToast(final String outString) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), outString, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void outputOnUILabel(final String textToShow) {
 //        final String textToShow = outputText;
         runOnUiThread(new Runnable() {
@@ -264,7 +272,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             huePicker.setProgress(color_border_hue, true);
         }
     }
+
+    private boolean setup_needed;
+
     public void onClickShowRaw(View view) {
+        setup_needed = true;
         currentOutputSelection = OutputSelection.RAW;
     }
 
@@ -280,12 +292,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickDetectHands(View view) {
-        targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
-
-        previousFrameMat.release();
-        previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
-
+        setup_needed = true;
         currentOutputSelection = OutputSelection.DETECT_HANDS;
+
+        realignCheckbox.setChecked(true);
+        liveOCRCheckbox.setChecked(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             huePicker.setProgress(skin_hue_estimate, true);
         }
@@ -308,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onFormLoaded() {
         Log.d(TAG, "Form loaded!" + targetForm.toString());
         Toast.makeText(getApplicationContext(),
-                targetForm.formUrl, Toast.LENGTH_SHORT).show();
+                "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
 //        Toast.makeText(getApplicationContext(),
 //                targetForm.toString(), Toast.LENGTH_SHORT).show();
     }
@@ -336,8 +347,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     Math.max(x - offset, 0),    // make sure its not negative
                     Math.max(y - offset, 0));
             Point P2 = new Point(
-                    Math.min(x + width + offset, currentFrameMat.width()),   // prevent overflows
-                    Math.min(y + height + offset, currentFrameMat.height()));
+                    Math.min(x + width + offset, currentFrameMat.width() - 1),   // prevent overflows
+                    Math.min(y + height + offset, currentFrameMat.height() - 1));
 
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(new Rect(P1, P2)));
 
@@ -460,22 +471,27 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         src_blurred.release();
     }
 
-    public void loadFormBasedOnName(Mat currentFrameMat) {
-        Rect formTitleBox = new Rect(0, 0, currentFrameMat.width() / 2, currentFrameMat.height() / 6); // about 15%
+    public boolean loadFormBasedOnName(Mat currentFrameMat) {
+        Rect formTitleBox = new Rect(0, 0, currentFrameMat.width() / 2, currentFrameMat.height() / 8); // about 15%
 
         Imgproc.rectangle(currentFrameMat, formTitleBox.tl(), formTitleBox.br(), new Scalar(255, 0, 0), 4);
 
         // TODO: we should probably implement this by loading a list of forms from some static address
         // At the moment we are strongly and implicitly!!! hardcoding the values "string -> URL"
         String formToLoad = concatTextBlocks(detect_text(currentFrameMat.submat(formTitleBox)));
-        outputOnUILabel("|" + formToLoad + "|");
+
+        outputOnToast("Loading form: " + formToLoad);
 
         formToLoad = formToLoad.replaceAll("\\s+","");
         if (formToLoad.equals("ComposeEmail1920x1080")) {
             targetForm = new TargetForm(getApplicationContext(), urlForm_1920_1080, this);
         } else if (formToLoad.equals("ComposeEmail1080x960")) {
             targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
-        }
+        } else
+            return false;
+
+        outputOnUILabel("Loading... " + formToLoad);
+        return true;
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -483,10 +499,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
-            // Use the whole height, take the proper amount of width based on the form ratio
-            long mid_delim = currentFrameMat.width() / 2; // By default, take a half
-            if (targetForm != null) // If form is loaded, follow its shape
-                mid_delim = Math.round((double)currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
+
+            if (setup_needed) {
+                // Clean previous data
+                previousFrameMat.release();
+                previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
+            }
+
+            if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
+                mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            }
 
             // Compute the points that define the division line
             Point mid_right = new Point(mid_delim, 0);
@@ -507,23 +530,27 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
             rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-            if (realignCheckbox.isChecked()) {
-                color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+
+            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+
+            if (realignCheckbox.isChecked())
                 realign_perspective(rotatedScreenPart.getNativeObjAddr());
+
+            if (setup_needed) {
+                if (loadFormBasedOnName(rotatedScreenPart))
+                    setup_needed = false;
+
+                // TODO: We should also stop refocusing if we can.
             }
 
-            // If liveOCR is true, I run OCR on the whole upper part of the screen
             if (liveOCRCheckbox.isChecked()) {
-                if (targetForm == null) {
-                    loadFormBasedOnName(rotatedScreenPart);
-                }
-
                 if (targetForm != null && targetForm.isLoaded) {
                     validateAndPlotForm(rotatedScreenPart, targetForm);
-                }
-
-                // extractAndDisplayTextFromFrame(rotatedScreenPart);
+                } else
+                    extractAndDisplayTextFromFrame(rotatedScreenPart);
             }
+
+
 
             // TODO PERF: if we need it, implement a faster 270 degree rotation!
             rotate90(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
@@ -587,14 +614,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
+
             if (liveOCRCheckbox.isChecked()) {
-                if (targetForm == null) { // Read formUrl and load it!
-                    loadFormBasedOnName(currentFrameMat);
+                if (setup_needed) { // Read formUrl and load it!
+                    setup_needed = loadFormBasedOnName(currentFrameMat);
                 }
 
                 if (targetForm != null && targetForm.isLoaded)
                     validateAndPlotForm(currentFrameMat, targetForm);
-
             }
 
             return currentFrameMat;
