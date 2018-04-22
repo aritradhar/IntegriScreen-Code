@@ -1,6 +1,6 @@
 {
   "ratio": "1080:960",
-  "vspace": "65",
+  "vspace": "80",
   "page": "email",
   "border_thickness":"1",
   "form_action":"/action_page.php",

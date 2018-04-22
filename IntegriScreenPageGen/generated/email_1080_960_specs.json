@@ -1,106 +1,106 @@
 {
   "form_action": "/action_page.php",
-  "vspace": "65",
+  "vspace": "80",
   "elements": [
     {
-      "ulc_y": "3.076923076923077",
+      "ulc_y": "2.5",
       "editable": "false",
       "ulc_x": "2",
       "width": "50",
       "id": "form_title",
       "type": "title",
       "initialvalue": "Compose Email 1080x960",
-      "height": "9.230769230769232"
+      "height": "7.5"
     },
     {
-      "ulc_y": "3.076923076923077",
+      "ulc_y": "2.5",
       "editable": "false",
       "ulc_x": "55",
       "width": "40",
       "id": "form_url",
       "type": "label",
       "initialvalue": "https://tinyurl.com/y7mwg5e3",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "15.384615384615385",
+      "ulc_y": "12.5",
       "editable": "false",
       "ulc_x": "10",
       "width": "10",
       "id": "label_recipient",
       "type": "label",
       "initialvalue": "To",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "15.384615384615385",
+      "ulc_y": "12.5",
       "editable": "true",
       "ulc_x": "20",
       "width": "40",
       "id": "email",
       "type": "textfield",
       "initialvalue": "recipient@bla.com",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "24.615384615384617",
+      "ulc_y": "20.0",
       "editable": "false",
       "ulc_x": "10",
       "width": "10",
       "id": "subject_label",
       "type": "label",
       "initialvalue": "Subject",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "24.615384615384617",
+      "ulc_y": "20.0",
       "editable": "true",
       "ulc_x": "20",
       "width": "40",
       "id": "subject",
       "type": "textfield",
       "initialvalue": "Initial Subject",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "35.38461538461539",
+      "ulc_y": "28.75",
       "editable": "false",
       "ulc_x": "10",
       "width": "10",
       "id": "body_label",
       "type": "label",
       "initialvalue": "Body",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "40.0",
+      "ulc_y": "32.5",
       "editable": "true",
       "ulc_x": "10",
       "width": "50",
       "id": "body",
       "type": "textarea",
       "initialvalue": "Hi Bla, blabla. Regards, Bla",
-      "height": "23.076923076923077"
+      "height": "18.75"
     },
     {
-      "ulc_y": "84.61538461538461",
+      "ulc_y": "68.75",
       "editable": "false",
       "ulc_x": "75",
       "width": "22",
       "id": "test_label_LR",
       "type": "label",
       "initialvalue": "LR 1234.abcdefgh",
-      "height": "4.615384615384616"
+      "height": "3.75"
     },
     {
-      "ulc_y": "84.61538461538461",
+      "ulc_y": "68.75",
       "editable": "false",
       "ulc_x": "2",
       "width": "22",
       "id": "test_label_LL",
       "type": "label",
       "initialvalue": "LL 1234.abcdefgh",
-      "height": "4.615384615384616"
+      "height": "3.75"
     }
   ],
   "page": "email",

@@ -282,6 +282,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickDetectHands(View view) {
         targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
 
+        previousFrameMat.release();
+        previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
+
         currentOutputSelection = OutputSelection.DETECT_HANDS;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             huePicker.setProgress(skin_hue_estimate, true);
@@ -328,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             long height = Math.round(element.box.height * frame_h / (double)form.resolution);
 
             // --- Add offsets ---
-            long offset = 5; // Offset to ensure that OCR does not fail due to tight limits on rectangles
+            long offset = 8; // Offset to ensure that OCR does not fail due to tight limits on rectangles
             Point P1 = new Point(
                     Math.max(x - offset, 0),    // make sure its not negative
                     Math.max(y - offset, 0));
@@ -564,8 +567,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            if (liveOCRCheckbox.isChecked()) { // Only constantly realign if live is turned on?
-                int hueCenter = color_border_hue / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+            if (liveOCRCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
+                int hueCenter = color_border_hue / 2;
                 color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
             }
 
@@ -619,8 +622,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Store for next frame
             tmpMat.copyTo(previousFrameMat);
 
-            // TODO: this kind of UI selection does not make too much sense logically, but it will be OK for now.
-            if (liveOCRCheckbox.isChecked()) {
+            // TODO: liveOCRCheckbox might not be the best UI element to toggle this, but it will be OK for now.
+            if (liveOCRCheckbox.isChecked()) { // display the frame around the changes
                 Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
@@ -631,7 +634,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         matCentroids.getNativeObjAddr());
                 Log.d("num_comp", String.valueOf(numComponents));
 
-                outputOnUILabel(Integer.toString(numComponents));
+                outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
 
                 matLabels.release();
                 matStats.release();

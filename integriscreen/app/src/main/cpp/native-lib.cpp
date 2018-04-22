@@ -90,7 +90,7 @@ jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
 
     ALOG("|%d|", numComponents);
 
-    int min_area_to_count = 20; // TODO: this should probably be relative to the screen resolution
+    int min_area_to_count = 40; // TODO: this should probably be relative to the screen resolution
 
     Rect bounding_box(matInput.cols, matInput.rows, -matInput.cols, -matInput.rows);
 
@@ -114,7 +114,8 @@ jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
     // This is just to showcase what I am finding
     labels.convertTo(labels, CV_8UC1, 50.0);
 
-    rectangle(matInput, bounding_box, Scalar(255, 0, 0), 2);
+    if (large_components > 0)
+        rectangle(matInput, bounding_box, Scalar(255, 0, 0), 2);
 
 
     return large_components;
@@ -127,7 +128,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          jlong matAddrOutput)
 {
     // When is a pixel considered black, and when white?
-    uchar black_white_threshold = 30;
+    uchar black_white_threshold = 45;
 
     Mat &matFirst = *(Mat *) matAddrFirst;
     Mat &matSecond = *(Mat *) matAddrSecond;
@@ -140,7 +141,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
     threshold(matDiff, matDiff, black_white_threshold, 255, CV_THRESH_BINARY);
 
     /// Apply the specified morphology operation
-    int morph_size = 1;
+    int morph_size = 2;
     Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
     // Morphological opening
