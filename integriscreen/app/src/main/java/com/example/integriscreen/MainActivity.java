@@ -71,9 +71,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // the form created based on specs received from Server
     TargetForm targetForm;
 
-//    String formURL = "https://drive.google.com/uc?id=10lC35oOTiTI_kdwoKwR6hSsi8c5bOMdc&export=download";
-    // String formURL = "https://tinyurl.com/y8uu2r5t"; // 1920x1080
-    String formURL = "https://tinyurl.com/y7mwg5e3"; // 1080x960
+    String urlForm_1920_1080 = "https://tinyurl.com/y8uu2r5t";
+    String urlForm_1080_960 = "https://tinyurl.com/y7mwg5e3";
 
     //    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
 
@@ -140,10 +139,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-
-        // Download the target form values
-        targetForm = new TargetForm(getApplicationContext(), formURL, this);
-
         currentOutputSelection = OutputSelection.RAW;
 
 
@@ -173,15 +168,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
         liveOCRCheckbox = (CheckBox)findViewById(R.id.liveOCRCheckBox);
-        // Un-checking "live" should stop the OCR mode
-/*        liveOCRCheckbox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( !((CheckBox)v).isChecked() ) {
-                    currentOutputSelection = OutputSelection.RAW;
-                }
-            }
-        });*/
 
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
@@ -281,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowRaw(View view) {
         currentOutputSelection = OutputSelection.RAW;
     }
+
     public void onClickDetectText(View view) {
         if (liveOCRCheckbox.isChecked())
             currentOutputSelection = OutputSelection.DETECT_TEXT;
@@ -293,6 +280,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickDetectHands(View view) {
+        targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
+
         currentOutputSelection = OutputSelection.DETECT_HANDS;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             huePicker.setProgress(skin_hue_estimate, true);
@@ -308,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // Button callback to handle downloading raw data
     public void onClickDownloadSpec(View view) {
         Log.d(TAG, "Start downloading specs of TargetForm from server...");
-        targetForm = new TargetForm(getApplicationContext(), formURL, this);
+        targetForm = new TargetForm(getApplicationContext(), urlForm_1920_1080, this);
         Log.d(TAG, targetForm.toString());
     }
 
@@ -468,13 +457,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         src_blurred.release();
     }
 
+    public void loadFormBasedOnName(Mat currentFrameMat) {
+        Rect formTitleBox = new Rect(0, 0, currentFrameMat.width() / 2, currentFrameMat.height() / 6); // about 15%
+
+        Imgproc.rectangle(currentFrameMat, formTitleBox.tl(), formTitleBox.br(), new Scalar(255, 0, 0), 4);
+
+        // TODO: we should probably implement this by loading a list of forms from some static address
+        // At the moment we are strongly and implicitly!!! hardcoding the values "string -> URL"
+        String formToLoad = concatTextBlocks(detect_text(currentFrameMat.submat(formTitleBox)));
+        outputOnUILabel("|" + formToLoad + "|");
+
+        formToLoad = formToLoad.replaceAll("\\s+","");
+        if (formToLoad.equals("ComposeEmail1920x1080")) {
+            targetForm = new TargetForm(getApplicationContext(), urlForm_1920_1080, this);
+        } else if (formToLoad.equals("ComposeEmail1080x960")) {
+            targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
+        }
+    }
+
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
 //        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
             // Use the whole height, take the proper amount of width based on the form ratio
-            long mid_delim = Math.round((double)currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            long mid_delim = currentFrameMat.width() / 2; // By default, take a half
+            if (targetForm != null) // If form is loaded, follow its shape
+                mid_delim = Math.round((double)currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
 
             // Compute the points that define the division line
             Point mid_right = new Point(mid_delim, 0);
@@ -502,7 +511,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // If liveOCR is true, I run OCR on the whole upper part of the screen
             if (liveOCRCheckbox.isChecked()) {
-                validateAndPlotForm(rotatedScreenPart, targetForm);
+                if (targetForm == null) {
+                    loadFormBasedOnName(rotatedScreenPart);
+                }
+
+                if (targetForm != null && targetForm.isLoaded) {
+                    validateAndPlotForm(rotatedScreenPart, targetForm);
+                }
+
                 // extractAndDisplayTextFromFrame(rotatedScreenPart);
             }
 
@@ -569,8 +585,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
             }
             if (liveOCRCheckbox.isChecked()) {
+                if (targetForm == null) { // Read formUrl and load it!
+                    loadFormBasedOnName(currentFrameMat);
+                }
+
                 if (targetForm != null && targetForm.isLoaded)
                     validateAndPlotForm(currentFrameMat, targetForm);
+
             }
 
             return currentFrameMat;
