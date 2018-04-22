@@ -128,7 +128,8 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          jlong matAddrOutput)
 {
     // When is a pixel considered black, and when white?
-    uchar black_white_threshold = 45;
+    // TODO: 45 seemed like a good threshold for a bit more conservative diff detection
+    uchar black_white_threshold = 30;
 
     Mat &matFirst = *(Mat *) matAddrFirst;
     Mat &matSecond = *(Mat *) matAddrSecond;
@@ -141,7 +142,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
     threshold(matDiff, matDiff, black_white_threshold, 255, CV_THRESH_BINARY);
 
     /// Apply the specified morphology operation
-    int morph_size = 2;
+    int morph_size = 1; // TODO: we might want to put this back to 2 later
     Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
     // Morphological opening

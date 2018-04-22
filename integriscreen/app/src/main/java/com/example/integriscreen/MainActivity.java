@@ -295,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         setup_needed = true;
         currentOutputSelection = OutputSelection.DETECT_HANDS;
 
+        limitAreaCheckbox.setChecked(false);
         realignCheckbox.setChecked(true);
         liveOCRCheckbox.setChecked(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -397,7 +398,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // Also, output on the UI label
-        outputOnUILabel(concatenatedText);
+        if (currentOutputSelection == OutputSelection.RAW && !liveOCRCheckbox.isChecked())
+            outputOnUILabel(concatenatedText);
 
         return concatenatedText;
     }
@@ -490,7 +492,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else
             return false;
 
-        outputOnUILabel("Loading... " + formToLoad);
         return true;
     }
 
@@ -530,8 +531,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
             rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-
-            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+            // This is a UI-hack: I use "limit" to prevent realigning, mainly for testing
+            if (!limitAreaCheckbox.isChecked())
+                color_detector(rotatedScreenPart.clone().getNativeObjAddr(),color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
 
             if (realignCheckbox.isChecked())
                 realign_perspective(rotatedScreenPart.getNativeObjAddr());
@@ -617,7 +619,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             if (liveOCRCheckbox.isChecked()) {
                 if (setup_needed) { // Read formUrl and load it!
-                    setup_needed = loadFormBasedOnName(currentFrameMat);
+                    if (loadFormBasedOnName(currentFrameMat))
+                        setup_needed = false;
                 }
 
                 if (targetForm != null && targetForm.isLoaded)
