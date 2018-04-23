@@ -2,6 +2,12 @@
     <wb-module deploy-name="IntegriScreenServer">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="commons-io-2.5.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/Aritra/workspace_Mars_new/IntegriScreenCode/IntegriScreenServer/lib/commons-io-2.5/commons-io-2.5.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="json.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/Aritra/workspace_Mars_new/IntegriScreenCode/IntegriScreenPageGen/lib/json.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="IntegriScreenServer"/>
         <property name="java-output-path" value="/IntegriScreenServer/build/classes"/>
     </wb-module>
