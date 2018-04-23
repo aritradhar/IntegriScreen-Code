@@ -33,10 +33,10 @@ public class PageGen {
 
 	public static String pageGen(String pageFileName) throws IOException
 	{
-		String jsonData = new String(Files.readAllBytes(new File(pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
-		String htmlFile = new String(Files.readAllBytes(new File("template.txt").toPath()), StandardCharsets.UTF_8);
+		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
+		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
 		
-		System.out.println("Opening File: " + pageFileName + ".html");
+		System.out.println("Opening File: " + MainServer.location + pageFileName + ".html");
 		
 
 		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
@@ -165,7 +165,9 @@ public class PageGen {
 		
 		System.out.println("Page generated");
 		
-		return "Generated HTML => " + MainServer.generatedLocation + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + MainServer.generatedLocation + pageFileName + "_unicorn.html";
+		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static/", "http://tildem.inf.ethz.ch");
+		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
+				"\n JSON spec file => " + MainServer.generatedLocation + pageFileName + "_specs.json";
 		
 	}
 

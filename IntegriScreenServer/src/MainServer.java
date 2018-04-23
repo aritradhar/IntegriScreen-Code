@@ -32,8 +32,8 @@ import org.apache.commons.io.IOUtils;
 
 public class MainServer extends HttpServlet {
 
-	public static String location = "/home/dhara/tomcat/static/data";
-	public static String generatedLocation = "/home/dhara/tomcat/static/generated";
+	public static final String location = "/home/dhara/tomcat/static/data/";
+	public static final String generatedLocation = "/home/dhara/tomcat/static/generated/";
 	
 	
 	private static final long serialVersionUID = 1L;
@@ -106,10 +106,11 @@ public class MainServer extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // Retrieves <input type="file" name="file">
-		String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
+		
 
-		if(fileName != null)
+		if(filePart != null)
 		{
+			String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
 			InputStream fileContent = null;
 			try {
 				fileContent = filePart.getInputStream();
