@@ -167,7 +167,7 @@ public class PageGen {
 		
 		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static/", "http://tildem.inf.ethz.ch");
 		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
-				"\n JSON spec file => " + MainServer.generatedLocation + pageFileName + "_specs.json";
+				"\n JSON spec file => " + urlName + pageFileName + "_specs.json";
 		
 	}
 
