@@ -69,7 +69,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         for (int i = 0; i < sizes.size(); i++)
             Log.d(TAG, "Supported PicSize - Height: " + sizes.get(i).height + ", Width: " + sizes.get(i).width);
 
-        mCamera.stopPgitreview(); // Preview should be stopped in order to update camera parameters
+        mCamera.stopPreview(); // Preview should be stopped in order to update camera parameters
 
         params.setPictureSize(sizes.get(quality).width, sizes.get(quality).height);
         mCamera.setParameters(params);
