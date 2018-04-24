@@ -154,6 +154,7 @@ public class MainServer extends HttpServlet {
 			System.out.println("Generate requiest received");
 			
 			File[] currentFiles = new File(location).listFiles();
+			fileString = new HashSet<>();
 			for(File file : currentFiles)
 			{
 				//System.out.println(file);

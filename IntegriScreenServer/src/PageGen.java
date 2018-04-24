@@ -165,9 +165,9 @@ public class PageGen {
 		
 		System.out.println("Page generated");
 		
-		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static/", "http://tildem.inf.ethz.ch");
+		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
-				"\n JSON spec file => " + urlName + pageFileName + "_specs.json";
+				"\nJSON spec file => " + urlName + pageFileName + "_specs.json";
 		
 	}
 
