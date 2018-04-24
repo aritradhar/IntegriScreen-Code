@@ -58,6 +58,27 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         return mCamera.getParameters().getPreviewSize();
     }
 
+    /**
+     * This method sets the size of picture taken within the app.
+     * Quality set to 0 takes the best picture.
+     */
+    public void setPictureSize(int quality) {
+        Camera.Parameters params = mCamera.getParameters();
+        List<Size> sizes = params.getSupportedPictureSizes();
+
+        for (int i = 0; i < sizes.size(); i++)
+            Log.d(TAG, "Supported PicSize - Height: " + sizes.get(i).height + ", Width: " + sizes.get(i).width);
+
+        mCamera.stopPgitreview(); // Preview should be stopped in order to update camera parameters
+
+        params.setPictureSize(sizes.get(quality).width, sizes.get(quality).height);
+        mCamera.setParameters(params);
+
+        Log.d(TAG, "Picture Size (Width x Height px): " + mCamera.getParameters().getPictureSize().width
+                + " x " + mCamera.getParameters().getPictureSize().height);
+        mCamera.startPreview();
+    }
+
     public void takePicture(final String fileName) {
         Log.i(TAG, "Taking picture");
         this.mPictureFileName = fileName;
@@ -65,10 +86,6 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
         mCamera.setPreviewCallback(null);
 
-//        Camera.Parameters params = mCamera.getParameters();
-//        params.getPictureSize().width = 3264;
-//        params.getPictureSize().height = 1836;
-//        mCamera.setParameters(params);
         // PictureCallback is implemented by the current class
         mCamera.takePicture(null, null, this);
     }

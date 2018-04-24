@@ -404,22 +404,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return concatenatedText;
     }
 
+    /**
+     * The method to take a high resolution picture programatically.
+     */
     private void takePicHighRes() {
+        _cameraBridgeViewBase.setPictureSize(0);    // the best quality is set by default for pictures
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateandTime = sdf.format(new Date());
 
         String fileName = Environment.getExternalStorageDirectory().getPath() +
                 "/opencv_" + currentDateandTime + ".jpg";
         Log.d(TAG, "Picture saved in: " + fileName);
-//        List<Camera.Size> res = _cameraBridgeViewBase.getResolutionList();
-//        for (int i=0; i<res.size(); i++) {
-//            Camera.Size r = res.get(i);
-//            Log.d(TAG, "Picture resolution #" + i + ": " + r.height + "x" + r.width);
-//        }
-//        Camera.Size tmpR = res.get(0);
-//        tmpR.width = 3264;
-//        tmpR.height = 1836;
-//        _cameraBridgeViewBase.setResolution(tmpR);
 
         _cameraBridgeViewBase.takePicture(fileName);
 
