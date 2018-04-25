@@ -35,27 +35,23 @@ bool quadsInitialized = false;
 extern "C"
 {
 
+Mat lambda;
+
 void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
         jlong inputAddr)
 {
     Mat &input = *(Mat *)inputAddr;
-    Mat output;
-
-    // Lambda Matrix
-    Mat lambda(2, 4, CV_32FC1);
-
-    // Set the lambda matrix the same type and size as input
-    lambda = Mat::zeros(input.rows, input.cols, input.type());
+    Mat output(input.rows, input.cols, input.type());
 
     if (!quadsInitialized) {
         // I need to set both here since detect has not been called and I want to make sure we don't crash
         set_mock_input_quads(input.rows, input.cols);
         set_output_quads(input.rows, input.cols);
-    }
 
-    // Get the Perspective Transform Matrix i.e. lambda
-    lambda = getPerspectiveTransform(inputQuad, outputQuad);
+        // If needed, update the lambda with some mock values
+        lambda = getPerspectiveTransform(inputQuad, outputQuad);
+    }
 
     // Apply the Perspective Transform that I just computed to the src image
     warpPerspective(input, output, lambda, input.size());
@@ -71,8 +67,18 @@ void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, j
     Mat transposedMat;
     transpose(inputMat, transposedMat);
     flip(transposedMat, outputMat, +1);
-    // rotate(inputMat, outputMat, 0); // rotateCode = 0 for 90 degree clockwise rotation
 }
+
+void JNICALL Java_com_example_integriscreen_MainActivity_rotate270(JNIEnv *env, jobject instance,
+                                                                  jlong inputAddr, jlong outputAddr)
+{
+    Mat &inputMat = *(Mat *)inputAddr;
+    Mat &outputMat = *(Mat *)outputAddr;
+
+    transpose(inputMat, inputMat);
+    flip(inputMat, outputMat,0); //transpose+flip(0)=CCW
+}
+
 
 jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
         JNIEnv *env, jobject instance,
@@ -170,22 +176,18 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
     }
 
     vector<Point2i> potentialCorners;
-    switch (detectionMethod) {
-        case 0: { // do nothing else
-            colorMask.copyTo(originalMat);
-            break;
-        }
-        case 1: { // Rectangle
-            potentialCorners = detect_rectangle_corners(colorMask, originalMat);
-            break;
-        }
-        case 2: { // Circle
-            potentialCorners = detect_circles(colorMask, originalMat);
-            break;
-        }
+    if (detectionMethod == 0) {
+        colorMask.copyTo(originalMat);
+    } else if (detectionMethod == 1) { // Rectangle
+        potentialCorners = detect_rectangle_corners(colorMask, originalMat);
+        if (update_input_quads(potentialCorners))
+            lambda = getPerspectiveTransform(inputQuad, outputQuad);
+    } else if (detectionMethod == 2) { // Circle
+        potentialCorners = detect_circles(colorMask, originalMat);
+        if (update_input_quads(potentialCorners))
+            lambda = getPerspectiveTransform(inputQuad, outputQuad);
     }
 
-    update_input_quads(potentialCorners);
 }
 
 } /// end of "extern C"

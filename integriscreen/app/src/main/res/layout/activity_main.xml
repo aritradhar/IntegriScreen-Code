@@ -33,7 +33,7 @@
         android:id="@+id/detect_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/liveOCRCheckBox"
+        android:layout_toEndOf="@+id/liveCheckbox"
         android:onClick="onClickShowColor"
         android:text="Detect Frame" />
 
@@ -57,7 +57,7 @@
         android:id="@+id/colorLabel"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/liveOCRCheckBox"
+        android:layout_toEndOf="@+id/liveCheckbox"
         android:layout_below="@id/detect_frame"
         android:background="@android:color/holo_green_light"
         android:text="240"
@@ -75,7 +75,7 @@
         android:progress="1" />
 
     <CheckBox
-        android:id="@+id/liveOCRCheckBox"
+        android:id="@+id/liveCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/realignCheckBox"
@@ -131,7 +131,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOutput"
-        android:layout_toStartOf="@+id/raw"
+        android:layout_toEndOf="@+id/canny"
         android:onClick="onClickTakePic"
         android:text="TakePic" />
 
@@ -141,8 +141,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOutput"
-        android:onClick="onClickDetectHands"
-        android:text="Hand D." />
+        android:onClick="onClickStartIS"
+        android:text="Start IS" />
 
     <Button
         android:id="@+id/diff"
