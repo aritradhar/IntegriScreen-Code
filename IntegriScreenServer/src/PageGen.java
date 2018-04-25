@@ -105,7 +105,7 @@ public class PageGen {
 				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"vh; position:absolute\">" + initialValue + "</h2>\n");
 				
 				//form action
-				elementHtmlString.append("<form action=\""+ form_action + "  method=\"post\"  enctype=\"multipart/form-data\">\">");
+				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
 				//hidden data
 				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_type" + "\" value=\""+ "input_form" + "\"/>");
 				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_id" + "\" value=\""+ pageName + "\"/>");

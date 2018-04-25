@@ -94,21 +94,19 @@ public class MainServer extends HttpServlet {
 
 		//input form
 		String page_type = request.getParameter("page_type");
+		
+		System.out.println(page_type);
 
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
+			System.out.println("Here");
 			ProcessApplicationForm.processApplicationForm(request, response);
 		}
 		
-		if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
+		else if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
 		{
 			ProcessApplicationForm.processApplicationFormPhone(request, response);
 		}
-
-		
-		
-		
-
 		else
 		{
 			Part filePart = null;
