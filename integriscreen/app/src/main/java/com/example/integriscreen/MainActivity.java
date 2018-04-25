@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -325,6 +327,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //                targetForm.toString(), Toast.LENGTH_SHORT).show();
     }
 
+    // Callback when picture is taken
+    public void onPicTaken(byte[] data) {
+        Log.d(TAG, "onPicTaken callback");
+
+        Bitmap bmpPic = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+        // TODO: following code should be commented
+        // Write the image in a file (in jpeg format)
+        try {
+            Log.d(TAG, "Saving pic");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            String fileName = Environment.getExternalStorageDirectory().getPath() +
+                    "/opencv_" + sdf.format(new Date()) + ".jpg";
+            FileOutputStream fos = new FileOutputStream(fileName);
+            fos.write(data);
+            fos.close();
+
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+    }
+
 
     void validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
 
@@ -404,24 +428,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return concatenatedText;
     }
 
+    /**
+     * The method to take a high resolution picture programatically.
+     */
     private void takePicHighRes() {
+        _cameraBridgeViewBase.setPictureSize(0);    // the best quality is set by default for pictures
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateandTime = sdf.format(new Date());
 
         String fileName = Environment.getExternalStorageDirectory().getPath() +
                 "/opencv_" + currentDateandTime + ".jpg";
         Log.d(TAG, "Picture saved in: " + fileName);
-//        List<Camera.Size> res = _cameraBridgeViewBase.getResolutionList();
-//        for (int i=0; i<res.size(); i++) {
-//            Camera.Size r = res.get(i);
-//            Log.d(TAG, "Picture resolution #" + i + ": " + r.height + "x" + r.width);
-//        }
-//        Camera.Size tmpR = res.get(0);
-//        tmpR.width = 3264;
-//        tmpR.height = 1836;
-//        _cameraBridgeViewBase.setResolution(tmpR);
 
-        _cameraBridgeViewBase.takePicture(fileName);
+        _cameraBridgeViewBase.takePicture(fileName, this);
 
 
     }
