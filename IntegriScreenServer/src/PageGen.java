@@ -107,7 +107,7 @@ public class PageGen {
 				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"vh; position:absolute\">" + initialValue + "</h2>\n");
 				
 				//form action
-				elementHtmlString.append("<form action=\""+ form_action + "\">");
+				elementHtmlString.append("<form action=\""+ form_action + "  method=\"post\"  enctype=\"multipart/form-data\">\">");
 				titleCounter++;
 			}
 			
