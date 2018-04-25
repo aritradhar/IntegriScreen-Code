@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox limitAreaCheckbox;
     private CheckBox liveCheckbox;
 
+    private Mat previousFrameMat;
+    private Mat outputMat;
+    private Mat tmpMat;
+
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
     private int v_border_perc = 47;
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     LOADING_FORM,          // Load the form based on title
                                     REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
                                     VERIFYING_UI,          // Start verifying that the UI is as expected
-                                    ACCEPTING_USER_INPUT,  // Accept user's input for as long as everything is OK
+        SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
                                     SUBMITTING_DATA,       // Keep sending user data until server responds
                                     EVERYTHING_OK,         // Tell the user that everything is OK
                                     DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
@@ -349,7 +353,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
 
-    void validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
+    private boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
+        boolean allElementsAsExpected = true;
 
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
@@ -385,11 +390,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
                 Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
+
+                allElementsAsExpected = false;
             }
 
             // Plot the borders of the UI elements
             Imgproc.rectangle(currentFrameMat, P1, P2, rectangle_color, 4);
         }
+
+        return allElementsAsExpected;
     }
 
 
@@ -455,9 +464,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             _cameraBridgeViewBase.disableView();
     }
 
-    private Mat previousFrameMat;
-    private Mat outputMat;
-    private Mat tmpMat;
     public void onCameraViewStarted(int width, int height) {
         outputMat = new Mat(1, 1, CvType.CV_8UC4);
         previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
@@ -529,8 +535,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentISState == ISState.INITIALIZING) {
             // Clean previous data
             previousFrameMat.release();
-            previousFrameMat = new Mat();
+            previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+
             transitionISSTo(ISState.DETECTING_FRAME);
+            outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
         }
 
         if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
@@ -558,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
         rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-        if (currentISState != ISState.VERIFYING_UI || liveCheckbox.isChecked()) { // during "verifying UI", we need to have a still screen
+        if ((currentISState != ISState.VERIFYING_UI && currentISState != ISState.SUPERVISING_USER_INPUT) || liveCheckbox.isChecked()) { // during "verifying UI", we need to have a still screen
             color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
@@ -572,15 +580,45 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentISState == ISState.DETECTING_FRAME) {
-            if (loadFormBasedOnName(rotatedScreenPart)) {
+            if (loadFormBasedOnName(rotatedScreenPart)) { // It is important that this function only returns true if such a form exists!
                 transitionISSTo(ISState.LOADING_FORM);
             }
         }
 
         if (currentISState == ISState.VERIFYING_UI) {
-            validateAndPlotForm(rotatedScreenPart, targetForm);
-        } else
+            if (validateAndPlotForm(rotatedScreenPart, targetForm) || limitAreaCheckbox.isChecked())
+                transitionISSTo(ISState.SUPERVISING_USER_INPUT);
+
+        } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            // TODO continue(ivo): something similar to diff should start happening here!
+
+            // Convert to black and white
+            Mat rotatedScreenPartBW = new Mat(rotatedScreenPart.size(), CvType.CV_8UC1);
+            Imgproc.cvtColor(rotatedScreenPart, rotatedScreenPartBW, Imgproc.COLOR_RGBA2GRAY);
+
+            rotatedScreenPartBW.copyTo(tmpMat);
+
+//            if (previousFrameMat.size() != rotatedScreenPartBW.size() ||
+ //                   previousFrameMat.type() != rotatedScreenPartBW.type())
+
+            if (previousFrameMat.width() == 1)
+                rotatedScreenPartBW.copyTo(previousFrameMat);
+            else {
+                Log.d("AAAA", "OK");
+            }
+
+            compute_diff(rotatedScreenPartBW.getNativeObjAddr(),
+                    previousFrameMat.getNativeObjAddr(),
+                    rotatedScreenPartBW.getNativeObjAddr());
+
+            // Store for the next frame
+            tmpMat.copyTo(previousFrameMat);
+            Imgproc.cvtColor(rotatedScreenPartBW, rotatedScreenPart, Imgproc.COLOR_GRAY2RGBA);
+
+            rotatedScreenPartBW.release();
+        } else {
             extractAndDisplayTextFromFrame(rotatedScreenPart);
+        }
 
         rotate270(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
         rotatedScreenPart.release();
