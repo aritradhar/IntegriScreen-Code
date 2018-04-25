@@ -20,6 +20,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
 
     private static final String TAG = "OCV::CustomCameraView";
     private String mPictureFileName;
+    private OnDataLoadedEventListener parentActivity;
 
     public CustomCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,6 +60,13 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
     }
 
     /**
+     * TODO: check if this method is correct
+     */
+    public void stopRefocusing() {
+        mCamera.cancelAutoFocus();
+    }
+
+    /**
      * This method sets the size of picture taken within the app.
      * Quality set to 0 takes the best picture.
      */
@@ -79,8 +87,9 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         mCamera.startPreview();
     }
 
-    public void takePicture(final String fileName) {
+    public void takePicture(final String fileName, OnDataLoadedEventListener parent) {
         Log.i(TAG, "Taking picture");
+        parentActivity = parent;
         this.mPictureFileName = fileName;
         // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
         // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
@@ -97,16 +106,18 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         mCamera.startPreview();
         mCamera.setPreviewCallback(this);
 
+        parentActivity.onPicTaken(data);
+
         // Write the image in a file (in jpeg format)
-        try {
-            FileOutputStream fos = new FileOutputStream(mPictureFileName);
-
-            fos.write(data);
-            fos.close();
-
-        } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
-        }
+//        try {
+//            FileOutputStream fos = new FileOutputStream(mPictureFileName);
+//
+//            fos.write(data);
+//            fos.close();
+//
+//        } catch (java.io.IOException e) {
+//            Log.e("PictureDemo", "Exception in photoCallback", e);
+//        }
 
     }
 }
