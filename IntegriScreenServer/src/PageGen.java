@@ -44,7 +44,7 @@ public class PageGen {
 		FileWriter jsonSpecsFile = new FileWriter(MainServer.generatedLocation + pageFileName + "_specs.json");
 		
 		JSONObject jObject = new JSONObject(jsonData);
-		String pageName = jObject.getString("page");
+		String pageName = jObject.getString("page_id");
 		String ratioString = jObject.getString("ratio");
 		String ratioHeight = ratioString.split(":")[0];
 		int heightInt = Integer.parseInt(ratioHeight);
@@ -53,9 +53,7 @@ public class PageGen {
 		String form_action = jObject.getString("form_action");
 		
 		String border_thickness = jObject.getString("border_thickness");
-		
-		System.out.println(htmlFile.contains("!!page_name!!"));
-		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", ratioHeight).replaceAll("!!width!!", ratioWidth);
+	
 		
 	
 		JSONArray elements = jObject.getJSONArray("elements");
@@ -108,6 +106,9 @@ public class PageGen {
 				
 				//form action
 				elementHtmlString.append("<form action=\""+ form_action + "  method=\"post\"  enctype=\"multipart/form-data\">\">");
+				//hidden data
+				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_type" + "\" value=\""+ "input_form" + "\"/>");
+				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_id" + "\" value=\""+ pageName + "\"/>");
 				titleCounter++;
 			}
 			
@@ -122,6 +123,11 @@ public class PageGen {
 
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
 						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute\">\n");
+			}
+			
+			else if(type.equalsIgnoreCase("button"))
+			{
+				elementHtmlString.append("<input type=\"submit\" value=\"upload\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;\">");
 			}
 			
 			else if(type.equalsIgnoreCase("label"))

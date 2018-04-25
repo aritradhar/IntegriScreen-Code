@@ -34,8 +34,8 @@ public class MainServer extends HttpServlet {
 
 	public static final String location = "/home/dhara/tomcat/static/data/";
 	public static final String generatedLocation = "/home/dhara/tomcat/static/generated/";
-	
-	
+
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -91,86 +91,101 @@ public class MainServer extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 
-		//String flag =  request.getParameter("flag");
+		//input form
+		String page_type = request.getParameter("page_type");
 
-		//if(flag.equals("upload"))
-		//	System.out.println("UPLOAD!!");
+		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
+		{
+			ProcessApplicationForm.processApplicationForm(request, response);
+		}
+		
+		if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
+		{
+			ProcessApplicationForm.processApplicationFormPhone(request, response);
+		}
 
-
-		Part filePart = null;
-		try {
-			filePart = request.getPart("file");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} // Retrieves <input type="file" name="file">
+		
+		
 		
 
-		if(filePart != null)
-		{
-			String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
-			InputStream fileContent = null;
-			try {
-				fileContent = filePart.getInputStream();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			StringWriter writer = new StringWriter();
-			try {
-				IOUtils.copy(fileContent, writer, StandardCharsets.UTF_8);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			String fileData = writer.toString();
-
-			System.out.println("FILENAME:" + fileName + " Received");
-
-			FileWriter fw;
-			try {
-				fw = new FileWriter(location+ "/" + fileName);
-				fw.append(fileData);
-				fw.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			try {
-				response.getWriter().append(fileName + " uploaded");
-				response.sendRedirect("/upload.html");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		//System.out.println("File data : " + fileData);
 		else
 		{
-			System.out.println("Generate requiest received");
-			
-			File[] currentFiles = new File(location).listFiles();
-			fileString = new HashSet<>();
-			for(File file : currentFiles)
+			Part filePart = null;
+			try {
+				filePart = request.getPart("file");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // Retrieves <input type="file" name="file">
+
+
+			if(filePart != null)
 			{
-				//System.out.println(file);
-				if(file.getName().contains(".json"))
-					fileString.add(file.getName().replaceAll(".json", ""));
+				String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
+				InputStream fileContent = null;
+				try {
+					fileContent = filePart.getInputStream();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				StringWriter writer = new StringWriter();
+				try {
+					IOUtils.copy(fileContent, writer, StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String fileData = writer.toString();
+
+				System.out.println("FILENAME:" + fileName + " Received");
+
+				FileWriter fw;
+				try {
+					fw = new FileWriter(location+ "/" + fileName);
+					fw.append(fileData);
+					fw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				try {
+					response.getWriter().append(fileName + " uploaded");
+					response.sendRedirect("/upload.html");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			
-			StringBuffer logs = new StringBuffer();
-			for(String pageFileName:fileString)
+			//System.out.println("File data : " + fileData);
+			else
 			{
-				String out = PageGen.pageGen(pageFileName);
-				System.out.println("Generated : " + pageFileName);
-				logs.append(out + "\n");
+				System.out.println("Generate requiest received");
+
+				File[] currentFiles = new File(location).listFiles();
+				fileString = new HashSet<>();
+				for(File file : currentFiles)
+				{
+					//System.out.println(file);
+					if(file.getName().contains(".swp"))
+						continue;
+					else if(file.getName().contains(".json"))
+						fileString.add(file.getName().replaceAll(".json", ""));
+				}
+
+				StringBuffer logs = new StringBuffer();
+				for(String pageFileName:fileString)
+				{
+					String out = PageGen.pageGen(pageFileName);
+					System.out.println("Generated : " + pageFileName);
+					logs.append(out + "\n");
+				}
+
+				response.getWriter().append(logs.toString());
 			}
-			
-			response.getWriter().append(logs.toString());
 		}
 	}
 
