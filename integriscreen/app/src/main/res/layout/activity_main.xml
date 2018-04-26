@@ -136,20 +136,29 @@
         android:text="TakePic" />
 
     <Button
-        android:id="@+id/detectHands"
+        android:id="@+id/ISStart"
         android:layout_marginStart="200dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOutput"
         android:onClick="onClickStartIS"
-        android:text="Start IS" />
+        android:text="IS Start" />
+
+    <Button
+        android:id="@+id/ISSubmitData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOutput"
+        android:layout_toEndOf="@+id/ISStart"
+        android:onClick="onClickSubmitData"
+        android:text="IS Submit" />
 
     <Button
         android:id="@+id/diff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOutput"
-        android:layout_toEndOf="@+id/detectHands"
+        android:layout_toEndOf="@+id/ISSubmitData"
         android:onClick="onClickShowDiff"
         android:text="Diff" />
 

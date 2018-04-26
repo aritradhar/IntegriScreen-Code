@@ -17,6 +17,7 @@ import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -42,7 +43,9 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -95,12 +98,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     LOADING_FORM,          // Load the form based on title
                                     REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
                                     VERIFYING_UI,          // Start verifying that the UI is as expected
-        SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
+                                    SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
                                     SUBMITTING_DATA,       // Keep sending user data until server responds
                                     EVERYTHING_OK,         // Tell the user that everything is OK
                                     DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     ISState currentISState;
+    boolean submitDataClicked;
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -282,6 +286,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowCanny(View view) {
         currentOutputSelection = OutputSelection.CANNY;
     }
+
+    public void onClickSubmitData(View view) {
+        submitDataClicked = true;
+    }
+
     public void onClickShowDiff(View view) {
         previousFrameMat.release();
         previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
@@ -312,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickStartIS(View view) {
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
+        realignCheckbox.setChecked(true);
         transitionISSTo(ISState.INITIALIZING);
     }
 
@@ -520,6 +530,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return true;
     }
 
+    boolean shouldDetectTransformation(ISState currentISState) {
+        if (liveCheckbox.isChecked())
+            return true;
+
+        List<ISState> dontDetectTransformation = Arrays.asList(
+                ISState.VERIFYING_UI,
+                ISState.SUPERVISING_USER_INPUT,
+                ISState.SUBMITTING_DATA);
+
+        if (dontDetectTransformation.contains(currentISState))
+            return false;
+
+        return true;
+    }
+
 
     void transitionISSTo(ISState newState)
     {
@@ -536,6 +561,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Clean previous data
             previousFrameMat.release();
             previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+
+            submitDataClicked = false;
 
             transitionISSTo(ISState.DETECTING_FRAME);
             outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
@@ -566,12 +593,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
         rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
-        if ((currentISState != ISState.VERIFYING_UI && currentISState != ISState.SUPERVISING_USER_INPUT) || liveCheckbox.isChecked()) { // during "verifying UI", we need to have a still screen
+        if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
             color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 // TODO (Enis):  We should stop refocusing here if we can.
                 transitionISSTo(ISState.VERIFYING_UI);
+
             }
         }
 
@@ -586,8 +614,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentISState == ISState.VERIFYING_UI) {
-            if (validateAndPlotForm(rotatedScreenPart, targetForm) || limitAreaCheckbox.isChecked())
+            if (validateAndPlotForm(rotatedScreenPart, targetForm) || limitAreaCheckbox.isChecked()) {
+                submitDataClicked = false;
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
+            }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
             // TODO continue(ivo): something similar to diff should start happening here!
@@ -635,6 +665,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             matLabels.release();
             matStats.release();
             matCentroids.release();
+
+            if (submitDataClicked) {
+                transitionISSTo(ISState.SUBMITTING_DATA);
+            }
+        } else if (currentISState == ISState.SUBMITTING_DATA) {
+            // TODO(enis,daniele): this is where we attempt to submit data to the server
+            outputOnUILabel("Submitting data to the server (TODO)...");
         } else {
             extractAndDisplayTextFromFrame(rotatedScreenPart);
         }
