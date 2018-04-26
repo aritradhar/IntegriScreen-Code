@@ -35,10 +35,12 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.FileOutputStream;
@@ -70,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Mat previousFrameMat2;
     private Mat tmpMat2;
     private Mat outputMat;
+
+    private Mat matPic;
 
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
@@ -193,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
         liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
-
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -342,20 +345,58 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     // Callback when picture is taken
-    public void onPicTaken(byte[] data) {
+    public void onPicTaken(byte[] data, int width, int height) {
         Log.d(TAG, "onPicTaken callback");
+        Log.d(TAG, "onPicTaken: " + System.currentTimeMillis());
 
-        Bitmap bmpPic = BitmapFactory.decodeByteArray(data, 0, data.length);
+        // store plain pic
+        storePic(data, "_byte");
 
-        // TODO: following code should be commented
+        //convert to mat
+        matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
+        Log.d(TAG, "afterImdecode: " + System.currentTimeMillis());
+        Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
+        Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
+
+        color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
+        realign_perspective(matPic.getNativeObjAddr());
+
+        //convert Mat to Bitmap
+        Bitmap bmpPic = Bitmap.createBitmap(matPic.cols(), matPic.rows(),
+                Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matPic, bmpPic);
+        storePic(bmpPic, "_mat");
+    }
+
+    private void storePic(byte[] data, String extension) {
         // Write the image in a file (in jpeg format)
         try {
-            Log.d(TAG, "Saving pic");
+            Log.d(TAG, "Saving byte[] to file");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            String fileName = Environment.getExternalStorageDirectory().getPath() +
-                    "/opencv_" + sdf.format(new Date()) + ".jpg";
+            String fileName = Environment.getExternalStorageDirectory().getPath()
+                    + "/DCIM/integriscreen" +
+                    "/opencv_" + sdf.format(new Date()) + extension + ".jpg";
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(data);
+            fos.close();
+
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+    }
+
+    private void storePic(Bitmap finalBitmap, String extension) {
+        // Write the image in a file (in jpeg format)
+        try {
+            Log.d(TAG, "Saving bitmap to file");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            String fileName = Environment.getExternalStorageDirectory().getPath()
+                    + "/DCIM/integriscreen" +
+                    "/opencv_" + sdf.format(new Date()) + extension + ".jpg";
+            FileOutputStream fos = new FileOutputStream(fileName);
+//            fos.write(data);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
             fos.close();
 
         } catch (java.io.IOException e) {
@@ -460,9 +501,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 "/opencv_" + currentDateandTime + ".jpg";
         Log.d(TAG, "Picture saved in: " + fileName);
 
+        Log.d(TAG, "before the takePicture: " + System.currentTimeMillis());
         _cameraBridgeViewBase.takePicture(fileName, this);
-
-
     }
     
     public void onDestroy() {
