@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -19,7 +20,10 @@ import org.json.JSONObject;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by eulqinaku on 11/04/2018.
@@ -55,6 +59,9 @@ public class TargetForm {
 
     public boolean isLoaded;
 
+    // url to submit the form
+    private String submitURL;
+
     private OnDataLoadedEventListener parentActivity;
 
     public TargetForm(Context context, String targetUrl, OnDataLoadedEventListener parent) {
@@ -66,8 +73,15 @@ public class TargetForm {
         timeTurnedActive = 0;
         allElements = null;
         applicationContext = context;
+        submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";     //TODO: eu_Hardcoded URL
         queue = Volley.newRequestQueue(applicationContext);
         makeJsonObjectRequest(targetUrl);
+    }
+
+    public TargetForm(Context context) {
+        applicationContext = context;
+        submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";     //TODO: eu_Hardcoded URL
+        queue = Volley.newRequestQueue(applicationContext);
     }
 
     /**
@@ -261,6 +275,40 @@ public class TargetForm {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(applicationContext,
                         error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Adding request to request queue
+        queue.add(jsonObjReq);
+    }
+
+    /**
+     * This method sends a POST request to the server with a json including form data
+     */
+    public void submitFormData() {
+        String submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";
+        Map<String, String> postParam = new HashMap<String, String>();
+
+        //store all pairs of elements in a hashmap
+        for (int i = 0; i < allElements.size(); i++) {
+            UIElement tmpEl = allElements.get(i);
+            postParam.put(tmpEl.id, tmpEl.currentVal);
+        }
+
+
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
+                submitURL, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
         });
 
