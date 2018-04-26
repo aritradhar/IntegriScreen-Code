@@ -95,6 +95,8 @@ public class PageGen {
 			
     		String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
     		String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
+    		
+    		String maxInputChars = inObject.has("maxlength") ? inObject.getString("maxlength") : "30";
 			
 			System.out.println(id);
 			
@@ -126,8 +128,8 @@ public class PageGen {
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
-						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+				elementHtmlString.append("<input type=" + type + " name =" + "integriscreen_" + id + " value=\"" + initialValue 
+						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 			
 			else if(type.equalsIgnoreCase("button"))
