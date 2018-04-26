@@ -596,15 +596,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Mat rotatedScreenPartBW = new Mat(rotatedScreenPart.size(), CvType.CV_8UC1);
             Imgproc.cvtColor(rotatedScreenPart, rotatedScreenPartBW, Imgproc.COLOR_RGBA2GRAY);
 
+            // Since rotatedScreenPartBW will get changed, store the current purely black and white version now for later.
             rotatedScreenPartBW.copyTo(tmpMat);
 
-//            if (previousFrameMat.size() != rotatedScreenPartBW.size() ||
- //                   previousFrameMat.type() != rotatedScreenPartBW.type())
-
-            if (previousFrameMat.width() == 1)
+            // If we don't have a stored previous frame, just use the latest one
+            if (!previousFrameMat.size().equals(rotatedScreenPartBW.size()) ||
+                   previousFrameMat.type() != rotatedScreenPartBW.type()) {
                 rotatedScreenPartBW.copyTo(previousFrameMat);
-            else {
-                Log.d("AAAA", "OK");
             }
 
             compute_diff(rotatedScreenPartBW.getNativeObjAddr(),
@@ -613,9 +611,30 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // Store for the next frame
             tmpMat.copyTo(previousFrameMat);
+
+
+
+            // This is where we start computing the components
+            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+
+            int numComponents = find_components(rotatedScreenPartBW.getNativeObjAddr(),
+                    matLabels.getNativeObjAddr(),
+                    matStats.getNativeObjAddr(),
+                    matCentroids.getNativeObjAddr());
+            Log.d("num_comp", String.valueOf(numComponents));
+
+            outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
+
+
+            // Convert back to RGBA to be shown on the phone
             Imgproc.cvtColor(rotatedScreenPartBW, rotatedScreenPart, Imgproc.COLOR_GRAY2RGBA);
 
             rotatedScreenPartBW.release();
+            matLabels.release();
+            matStats.release();
+            matCentroids.release();
         } else {
             extractAndDisplayTextFromFrame(rotatedScreenPart);
         }
@@ -632,7 +651,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
-        color_detector(handsPart.getNativeObjAddr(),huePicker.getProgress() / 2, 0);
+        color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0);
 
         // Convert back to 4 channel colors
         Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
