@@ -24,6 +24,15 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
 }
 
+label, textarea, input {
+    padding: 5px 10px;
+    -moz-user-select: none;
+    user-select: none;
+    caret-color: transparent;
+}
+
+html, body, input, select, textarea, button{font-family: !!font!!; letter-spacing: !!letter_spacing!!;}
+
 <!--place-for-unicorn-styling-->
 
 </style>
