@@ -5,7 +5,7 @@
   "border_thickness":"1",
   "font_family": "'Verdana', sans-serif",
   "letter_spacing": "normal",
-  "form_action":"/action_page.php",
+  "form_action":"/IntegriScreenServer/MainServer",
   "elements": [
     {
       "id": "form_title",
@@ -28,13 +28,6 @@
       "width": "40",
       "height": "3"
     },
-
-
-
-
-
-
-
 
     {
       "id": "label_recipient",
