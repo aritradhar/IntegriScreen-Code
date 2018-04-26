@@ -97,7 +97,17 @@
       "width": "50",
       "height": "15"
     },
-
+	
+	{
+      "id": "submit_button",
+      "type": "button",
+      "editable": "false",
+      "initialvalue": "Send",
+      "ulc_x": "10",
+      "ulc_y": "42",
+      "width": "25",
+      "height": "15"
+    },
 
     {
       "id": "test_label_LR",
