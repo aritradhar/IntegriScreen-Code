@@ -7,7 +7,7 @@ package com.integriscreen.keystrokedetector;
  */
 public class RecordingParameters {
 
-    public static final int WINDOW_SIZE = 2048;
+    public static final int WINDOW_SIZE = 4096;
     public static final int SAMPLE_RATE = 44100;
     // Length of the BG noise window, in milliseconds
     public static final int BG_NOISE_LENGTH = 200;
@@ -16,8 +16,10 @@ public class RecordingParameters {
     // Length of the BG noise window, in samples
     public static final int BG_SAMPLES = Math.round(BG_NOISE_LENGTH / WINDOW_LENGTH);
     // Minimum distance between keystrokes, in milliseconds
-    public static final int KEYSTROKE_MIN_DISTANCE = 120;
+    public static final int KEYSTROKE_MIN_DISTANCE = 150;
     // Minimum distance between keystrokes, in samples
     public static final int KEYSTROKE_MIN_WINDOW = Math.round(KEYSTROKE_MIN_DISTANCE / WINDOW_LENGTH);
+    // Minimum energy difference between threshold and sound
+    public static final int THRESHOLD_DELTA = 10;
 
 }

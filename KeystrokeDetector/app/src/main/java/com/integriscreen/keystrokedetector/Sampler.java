@@ -1,14 +1,22 @@
 package com.integriscreen.keystrokedetector;
 
+import android.icu.text.AlphabeticIndex;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.widget.Button;
 import android.widget.TextView;
 
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.paramsen.noise.Noise;
 import com.paramsen.noise.NoiseOptimized;
 
+import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
 /**
@@ -71,14 +79,12 @@ public class Sampler extends Thread {
                 // A threshold exists &&
             if (mainActivity.thresholdValue != -1 &&
                     // Current window energy is above threshold &&
-                    energy > mainActivity.thresholdValue + 5 &&
+                    energy > mainActivity.thresholdValue + RecordingParameters.THRESHOLD_DELTA &&
                     // last event was enough milliseconds ago
                     mainActivity.last_event_window + RecordingParameters.KEYSTROKE_MIN_WINDOW <= sampleCount) {
-                // event detected -- update label
-                mainActivity.last_event_window = sampleCount;
-                keystrokeCount += 1;
-                mainActivity.runOnUiThread(() -> ((Button) mainActivity.findViewById(R.id.count)).setText(String.valueOf(keystrokeCount)));
-                // calculate what time the event happened
+                // event detected
+                // Is it a keystroke?
+                mainActivity.isKeystroke(Arrays.copyOfRange(fftOutput, 0, RecordingParameters.WINDOW_SIZE), 0);
             }
 
         }
