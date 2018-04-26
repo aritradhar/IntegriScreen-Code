@@ -66,8 +66,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox liveCheckbox;
 
     private Mat previousFrameMat;
-    private Mat outputMat;
     private Mat tmpMat;
+    private Mat previousFrameMat2;
+    private Mat tmpMat2;
+    private Mat outputMat;
 
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
@@ -478,12 +480,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         outputMat = new Mat(1, 1, CvType.CV_8UC4);
         previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
         tmpMat = new Mat(1, 1, CvType.CV_8UC1);
+        previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC4);
+        tmpMat2 = new Mat(1, 1, CvType.CV_8UC1);
     }
 
     public void onCameraViewStopped() {
         outputMat.release();
         previousFrameMat.release();
         tmpMat.release();
+        previousFrameMat2.release();
+        tmpMat2.release();
     }
 
     // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
@@ -549,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     void transitionISSTo(ISState newState)
     {
         currentISState = newState;
-        outputOnToast("Entering State: " + newState.name());
+        // outputOnToast("Entering State: " + newState.name());
         outputOnUILabel("Current State: " + newState.name());
     }
 
@@ -561,6 +567,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Clean previous data
             previousFrameMat.release();
             previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+            previousFrameMat2.release();
+            previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
 
             submitDataClicked = false;
 
@@ -637,7 +645,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             compute_diff(rotatedScreenPartBW.getNativeObjAddr(),
                     previousFrameMat.getNativeObjAddr(),
-                    rotatedScreenPartBW.getNativeObjAddr());
+                    rotatedScreenPartBW.getNativeObjAddr(),
+                    1);
 
             // Store for the next frame
             tmpMat.copyTo(previousFrameMat);
@@ -683,12 +692,51 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // ===== 2) Handle the lower part
         // -- apply detect_color(human_skin)
-        // TODO: -- apply diff to detect human skin
+        // -- apply diff on color of human_skin
         // TODO: -- detect if changes are happening
+        int activityDetected = 0;
+
         Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
         color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0);
+
+        // Since handsPart will get changed in the process, store the current purely black and white version now for later.
+        handsPart.copyTo(tmpMat2);
+
+        // If we don't have a stored previous frame, just use the latest one
+        if (!previousFrameMat2.size().equals(handsPart.size()) ||
+                previousFrameMat2.type() != handsPart.type()) {
+            handsPart.copyTo(previousFrameMat2);
+        }
+
+        compute_diff(handsPart.getNativeObjAddr(),
+                previousFrameMat2.getNativeObjAddr(),
+                handsPart.getNativeObjAddr(),
+                2);
+
+        // This is where we start computing the components
+        Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
+        Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
+        Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+        int numComponents = find_components(handsPart.getNativeObjAddr(),
+                matLabels.getNativeObjAddr(),
+                matStats.getNativeObjAddr(),
+                matCentroids.getNativeObjAddr());
+        Log.d("num_comp", String.valueOf(numComponents));
+
+        if (numComponents > 1)
+            activityDetected = 1;
+
+        matLabels.release();
+        matStats.release();
+        matCentroids.release();
+
+        // Store for the next frame
+        tmpMat2.copyTo(previousFrameMat2);
+
+
+        // --------------------------------------
 
         // Convert back to 4 channel colors
         Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
@@ -702,6 +750,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         handsPart.copyTo(currentFrameMat.submat(handsBox));
         handsPart.release();
+
+        // Draw the separating line
+        line(currentFrameMat, mid_left, mid_right, new Scalar(255, 255 * activityDetected, 0), 3);
 
         return currentFrameMat;
     }
@@ -769,7 +820,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             compute_diff(currentFrameMat.getNativeObjAddr(),
                     previousFrameMat.getNativeObjAddr(),
-                    currentFrameMat.getNativeObjAddr());
+                    currentFrameMat.getNativeObjAddr(),
+                    1);
 
             // Store for next frame
             tmpMat.copyTo(previousFrameMat);
@@ -882,7 +934,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return textConcat;
     }
 
-    public native void compute_diff(long matFirst, long matSecond, long matDiff);
+    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
