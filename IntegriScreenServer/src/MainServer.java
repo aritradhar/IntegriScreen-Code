@@ -32,8 +32,8 @@ import org.apache.commons.io.IOUtils;
 
 public class MainServer extends HttpServlet {
 
-	public static final String location = "data/";
-	public static final String generatedLocation = "generated/";
+	public static final String location = "/home/dhara/tomcat/static/data/";
+	public static final String generatedLocation = "/home/dhara/tomcat/static/generated/";
 
 
 	private static final long serialVersionUID = 1L;
