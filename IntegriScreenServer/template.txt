@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+
+html, body{
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+label {
+  overflow:hidden;
+  display:inline-block;
+  text-overflow: hidden;
+  white-space: nowrap;
+}
+
+textarea {
+  resize: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0 auto;
+}
+
+<!--place-for-unicorn-styling-->
+
+</style>
+
+
+!!body!!
+
+
+
+</body>
+
+
+</html>
