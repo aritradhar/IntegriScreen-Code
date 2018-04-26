@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     ISState currentISState;
     boolean submitDataClicked;
+    boolean activityDetected;
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -557,145 +558,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         outputOnUILabel("Current State: " + newState.name());
     }
 
-    // This function runs a state machine, which will in each frame transition to the next state if specific conditions are met.
-    public Mat executeISStateMachine(Mat currentFrameMat) {
-        long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
 
-        if (currentISState == ISState.INITIALIZING) {
-            // Clean previous data
-            previousFrameMat.release();
-            previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
-            previousFrameMat2.release();
-            previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
-
-            submitDataClicked = false;
-
-            transitionISSTo(ISState.DETECTING_FRAME);
-            outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
-        }
-
-        if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
-            mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
-            if (currentISState == ISState.LOADING_FORM)
-                transitionISSTo(ISState.REALIGNING_AFTER_FORM_LOAD);
-        }
-
-        // Compute the points that define the division line
-        Point mid_right = new Point(mid_delim, 0);
-        Point mid_left = new Point(mid_delim, currentFrameMat.height());
-
-        // line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 8);
-
-        // ==== 1) Handle the upper part of the screen:
-        // -- Rotate by 90
-        // -- Detect the transformation
-        // -- Realign
-        // -- Validate the form
-        // -- Rotate back
-
-        Rect screenBox = new Rect(new Point(0, 0), mid_left);
-        Mat screenPart = currentFrameMat.submat(screenBox);
-
-        Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
-        rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
-
-        if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
-            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
-
-            if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
-                // TODO (Enis):  We should stop refocusing here if we can.
-                _cameraBridgeViewBase.stopRefocusing();
-                transitionISSTo(ISState.VERIFYING_UI);
-
-            }
-        }
-
-        if (realignCheckbox.isChecked()) {
-            realign_perspective(rotatedScreenPart.getNativeObjAddr());
-        }
-
-        if (currentISState == ISState.DETECTING_FRAME) {
-            if (loadFormBasedOnName(rotatedScreenPart)) { // It is important that this function only returns true if such a form exists!
-                transitionISSTo(ISState.LOADING_FORM);
-            }
-        }
-
-        if (currentISState == ISState.VERIFYING_UI) {
-            if (validateAndPlotForm(rotatedScreenPart, targetForm) || limitAreaCheckbox.isChecked()) {
-                submitDataClicked = false;
-                transitionISSTo(ISState.SUPERVISING_USER_INPUT);
-            }
-
-        } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
-            // TODO continue(ivo): something similar to diff should start happening here!
-
-            // Convert to black and white
-            Mat rotatedScreenPartBW = new Mat(rotatedScreenPart.size(), CvType.CV_8UC1);
-            Imgproc.cvtColor(rotatedScreenPart, rotatedScreenPartBW, Imgproc.COLOR_RGBA2GRAY);
-
-            // Since rotatedScreenPartBW will get changed, store the current purely black and white version now for later.
-            rotatedScreenPartBW.copyTo(tmpMat);
-
-            // If we don't have a stored previous frame, just use the latest one
-            if (!previousFrameMat.size().equals(rotatedScreenPartBW.size()) ||
-                   previousFrameMat.type() != rotatedScreenPartBW.type()) {
-                rotatedScreenPartBW.copyTo(previousFrameMat);
-            }
-
-            compute_diff(rotatedScreenPartBW.getNativeObjAddr(),
-                    previousFrameMat.getNativeObjAddr(),
-                    rotatedScreenPartBW.getNativeObjAddr(),
-                    1);
-
-            // Store for the next frame
-            tmpMat.copyTo(previousFrameMat);
-
-
-
-            // This is where we start computing the components
-            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
-
-            int numComponents = find_components(rotatedScreenPartBW.getNativeObjAddr(),
-                    matLabels.getNativeObjAddr(),
-                    matStats.getNativeObjAddr(),
-                    matCentroids.getNativeObjAddr());
-            Log.d("num_comp", String.valueOf(numComponents));
-
-            outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
-
-
-            // Convert back to RGBA to be shown on the phone
-            Imgproc.cvtColor(rotatedScreenPartBW, rotatedScreenPart, Imgproc.COLOR_GRAY2RGBA);
-
-            rotatedScreenPartBW.release();
-            matLabels.release();
-            matStats.release();
-            matCentroids.release();
-
-            if (submitDataClicked) {
-                transitionISSTo(ISState.SUBMITTING_DATA);
-            }
-        } else if (currentISState == ISState.SUBMITTING_DATA) {
-            // TODO(enis,daniele): this is where we attempt to submit data to the server
-            outputOnUILabel("Submitting data to the server (TODO)...");
-        } else {
-            extractAndDisplayTextFromFrame(rotatedScreenPart);
-        }
-
-        rotate270(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
-        rotatedScreenPart.release();
-
-
-
+    void detectHandsAndUpdateActivity(Mat currentFrameMat, long mid_delim)
+    {
         // ===== 2) Handle the lower part
         // -- apply detect_color(human_skin)
         // -- apply diff on color of human_skin
-        // TODO: -- detect if changes are happening
-        int activityDetected = 0;
-
-        Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
+        // -- detect if any changes are happening in the lower part
+        Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
         color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0);
@@ -725,7 +595,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d("num_comp", String.valueOf(numComponents));
 
         if (numComponents > 1)
-            activityDetected = 1;
+            activityDetected = true;
+        else
+            activityDetected = false;
 
         matLabels.release();
         matStats.release();
@@ -734,24 +606,171 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Store for the next frame
         tmpMat2.copyTo(previousFrameMat2);
 
-
         // --------------------------------------
 
         // Convert back to 4 channel colors
         Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
 
+        handsPart.copyTo(currentFrameMat.submat(handsBox));
+        handsPart.release();
+    }
 
+    void processRotatedUpperPart(Mat rotatedUpperPart)
+    {
+        // HANDLE THE UPPER PART!
+        // ---------------- Based on the state that we are in, handle the upper part ------
+
+        if (currentISState == ISState.VERIFYING_UI) {
+            if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
+                submitDataClicked = false;
+                transitionISSTo(ISState.SUPERVISING_USER_INPUT);
+            }
+
+        } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            // TODO continue(ivo): something similar to diff should start happening here!
+
+            // Convert to black and white
+            Mat rotatedUpperPartBW = new Mat(rotatedUpperPart.size(), CvType.CV_8UC1);
+            Imgproc.cvtColor(rotatedUpperPart, rotatedUpperPartBW, Imgproc.COLOR_RGBA2GRAY);
+
+            // Since rotatedUpperPartBW will get changed, store the current purely black and white version now for later.
+            rotatedUpperPartBW.copyTo(tmpMat);
+
+            // If we don't have a stored previous frame, just use the latest one
+            if (!previousFrameMat.size().equals(rotatedUpperPartBW.size()) ||
+                    previousFrameMat.type() != rotatedUpperPartBW.type()) {
+                rotatedUpperPartBW.copyTo(previousFrameMat);
+            }
+
+            compute_diff(rotatedUpperPartBW.getNativeObjAddr(),
+                    previousFrameMat.getNativeObjAddr(),
+                    rotatedUpperPartBW.getNativeObjAddr(),
+                    1);
+
+            // Store for the next frame
+            tmpMat.copyTo(previousFrameMat);
+
+
+
+            // This is where we start computing the components
+            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
+            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+
+            int numComponents = find_components(rotatedUpperPartBW.getNativeObjAddr(),
+                    matLabels.getNativeObjAddr(),
+                    matStats.getNativeObjAddr(),
+                    matCentroids.getNativeObjAddr());
+            Log.d("num_comp", String.valueOf(numComponents));
+
+            outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
+
+            if (numComponents > 1 && !activityDetected)
+                outputOnToast("Warning: UI changes, but no hand movement!");
+
+            // Convert back to RGBA to be shown on the phone
+            Imgproc.cvtColor(rotatedUpperPartBW, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+
+            rotatedUpperPartBW.release();
+            matLabels.release();
+            matStats.release();
+            matCentroids.release();
+
+            if (submitDataClicked) {
+                transitionISSTo(ISState.SUBMITTING_DATA);
+            }
+        } else if (currentISState == ISState.SUBMITTING_DATA) {
+            // TODO(enis,daniele): this is where we attempt to submit data to the server
+            outputOnUILabel("Submitting data to the server (TODO)...");
+        } else {
+            extractAndDisplayTextFromFrame(rotatedUpperPart);
+        }
+    }
+
+    void handleUpperPart(Mat currentFrameMat, long mid_delim) {
+        // ==== 1) Handle the upper part of the screen:
+        // -- Rotate by 90
+        // -- Detect the transformation
+        // -- Realign
+        // -- PROCESSS
+        // -- Rotate back
+
+        Rect screenBox = new Rect(new Point(0, 0), new Point(mid_delim, currentFrameMat.height()));
+        Mat screenPart = currentFrameMat.submat(screenBox);
+
+        Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
+        rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+
+        if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
+            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+
+            if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
+                // we do not want to refocus anymore!
+                _cameraBridgeViewBase.stopRefocusing();
+                transitionISSTo(ISState.VERIFYING_UI);
+            }
+        }
+
+        if (realignCheckbox.isChecked()) {
+            realign_perspective(rotatedScreenPart.getNativeObjAddr());
+        }
+
+        if (currentISState == ISState.DETECTING_FRAME) {
+            if (loadFormBasedOnName(rotatedScreenPart)) { // It is important that this function only returns true if such a form exists!
+                transitionISSTo(ISState.LOADING_FORM);
+            }
+        }
+
+        // Depending on the app state, run detection of text, find changes, etc.
+        processRotatedUpperPart(rotatedScreenPart);
+
+        rotate270(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
+        rotatedScreenPart.release();
 
         // Combine the two parts
         screenPart.copyTo(currentFrameMat.submat(screenBox));
         // TODO PERF: I shouldn't be recreating and then releasing, but re-using Mats
         screenPart.release();
+    }
 
-        handsPart.copyTo(currentFrameMat.submat(handsBox));
-        handsPart.release();
+    // This function runs a state machine, which will in each frame transition to the next state if specific conditions are met.
+    public Mat executeISStateMachine(Mat currentFrameMat) {
+        long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
 
-        // Draw the separating line
-        line(currentFrameMat, mid_left, mid_right, new Scalar(255, 255 * activityDetected, 0), 3);
+        if (currentISState == ISState.INITIALIZING) {
+            // Clean previous data
+            previousFrameMat.release();
+            previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+            previousFrameMat2.release();
+            previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
+
+            submitDataClicked = false;
+
+            transitionISSTo(ISState.DETECTING_FRAME);
+            outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
+        }
+
+        if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
+            mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            if (currentISState == ISState.LOADING_FORM)
+                transitionISSTo(ISState.REALIGNING_AFTER_FORM_LOAD);
+        }
+
+
+        // ======== Handle and update the upport part of the screen: rotate, detect frame, realign, process, rotate back, update
+        handleUpperPart(currentFrameMat, mid_delim);
+
+
+        // ======== Handle the lower part of the screen
+        // This function detects the hands, updates the currentFrameMat and sets activityDetected variable
+        detectHandsAndUpdateActivity(currentFrameMat, mid_delim);
+        // =============================================
+
+
+        // Draw the separating line, choose color depending on activity
+        Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
+        line(currentFrameMat, new Point(mid_delim, currentFrameMat.height()), new Point(mid_delim, 0), lineColor, 3);
+
 
         return currentFrameMat;
     }
