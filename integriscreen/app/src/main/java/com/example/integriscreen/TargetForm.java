@@ -73,15 +73,9 @@ public class TargetForm {
         timeTurnedActive = 0;
         allElements = null;
         applicationContext = context;
-        submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";     //TODO: eu_Hardcoded URL
+        submitURL = "";
         queue = Volley.newRequestQueue(applicationContext);
         makeJsonObjectRequest(targetUrl);
-    }
-
-    public TargetForm(Context context) {
-        applicationContext = context;
-        submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";     //TODO: eu_Hardcoded URL
-        queue = Volley.newRequestQueue(applicationContext);
     }
 
     /**
@@ -286,7 +280,6 @@ public class TargetForm {
      * This method sends a POST request to the server with a json including form data
      */
     public void submitFormData() {
-        String submitURL = "http://enis.ulqinaku.com/rs/integri/json.php";
         Map<String, String> postParam = new HashMap<String, String>();
 
         //store all pairs of elements in a hashmap
