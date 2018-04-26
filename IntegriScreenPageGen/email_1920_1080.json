@@ -1,8 +1,10 @@
 {
   "ratio": "1920:1080",
   "vspace": "50",
-  "page": "email",
+  "page_id": "email",
   "border_thickness":"1",
+  "font_family": "'Verdana', sans-serif",
+  "letter_spacing": "normal",
   "form_action":"/action_page.php",
   "elements": [
     {
@@ -42,7 +44,9 @@
       "ulc_x": "10",
       "ulc_y": "10",
       "width": "10",
-      "height": "3"
+      "height": "3",
+      "font": "'Helvetica', sans-serif",
+      "spacing": "1em"
     },
 
      {

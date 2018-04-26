@@ -54,6 +54,9 @@ public class PageGen {
 		
 		String border_thickness = jObject.getString("border_thickness");
 		
+		String global_font = jObject.getString("font_family");
+		String font_spacing = jObject.getString("letter_spacing");
+		
 		System.out.println(htmlFile.contains("!!page_name!!"));
 		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", ratioHeight).replaceAll("!!width!!", ratioWidth);
 		
@@ -93,6 +96,9 @@ public class PageGen {
 			String width = inObject.getString("width");
 			String height = inObject.getString("height");
 			
+            String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
+            String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
+			
 			System.out.println(id);
 			
 					
@@ -113,7 +119,7 @@ public class PageGen {
 			
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "%;\">" + initialValue + "</textarea>\n");
+				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "%;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
 			
 			}
 			
@@ -121,13 +127,13 @@ public class PageGen {
 			{
 
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
-						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute\">\n");
+						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 			
 			else if(type.equalsIgnoreCase("label"))
 			{
 
-				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;\">" + initialValue + "</label>\n");
+				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
 			}
 			
 			divCounter++;
@@ -145,6 +151,8 @@ public class PageGen {
 		}
 		elementHtmlString.append("</form>\n</div>");
 
+		htmlFile.replaceAll("!!font!!", global_font);
+		htmlFile.replaceAll("!!letter_spacing!!", font_spacing);
 		
 		// ----- Generate the main .html file		
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
