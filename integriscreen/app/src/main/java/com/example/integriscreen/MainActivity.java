@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     // Callback when picture is taken
-    public void onPicTaken(byte[] data, int width, int height) {
+    public void onPicTaken(byte[] data) {
         Log.d(TAG, "onPicTaken callback");
         Log.d(TAG, "onPicTaken: " + System.currentTimeMillis());
 
