@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "MainActivity";
 
-    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, DETECT_HANDS};
+    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN};
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
     private TextView colorLabel;
@@ -60,7 +60,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private SeekBar detectPicker;
     private CheckBox realignCheckbox;
     private CheckBox limitAreaCheckbox;
-    private CheckBox liveOCRCheckbox;
+    private CheckBox liveCheckbox;
+
+    private Mat previousFrameMat;
+    private Mat outputMat;
+    private Mat tmpMat;
 
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
@@ -83,6 +87,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // TextRecognizer is the native vision API for text extraction
     TextRecognizer textRecognizer;
+
+
+    private enum ISState { INITIALIZING,          // Set up global vars, etc.
+                                    DETECTING_FRAME,       // Start detecting the green frame
+                                    DETECTING_TITLE,       // Start OCR-ing to find the title
+                                    LOADING_FORM,          // Load the form based on title
+                                    REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
+                                    VERIFYING_UI,          // Start verifying that the UI is as expected
+        SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
+                                    SUBMITTING_DATA,       // Keep sending user data until server responds
+                                    EVERYTHING_OK,         // Tell the user that everything is OK
+                                    DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
+                                    ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
+    ISState currentISState;
+
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -168,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         detectPicker = (SeekBar)findViewById(R.id.detect_method);
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
-        liveOCRCheckbox = (CheckBox)findViewById(R.id.liveOCRCheckBox);
+        liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
 
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
@@ -275,15 +294,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private boolean setup_needed;
-
     public void onClickShowRaw(View view) {
-        setup_needed = true;
         currentOutputSelection = OutputSelection.RAW;
     }
 
     public void onClickDetectText(View view) {
-        if (liveOCRCheckbox.isChecked())
+        if (liveCheckbox.isChecked())
             currentOutputSelection = OutputSelection.DETECT_TEXT;
         else {
             if (limitAreaCheckbox.isChecked())
@@ -293,29 +309,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    public void onClickDetectHands(View view) {
-        setup_needed = true;
-        currentOutputSelection = OutputSelection.DETECT_HANDS;
+    public void onClickStartIS(View view) {
+        currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
-        limitAreaCheckbox.setChecked(false);
-        realignCheckbox.setChecked(true);
-        liveOCRCheckbox.setChecked(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            huePicker.setProgress(skin_hue_estimate, true);
-        }
+        transitionISSTo(ISState.INITIALIZING);
     }
 
     // Button callback to handle taking a picture
     public void onClickTakePic(View view) {
         Log.d(TAG, "Take picture button clicled.");
         takePicHighRes();
-    }
-
-    // Button callback to handle downloading raw data
-    public void onClickDownloadSpec(View view) {
-        Log.d(TAG, "Start downloading specs of TargetForm from server...");
-        targetForm = new TargetForm(getApplicationContext(), urlForm_1920_1080, this);
-        Log.d(TAG, targetForm.toString());
     }
 
     // Callback which is called by TargetForm class once the data is ready.
@@ -350,7 +353,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
 
-    void validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
+    private boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
+        boolean allElementsAsExpected = true;
 
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
@@ -369,11 +373,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // --- Add offsets ---
             long offset = 8; // Offset to ensure that OCR does not fail due to tight limits on rectangles
             Point P1 = new Point(
-                    Math.max(x - offset, 0),    // make sure its not negative
-                    Math.max(y - offset, 0));
+                    Math.min(Math.max(x - offset, 0), currentFrameMat.width() - 1),   // make sure that it is between 0 and currentFrameMat.height() and currentFrameMat.width()
+                    Math.min(Math.max(y - offset, 0), currentFrameMat.height() - 1));
             Point P2 = new Point(
-                    Math.min(x + width + offset, currentFrameMat.width() - 1),   // prevent overflows
-                    Math.min(y + height + offset, currentFrameMat.height() - 1));
+                    Math.min(x + width + offset, currentFrameMat.width()),   // prevent overflows
+                    Math.min(y + height + offset, currentFrameMat.height()));
 
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(new Rect(P1, P2)));
 
@@ -386,11 +390,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
                 Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
+
+                allElementsAsExpected = false;
             }
 
             // Plot the borders of the UI elements
             Imgproc.rectangle(currentFrameMat, P1, P2, rectangle_color, 4);
         }
+
+        return allElementsAsExpected;
     }
 
 
@@ -422,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // Also, output on the UI label
-        if (currentOutputSelection == OutputSelection.RAW && !liveOCRCheckbox.isChecked())
+        if (currentOutputSelection == OutputSelection.RAW && !liveCheckbox.isChecked())
             outputOnUILabel(concatenatedText);
 
         return concatenatedText;
@@ -456,9 +464,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             _cameraBridgeViewBase.disableView();
     }
 
-    private Mat previousFrameMat;
-    private Mat outputMat;
-    private Mat tmpMat;
     public void onCameraViewStarted(int width, int height) {
         outputMat = new Mat(1, 1, CvType.CV_8UC4);
         previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
@@ -502,7 +507,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // At the moment we are strongly and implicitly!!! hardcoding the values "string -> URL"
         String formToLoad = concatTextBlocks(detect_text(currentFrameMat.submat(formTitleBox)));
 
-        outputOnToast("Loading form: " + formToLoad);
 
         formToLoad = formToLoad.replaceAll("\\s+","");
         if (formToLoad.equals("ComposeEmail1920x1080")) {
@@ -512,99 +516,151 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else
             return false;
 
+        outputOnToast("Loading form: " + formToLoad);
         return true;
     }
+
+
+    void transitionISSTo(ISState newState)
+    {
+        currentISState = newState;
+        outputOnToast("Entering State: " + newState.name());
+        outputOnUILabel("Current State: " + newState.name());
+    }
+
+    // This function runs a state machine, which will in each frame transition to the next state if specific conditions are met.
+    public Mat executeISStateMachine(Mat currentFrameMat) {
+        long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
+
+        if (currentISState == ISState.INITIALIZING) {
+            // Clean previous data
+            previousFrameMat.release();
+            previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+
+            transitionISSTo(ISState.DETECTING_FRAME);
+            outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
+        }
+
+        if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
+            mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            if (currentISState == ISState.LOADING_FORM)
+                transitionISSTo(ISState.REALIGNING_AFTER_FORM_LOAD);
+        }
+
+        // Compute the points that define the division line
+        Point mid_right = new Point(mid_delim, 0);
+        Point mid_left = new Point(mid_delim, currentFrameMat.height());
+
+        // line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 8);
+
+        // ==== 1) Handle the upper part of the screen:
+        // -- Rotate by 90
+        // -- Detect the transformation
+        // -- Realign
+        // -- Validate the form
+        // -- Rotate back
+
+        Rect screenBox = new Rect(new Point(0, 0), mid_left);
+        Mat screenPart = currentFrameMat.submat(screenBox);
+
+        Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
+        rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+
+        if ((currentISState != ISState.VERIFYING_UI && currentISState != ISState.SUPERVISING_USER_INPUT) || liveCheckbox.isChecked()) { // during "verifying UI", we need to have a still screen
+            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+
+            if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
+                // TODO (Enis):  We should stop refocusing here if we can.
+                transitionISSTo(ISState.VERIFYING_UI);
+            }
+        }
+
+        if (realignCheckbox.isChecked()) {
+            realign_perspective(rotatedScreenPart.getNativeObjAddr());
+        }
+
+        if (currentISState == ISState.DETECTING_FRAME) {
+            if (loadFormBasedOnName(rotatedScreenPart)) { // It is important that this function only returns true if such a form exists!
+                transitionISSTo(ISState.LOADING_FORM);
+            }
+        }
+
+        if (currentISState == ISState.VERIFYING_UI) {
+            if (validateAndPlotForm(rotatedScreenPart, targetForm) || limitAreaCheckbox.isChecked())
+                transitionISSTo(ISState.SUPERVISING_USER_INPUT);
+
+        } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            // TODO continue(ivo): something similar to diff should start happening here!
+
+            // Convert to black and white
+            Mat rotatedScreenPartBW = new Mat(rotatedScreenPart.size(), CvType.CV_8UC1);
+            Imgproc.cvtColor(rotatedScreenPart, rotatedScreenPartBW, Imgproc.COLOR_RGBA2GRAY);
+
+            rotatedScreenPartBW.copyTo(tmpMat);
+
+//            if (previousFrameMat.size() != rotatedScreenPartBW.size() ||
+ //                   previousFrameMat.type() != rotatedScreenPartBW.type())
+
+            if (previousFrameMat.width() == 1)
+                rotatedScreenPartBW.copyTo(previousFrameMat);
+            else {
+                Log.d("AAAA", "OK");
+            }
+
+            compute_diff(rotatedScreenPartBW.getNativeObjAddr(),
+                    previousFrameMat.getNativeObjAddr(),
+                    rotatedScreenPartBW.getNativeObjAddr());
+
+            // Store for the next frame
+            tmpMat.copyTo(previousFrameMat);
+            Imgproc.cvtColor(rotatedScreenPartBW, rotatedScreenPart, Imgproc.COLOR_GRAY2RGBA);
+
+            rotatedScreenPartBW.release();
+        } else {
+            extractAndDisplayTextFromFrame(rotatedScreenPart);
+        }
+
+        rotate270(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
+        rotatedScreenPart.release();
+
+
+
+        // ===== 2) Handle the lower part
+        // -- apply detect_color(human_skin)
+        // TODO: -- apply diff to detect human skin
+        // TODO: -- detect if changes are happening
+        Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
+        Mat handsPart = currentFrameMat.submat(handsBox);
+
+        color_detector(handsPart.getNativeObjAddr(),huePicker.getProgress() / 2, 0);
+
+        // Convert back to 4 channel colors
+        Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
+
+
+
+        // Combine the two parts
+        screenPart.copyTo(currentFrameMat.submat(screenBox));
+        // TODO PERF: I shouldn't be recreating and then releasing, but re-using Mats
+        screenPart.release();
+
+        handsPart.copyTo(currentFrameMat.submat(handsBox));
+        handsPart.release();
+
+        return currentFrameMat;
+    }
+
+
+
+
+
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
 //        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
-        if (currentOutputSelection == OutputSelection.DETECT_HANDS) {
-            long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
-
-            if (setup_needed) {
-                // Clean previous data
-                previousFrameMat.release();
-                previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
-            }
-
-            if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
-                mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
-            }
-
-            // Compute the points that define the division line
-            Point mid_right = new Point(mid_delim, 0);
-            Point mid_left = new Point(mid_delim, currentFrameMat.height());
-
-            // line(currentFrameMat, mid_right, mid_left, new Scalar(255, 0, 0), 8);
-
-            // ==== 1) Handle the upper part of the screen:
-            // -- Rotate by 90
-            // -- Detect the transformation
-            // -- Realign
-            // -- Validate the form
-            // -- Rotate back
-
-            Rect screenBox = new Rect(new Point(0, 0), mid_left);
-            Mat screenPart = currentFrameMat.submat(screenBox);
-
-            Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
-            rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
-
-            // This is a UI-hack: I use "limit" to prevent realigning, mainly for testing
-            if (!limitAreaCheckbox.isChecked())
-                color_detector(rotatedScreenPart.clone().getNativeObjAddr(),color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
-
-            if (realignCheckbox.isChecked())
-                realign_perspective(rotatedScreenPart.getNativeObjAddr());
-
-            if (setup_needed) {
-                if (loadFormBasedOnName(rotatedScreenPart))
-                    setup_needed = false;
-
-                // TODO: We should also stop refocusing if we can.
-            }
-
-            if (liveOCRCheckbox.isChecked()) {
-                if (targetForm != null && targetForm.isLoaded) {
-                    validateAndPlotForm(rotatedScreenPart, targetForm);
-                } else
-                    extractAndDisplayTextFromFrame(rotatedScreenPart);
-            }
-
-
-
-            // TODO PERF: if we need it, implement a faster 270 degree rotation!
-            rotate90(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
-            rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
-            rotate90(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
-
-            rotatedScreenPart.release();
-
-
-
-            // ===== 2) Handle the lower part
-            // -- apply detect_color(human_skin)
-            // TODO: -- apply diff to detect human skin
-            // TODO: -- detect if changes are happening
-            Rect handsBox = new Rect(mid_right, new Point(currentFrameMat.width(), currentFrameMat.height()));
-            Mat handsPart = currentFrameMat.submat(handsBox);
-
-            color_detector(handsPart.getNativeObjAddr(), huePicker.getProgress() / 2, 0);
-            // Convert back to 4 channel colors
-            Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
-
-
-
-            // Combine the two parts
-            screenPart.copyTo(currentFrameMat.submat(screenBox));
-            // TODO PERF: I shouldn't be recreating and then releasing, but re-using Mats
-            screenPart.release();
-
-            handsPart.copyTo(currentFrameMat.submat(handsBox));
-            handsPart.release();
-
-            return currentFrameMat;
+        if (currentOutputSelection == OutputSelection.INTEGRISCREEN) {
+            return executeISStateMachine(currentFrameMat);
         }
 
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
@@ -616,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            if (liveOCRCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
+            if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
                 int hueCenter = color_border_hue / 2;
                 color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
             }
@@ -635,16 +691,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 lower_right = new Point(currentFrameMat.width() - h_edge, currentFrameMat.height() - v_edge);
 
                 Imgproc.rectangle(currentFrameMat, upper_left, lower_right, new Scalar(255, 0, 0), 4);
-            }
-
-            if (liveOCRCheckbox.isChecked()) {
-                if (setup_needed) { // Read formUrl and load it!
-                    if (loadFormBasedOnName(currentFrameMat))
-                        setup_needed = false;
-                }
-
-                if (targetForm != null && targetForm.isLoaded)
-                    validateAndPlotForm(currentFrameMat, targetForm);
             }
 
             return currentFrameMat;
@@ -672,8 +718,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Store for next frame
             tmpMat.copyTo(previousFrameMat);
 
-            // TODO: liveOCRCheckbox might not be the best UI element to toggle this, but it will be OK for now.
-            if (liveOCRCheckbox.isChecked()) { // display the frame around the changes
+            if (liveCheckbox.isChecked()) { // display the frame around the changes
                 Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
@@ -786,4 +831,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
     public native void rotate90(long inputAddr, long outputAddr);
+    public native void rotate270(long inputAddr, long outputAddr);
 }
+

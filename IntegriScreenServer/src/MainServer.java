@@ -58,32 +58,8 @@ public class MainServer extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		String pageId = request.getParameter("page");
-
-
-		String file = request.getParameter("file"); // Retrieves <input type="text" name="description">
-		Part filePart = request.getPart("file"); // Retrieves <input type="file" name="file">
-		//String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
-		//InputStream fileContent = filePart.getInputStream();
-
-		System.out.println(file);
-
-
-		if(pageId == null)
-			response.getWriter().append("ERROR!");
-
-		else
-		{
-			if(!fileString.contains(pageId))
-				response.getWriter().append("The specification for the requested page does not exist");
-
-			else
-			{
-				String jsonData = new String(Files.readAllBytes(new File(pageId + ".json").toPath()), StandardCharsets.UTF_8);
-				response.getWriter().append(jsonData);
-			}
-		}
+			
+		//no get method supported due to the multipart configuration nature of this Servlet
 	}
 
 	/**
@@ -94,21 +70,21 @@ public class MainServer extends HttpServlet {
 
 		//input form
 		String page_type = request.getParameter("page_type");
-
+		
+		System.out.println(page_type);
+		
+		//page response from the browser
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
+			System.out.println("Here");
 			ProcessApplicationForm.processApplicationForm(request, response);
 		}
-		
-		if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
+		//page response from the phone
+		else if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
 		{
 			ProcessApplicationForm.processApplicationFormPhone(request, response);
 		}
-
-		
-		
-		
-
+		//JSON upload and the automated generation of the pages and _specs configurations
 		else
 		{
 			Part filePart = null;
