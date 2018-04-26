@@ -85,8 +85,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     String urlForm_1920_1080 = "https://tinyurl.com/y8uu2r5t";
     String urlForm_1080_960 = "https://tinyurl.com/y7mwg5e3";
 
-    //    String formURL = "http://enis.ulqinaku.com/rs/integri/json.php";
-
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
 
@@ -606,6 +604,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 // TODO (Enis):  We should stop refocusing here if we can.
+                _cameraBridgeViewBase.stopRefocusing();
                 transitionISSTo(ISState.VERIFYING_UI);
 
             }
