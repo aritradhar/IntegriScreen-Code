@@ -41,7 +41,6 @@ public class PageGen {
 
 		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
 		FileWriter fwu = new FileWriter(MainServer.generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
-		FileWriter jsonSpecsFile = new FileWriter(MainServer.generatedLocation + pageFileName + "_specs.json");
 		
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page_id");
@@ -74,9 +73,9 @@ public class PageGen {
 		int vspaceInt = Integer.parseInt(vspace);
 		
 		//container div
-		elementHtmlString.append("<div style=\"height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		elementHtmlString.append("<div style=\"height:" + vspace + "%; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "%; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
 		// green border overlay
-		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
+		elementHtmlString.append("<div style=\"border:" + border_thickness + "% solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
 		
 		int titleCounter = 0;
 		
@@ -109,7 +108,7 @@ public class PageGen {
 					System.exit(1);
 				}
 				
-				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"vh; position:absolute\">" + initialValue + "</h2>\n");
+				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
 				
 				//form action
 				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
@@ -121,7 +120,7 @@ public class PageGen {
 			
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
+				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;height:" + height + "%;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
 			
 			}
 			
@@ -129,30 +128,21 @@ public class PageGen {
 			{
 
 				elementHtmlString.append("<input type=" + type + " name =" + "integriscreen_" + id + " value=\"" + initialValue 
-						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 			
 			else if(type.equalsIgnoreCase("button"))
 			{
-				elementHtmlString.append("<input type=\"submit\" value=\"upload\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;\">");
+				elementHtmlString.append("<input type=\"submit\" value=\"upload\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
 			}
 			
 			else if(type.equalsIgnoreCase("label"))
 			{
-				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
+				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
 			}
 			
 			divCounter++;
 			
-			
-		    Double vert_mul = 100.0 / vspaceInt;
-	        // Convert vspace and height from vh to percentage relative to the green border
-			Double ulc_y_d = Double.parseDouble(ulc_y) * vert_mul;
-			Double height_d = Double.parseDouble(height) * vert_mul;
-			
-			
-			inObject.put("ulc_y", String.valueOf(ulc_y_d));
-			inObject.put("height", String.valueOf(height_d));
 
 		}
 		elementHtmlString.append("</form>\n</div>");
@@ -173,15 +163,11 @@ public class PageGen {
 				+ "input {background: #e1f7d5;}");		
 		fwu.write(htmlFile);  fwu.close();
 		
-		
-		// --- Generate the _specs.json file
-		jsonSpecsFile.write(jObject.toString(2)); jsonSpecsFile.close();
-		
 		System.out.println("Page generated");
 		
 		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
-				"\nJSON spec file => " + urlName + pageFileName + "_specs.json";
+				"\nJSON spec file => " + urlName + pageFileName + ".json";
 		
 	}
 
