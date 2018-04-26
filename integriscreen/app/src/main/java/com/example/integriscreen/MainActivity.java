@@ -367,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
         realign_perspective(matPic.getNativeObjAddr());
+        detect_text(matPic);
 
         //convert Mat to Bitmap
         Bitmap bmpPic = Bitmap.createBitmap(matPic.cols(), matPic.rows(),
@@ -501,15 +502,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private void takePicHighRes() {
         _cameraBridgeViewBase.setPictureSize(0);    // the best quality is set by default for pictures
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String currentDateandTime = sdf.format(new Date());
-
-        String fileName = Environment.getExternalStorageDirectory().getPath() +
-                "/opencv_" + currentDateandTime + ".jpg";
-        Log.d(TAG, "Picture saved in: " + fileName);
-
         Log.d(TAG, "before the takePicture: " + System.currentTimeMillis());
-        _cameraBridgeViewBase.takePicture(fileName, this);
+        _cameraBridgeViewBase.takePicture(this);
     }
     
     public void onDestroy() {

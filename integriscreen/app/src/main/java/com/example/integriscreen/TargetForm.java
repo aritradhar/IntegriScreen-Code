@@ -73,7 +73,7 @@ public class TargetForm {
         timeTurnedActive = 0;
         allElements = null;
         applicationContext = context;
-        submitURL = "";
+        submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
         queue = Volley.newRequestQueue(applicationContext);
         makeJsonObjectRequest(targetUrl);
     }
@@ -199,6 +199,7 @@ public class TargetForm {
 
 
                     pageId = response.getString("page_id");
+                    submitURL += "&pageid=" + pageId; //Todo eu: check if variable is fine
 
                     // Parsing json object response
                     JSONArray JSONElements = response.getJSONArray("elements");
