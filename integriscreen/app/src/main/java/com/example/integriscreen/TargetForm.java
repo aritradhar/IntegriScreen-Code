@@ -198,7 +198,7 @@ public class TargetForm {
                     inner_w = (int)Math.round((double)inner_h * ratio_w / ratio_h);
 
 
-                    pageId = response.getString("page");
+                    pageId = response.getString("page_id");
 
                     // Parsing json object response
                     JSONArray JSONElements = response.getJSONArray("elements");

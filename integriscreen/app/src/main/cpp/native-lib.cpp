@@ -132,20 +132,32 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
          jlong matAddrFirst,
          jlong matAddrSecond,
          jlong matAddrOutput,
-         jlong morphSize)
-{
+         jlong morphSize,
+         jlong downscaleFactor) {
     // When is a pixel considered black, and when white?
     // TODO: 45 seemed like a good threshold for a bit more conservative diff detection
     uchar black_white_threshold = 30;
 
-    Mat &matFirst = *(Mat *) matAddrFirst;
-    Mat &matSecond = *(Mat *) matAddrSecond;
+//    Mat &matA = *(Mat *) matAddrFirst;
+//    Mat &matB = *(Mat *) matAddrSecond;
+    Mat matA, matB;
+    Mat &matAFull = *(Mat *) matAddrFirst;
+    Mat &matBFull = *(Mat *) matAddrSecond;
+
     Mat &matOutput = *(Mat *) matAddrOutput;
 
     Mat matDiff;
 
+    if (downscaleFactor > 1) {
+        pyrDown(matAFull, matA, Size(matAFull.cols / downscaleFactor, matAFull.rows / downscaleFactor));
+        pyrDown(matBFull, matB, Size(matBFull.cols / downscaleFactor, matBFull.rows / downscaleFactor));
+    } else {
+        matAFull.copyTo(matA);
+        matBFull.copyTo(matB);
+    }
+
     // Compute the distance between two frames, apply a threshold.
-    absdiff(matFirst, matSecond, matDiff);
+    absdiff(matA, matB, matDiff);
     threshold(matDiff, matDiff, black_white_threshold, 255, CV_THRESH_BINARY);
 
     /// Apply the specified morphology operation
@@ -154,6 +166,11 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 
     // Morphological opening
     morphologyEx( matDiff, matOutput, MORPH_OPEN, element );
+
+    if (downscaleFactor > 1) {
+        pyrUp(matOutput, matDiff, Size(matA.cols * downscaleFactor, matA.rows * downscaleFactor));
+        matDiff.copyTo(matOutput);
+    }
 
     // Morphological closing. It seems that we can live without it.
     // morphologyEx( blurSecond, blurSecond, MORPH_CLOSE, element );

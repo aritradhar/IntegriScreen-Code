@@ -47,7 +47,9 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -80,14 +82,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int v_border_perc = 47;
     Point upper_left, lower_right;
 
-    int skin_hue_estimate = 22;
+    int skin_hue_estimate = 26;
     int color_border_hue = 120;
 
     // the form created based on specs received from Server
     TargetForm targetForm;
 
-    String urlForm_1920_1080 = "https://tinyurl.com/y8uu2r5t";
-    String urlForm_1080_960 = "https://tinyurl.com/y7mwg5e3";
+    private HashMap<String, String> knownForms;
+    private String formsPrefix = "http://tildem.inf.ethz.ch/generated/";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -198,9 +200,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
         liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
 
+        knownForms = new HashMap<String, String>();
+        // We store without spaces to prevent problems with whitespace in OCR
+        knownForms.put("ComposeEmail1920x1080", "email_1920_1080_specs.json");
+        knownForms.put("ComposeEmail1080x960", "email_1080_960_specs.json");
+        knownForms.put("ComposeEmail", "email_specs.json");
+
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
@@ -423,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             long height = Math.round(element.box.height * frame_h / (double)form.resolution);
 
             // --- Add offsets ---
-            long offset = 8; // Offset to ensure that OCR does not fail due to tight limits on rectangles
+            long offset = 0; // Offset to ensure that OCR does not fail due to tight limits on rectangles
             Point P1 = new Point(
                     Math.min(Math.max(x - offset, 0), currentFrameMat.width() - 1),   // make sure that it is between 0 and currentFrameMat.height() and currentFrameMat.width()
                     Math.min(Math.max(y - offset, 0), currentFrameMat.height() - 1));
@@ -564,14 +571,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         formToLoad = formToLoad.replaceAll("\\s+","");
-        if (formToLoad.equals("ComposeEmail1920x1080")) {
-            targetForm = new TargetForm(getApplicationContext(), urlForm_1920_1080, this);
-        } else if (formToLoad.equals("ComposeEmail1080x960")) {
-            targetForm = new TargetForm(getApplicationContext(), urlForm_1080_960, this);
+        String urlToLoad = knownForms.get(formToLoad);
+        if (urlToLoad != null) {
+            targetForm = new TargetForm(getApplicationContext(), formsPrefix + urlToLoad, this);
+            outputOnToast("Loading form: " + formToLoad);
         } else
             return false;
 
-        outputOnToast("Loading form: " + formToLoad);
         return true;
     }
 
@@ -622,7 +628,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         compute_diff(handsPart.getNativeObjAddr(),
                 previousFrameMat2.getNativeObjAddr(),
                 handsPart.getNativeObjAddr(),
-                2);
+                2, 1);
 
         // This is where we start computing the components
         Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
@@ -685,7 +691,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             compute_diff(rotatedUpperPartBW.getNativeObjAddr(),
                     previousFrameMat.getNativeObjAddr(),
                     rotatedUpperPartBW.getNativeObjAddr(),
-                    1);
+                    2, 1);
 
             // Store for the next frame
             tmpMat.copyTo(previousFrameMat);
@@ -873,13 +879,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             tmpMat.copyTo(currentFrameMat);
 
-            if (previousFrameMat.width() == 1)
+            if (!previousFrameMat.size().equals(currentFrameMat.size()) ||
+                    previousFrameMat.type() != currentFrameMat.type())
                 currentFrameMat.copyTo(previousFrameMat);
 
             compute_diff(currentFrameMat.getNativeObjAddr(),
                     previousFrameMat.getNativeObjAddr(),
                     currentFrameMat.getNativeObjAddr(),
-                    1);
+                    2, 2);
 
             // Store for next frame
             tmpMat.copyTo(previousFrameMat);
@@ -992,7 +999,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return textConcat;
     }
 
-    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize);
+    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
     public native void realign_perspective(long inputAddr);
