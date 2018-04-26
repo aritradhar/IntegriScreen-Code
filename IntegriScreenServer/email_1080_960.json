@@ -1,11 +1,11 @@
 {
   "ratio": "1080:960",
   "vspace": "80",
-  "page_id": "email",
+  "page_id": "email_960",
   "border_thickness":"1",
   "font_family": "'Verdana', sans-serif",
   "letter_spacing": "normal",
-  "form_action":"/action_page.php",
+  "form_action":"/IntegriScreenServer/MainServer",
   "elements": [
     {
       "id": "form_title",
