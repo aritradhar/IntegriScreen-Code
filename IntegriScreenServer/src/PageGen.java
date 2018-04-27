@@ -70,6 +70,7 @@ public class PageGen {
 		
 
 		double padding_perc = 1; // we pad all elements with 1% space by default!
+		String page_title_h2 = null;
 
 		for(int i = 0; i < elements.length(); i++)
 		{
@@ -101,6 +102,7 @@ public class PageGen {
 				}
 
 				elementHtmlString.append("<h2 style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
+				page_title_h2 = initialValue;
 
 				//form action
 				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
@@ -168,7 +170,7 @@ public class PageGen {
 		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
 		//		"\nJSON file => " + urlDataName + pageFileName + ".json";
 		
-		return new String[] {pageFileName, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};
+		return new String[] {pageFileName, page_title_h2, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};
 		
 	}
 

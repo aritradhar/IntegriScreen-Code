@@ -40,15 +40,19 @@ public class ProcessApplicationForm {
 	public static void processApplicationForm(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pageID = request.getParameter("page_id");
+		System.out.println("Page id : " + pageID);
 		Enumeration<String> params = request.getParameterNames();
 		
 		HashMap<String, String> KVPair = new HashMap<>();
 		
+		System.out.println("--- Parameters from browser form ---");
 		while(params.hasMoreElements())
 		{
 			String key = params.nextElement();
 			KVPair.put(key, request.getParameter(key));
+			System.out.println("Key: " + key + " | value: " + request.getParameter(key));
 		}
+		System.out.println("--------");
 		
 		
 		data.put(pageID, KVPair);
@@ -69,7 +73,7 @@ public class ProcessApplicationForm {
 		
 		if(!data.containsKey(page_id))
 		{
-			response.getWriter().write("{\"Response\" : \"No data yet!\"");
+			response.getWriter().write("{\"Response\" : \"null\"}");
 		}
 		else
 		{
@@ -99,7 +103,11 @@ public class ProcessApplicationForm {
 			}
 			
 			if(match)
-				responseBuffer.append("{\"Response\":\"Match\"");
+			{
+				responseBuffer.append("{\"Response\":\"match\"}");
+				System.out.println("Page data removed from map");
+				data.remove(page_id);
+			}
 			
 			response.getWriter().write(responseBuffer.toString());
 			response.flushBuffer();

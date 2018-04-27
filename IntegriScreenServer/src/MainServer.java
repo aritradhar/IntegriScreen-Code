@@ -73,17 +73,18 @@ public class MainServer extends HttpServlet {
 		//input form
 		String page_type = request.getParameter("page_type");
 		
-		System.out.println(page_type);
+		//System.out.println(page_type);
 		
 		//page response from the browser
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
-			System.out.println("Here");
+			System.out.println("Got a browser form");
 			ProcessApplicationForm.processApplicationForm(request, response);
 		}
 		//page response from the phone
 		else if(page_type!= null && page_type.equalsIgnoreCase("mobile_form"))
 		{
+			System.out.println("Got a mobile form");
 			ProcessApplicationForm.processApplicationFormPhone(request, response);
 		}
 		//JSON upload and the automated generation of the pages and _specs configurations
@@ -154,7 +155,6 @@ public class MainServer extends HttpServlet {
 						fileString.add(file.getName().replaceAll(".json", ""));
 				}
 
-				StringBuffer logs = new StringBuffer();
 				JSONObject outJson = new JSONObject();
 				JSONArray jarray = new JSONArray();
 				int counter = 0;
@@ -165,9 +165,10 @@ public class MainServer extends HttpServlet {
 					
 					JSONObject inJson = new JSONObject();
 					inJson.put("form_id", out[0]);
-					inJson.put("json", out[1]);
-					inJson.put("html", out[2]);
-					inJson.put("unicorn", out[3]);
+					inJson.put("page_title", out[1]);
+					inJson.put("json", out[2]);
+					inJson.put("html", out[3]);
+					inJson.put("unicorn", out[4]);
 					jarray.put(counter++, inJson);
 				}
 				outJson.put("response", jarray);
