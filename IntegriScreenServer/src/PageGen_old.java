@@ -7,29 +7,23 @@ import java.nio.file.Files;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
-
 public class PageGen {
 	public static void main(String[] args) throws IOException {
-		// This will load data/NAME.json as input and generate generated/NAME.html as output
+		// This will load email.json as input and generate email.html as output
 		pageGen("email_1080_960");
 		pageGen("email_1920_1080");
-		pageGen("hard_form");
-		pageGen("medium_form");
-		pageGen("easy_form");
 	}
 
 	public static String pageGen(String pageFileName) throws IOException
 	{
-		String generatedLocation = "./generated/";
-		String jsonData = new String(Files.readAllBytes(new File("./data/" + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
-		String htmlFile = new String(Files.readAllBytes(new File("./data/template.txt").toPath()), StandardCharsets.UTF_8);
+		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
+		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
 
-		System.out.println("Opening File: " + pageFileName + ".html");
+		System.out.println("Opening File: " + MainServer.location + pageFileName + ".html");
 
 
-		FileWriter fw = new FileWriter(generatedLocation + pageFileName + ".html");
-		FileWriter fwu = new FileWriter(generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
+		FileWriter fwu = new FileWriter(MainServer.generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
 
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page_id");
@@ -67,9 +61,6 @@ public class PageGen {
 		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
 
 		int titleCounter = 0;
-		
-
-		double padding_perc = 1; // we pad all elements with 1% space by default!
 
 		for(int i = 0; i < elements.length(); i++)
 		{
@@ -80,9 +71,9 @@ public class PageGen {
 			String initialValue = inObject.getString("initialvalue");
 			String ulc_x = inObject.getString("ulc_x");
 			String ulc_y = inObject.getString("ulc_y");
-					
-			double width = inObject.getDouble("width") - 2 * padding_perc;
-			double height = inObject.getDouble("height") - 2 * padding_perc;
+
+			String width = inObject.getString("width");
+			String height = inObject.getString("height");
 
     		String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
     		String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
@@ -120,7 +111,7 @@ public class PageGen {
 			{
 
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue
-						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 
 			else if(type.equalsIgnoreCase("button"))
@@ -162,7 +153,7 @@ public class PageGen {
 
 		System.out.println("Page generated");
 
-		String urlName = generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
+		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" +
 				"\nJSON spec file => " + urlName + pageFileName + ".json";
 

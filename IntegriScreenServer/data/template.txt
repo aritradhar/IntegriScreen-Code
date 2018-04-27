@@ -23,10 +23,11 @@ textarea {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
+    padding: 1% 1%;
 }
 
-label, textarea, input {
-    padding: 5px 10px;
+label, textarea, input, button {	
+    padding: 1% 1%;
     -moz-user-select: none;
     user-select: none;
     caret-color: transparent;
