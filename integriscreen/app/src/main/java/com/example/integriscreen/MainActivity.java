@@ -365,25 +365,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
+        Mat origMatPic = matPic.clone();
+        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
         color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
         realign_perspective(matPic.getNativeObjAddr());
-        detect_text(matPic);
-
-        //convert Mat to Bitmap
-        Bitmap bmpPic = Bitmap.createBitmap(matPic.cols(), matPic.rows(),
-                Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(matPic, bmpPic);
-        storePic(bmpPic, "_mat");
+        rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
+//        Log.d("TextDetection", "Detected: " + concatTextBlocks(detect_text(matPic)));
+        Log.d("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
+        storePic(matPic, "_mat");
     }
 
     private void storePic(byte[] data, String extension) {
         // Write the image in a file (in jpeg format)
         try {
             Log.d(TAG, "Saving byte[] to file");
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
             String fileName = Environment.getExternalStorageDirectory().getPath()
                     + "/DCIM/integriscreen" +
-                    "/opencv_" + sdf.format(new Date()) + extension + ".jpg";
+                    "/IS_" + sdf.format(new Date()) + extension + ".jpg";
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(data);
             fos.close();
@@ -393,17 +392,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void storePic(Bitmap finalBitmap, String extension) {
+    private void storePic(Mat mat, String extension) {
+
+        //convert Mat to Bitmap
+        Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
+                Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmpPic);
+
         // Write the image in a file (in jpeg format)
         try {
             Log.d(TAG, "Saving bitmap to file");
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
             String fileName = Environment.getExternalStorageDirectory().getPath()
                     + "/DCIM/integriscreen" +
-                    "/opencv_" + sdf.format(new Date()) + extension + ".jpg";
+                    "/IS_" + sdf.format(new Date()) + extension + ".jpg";
             FileOutputStream fos = new FileOutputStream(fileName);
 //            fos.write(data);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            bmpPic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();
 
@@ -663,6 +668,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentISState == ISState.VERIFYING_UI) {
             if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
                 submitDataClicked = false;
+                // storePic(rotatedUpperPart, "_UIVerified");
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
             }
 
