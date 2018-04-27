@@ -19,17 +19,17 @@ public class PageGen {
 		pageGen("easy_form");
 	}
 
-	public static String pageGen(String pageFileName) throws IOException
+	public static String[] pageGen(String pageFileName) throws IOException
 	{
-		String generatedLocation = "./generated/";
-		String jsonData = new String(Files.readAllBytes(new File("./data/" + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
-		String htmlFile = new String(Files.readAllBytes(new File("./data/template.txt").toPath()), StandardCharsets.UTF_8);
+		// String generatedLocation = "./generated/";
+		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
+		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
 
 		System.out.println("Opening File: " + pageFileName + ".html");
 
 
-		FileWriter fw = new FileWriter(generatedLocation + pageFileName + ".html");
-		FileWriter fwu = new FileWriter(generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
+		FileWriter fwu = new FileWriter(MainServer.generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
 
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page_id");
@@ -161,11 +161,15 @@ public class PageGen {
 		fwu.write(htmlFile);  fwu.close();
 
 		System.out.println("Page generated");
-
-		String urlName = generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
-		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" +
-				"\nJSON spec file => " + urlName + pageFileName + ".json";
-
+		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
+		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
+		
+		
+		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
+		//		"\nJSON file => " + urlDataName + pageFileName + ".json";
+		
+		return new String[] {pageFileName, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};
+		
 	}
 
 }

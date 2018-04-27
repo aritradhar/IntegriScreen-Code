@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Servlet implementation class MainServer
@@ -153,14 +155,24 @@ public class MainServer extends HttpServlet {
 				}
 
 				StringBuffer logs = new StringBuffer();
+				JSONObject outJson = new JSONObject();
+				JSONArray jarray = new JSONArray();
+				int counter = 0;
 				for(String pageFileName:fileString)
 				{
-					String out = PageGen.pageGen(pageFileName);
+					String[] out = PageGen.pageGen(pageFileName);
 					System.out.println("Generated : " + pageFileName);
-					logs.append(out + "\n");
+					
+					JSONObject inJson = new JSONObject();
+					inJson.put("form_id", out[0]);
+					inJson.put("json", out[1]);
+					inJson.put("html", out[2]);
+					inJson.put("unicorn", out[3]);
+					jarray.put(counter++, inJson);
 				}
+				outJson.put("response", jarray);
 
-				response.getWriter().append(logs.toString());
+				response.getWriter().append(outJson.toString(1));
 			}
 		}
 	}
