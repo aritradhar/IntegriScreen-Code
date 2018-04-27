@@ -13,7 +13,7 @@ import org.json.JSONObject;
 //Beautiful Life Specialist														  	* *
 //ETH Zurich													   				    * *
 //Zurich, Switzerland															    * *
-//--------------------------------------------------------------------------------- * * 
+//--------------------------------------------------------------------------------- * *
 ///////////////////////////////////////////////// 									* *
 //This program is meant to do world domination... 									* *
 ///////////////////////////////////////////////// 									* *
@@ -27,43 +27,45 @@ import org.json.JSONObject;
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load email.json as input and generate email.html as output
+		// pageGen("email");
 		pageGen("email_1080_960");
 		pageGen("email_1920_1080");
+		pageGen("hard_form");
+		pageGen("medium_form");
+		pageGen("easy_form");
+
 	}
 
-	public static void pageGen(String pageFileName) throws IOException
+	public static String pageGen(String pageFileName) throws IOException
 	{
-		String jsonData = new String(Files.readAllBytes(new File(pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
-		String htmlFile = new String(Files.readAllBytes(new File("template.txt").toPath()), StandardCharsets.UTF_8);
-		
+		String generatedLocation = "./generated/";
+		String jsonData = new String(Files.readAllBytes(new File("./data/" + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
+		String htmlFile = new String(Files.readAllBytes(new File("./data/template.txt").toPath()), StandardCharsets.UTF_8);
+
 		System.out.println("Opening File: " + pageFileName + ".html");
-		
-		String genFolder = "./generated/";
-		FileWriter fw = new FileWriter(genFolder + pageFileName + ".html");
-		FileWriter fwu = new FileWriter(genFolder + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
-		FileWriter jsonSpecsFile = new FileWriter(genFolder + pageFileName + "_specs.json");
-		
+
+
+		FileWriter fw = new FileWriter(generatedLocation + pageFileName + ".html");
+		FileWriter fwu = new FileWriter(generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+
 		JSONObject jObject = new JSONObject(jsonData);
-		String pageName = jObject.getString("page");
+		String pageName = jObject.getString("page_id");
 		String ratioString = jObject.getString("ratio");
 		String ratioHeight = ratioString.split(":")[0];
 		int heightInt = Integer.parseInt(ratioHeight);
 		String ratioWidth = ratioString.split(":")[1];
 		int widthInt = Integer.parseInt(ratioWidth);
 		String form_action = jObject.getString("form_action");
-		
+
 		String border_thickness = jObject.getString("border_thickness");
-		
+
 		String global_font = jObject.getString("font_family");
 		String font_spacing = jObject.getString("letter_spacing");
-		
-		System.out.println(htmlFile.contains("!!page_name!!"));
-		htmlFile = htmlFile.replaceAll("!!page_name!!", pageName).replaceAll("!!height!!", ratioHeight).replaceAll("!!width!!", ratioWidth);
-		
-	
+
+
 		JSONArray elements = jObject.getJSONArray("elements");
-		
-		
+
+
 		/*
 		 * Subject:<br>
   		<input type="text" name="subject" value="Bla Bla">
@@ -72,17 +74,20 @@ public class PageGen {
 		 */
 		int divCounter = 1;
 		StringBuffer elementHtmlString = new StringBuffer();
-		
+
 		String vspace = jObject.getString("vspace");
 		int vspaceInt = Integer.parseInt(vspace);
-		
+
 		//container div
 		elementHtmlString.append("<div style=\"height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
 		// green border overlay
 		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
-		
+
 		int titleCounter = 0;
 		
+
+		double padding_perc = 1; // we pad all elements with 1% space by default!
+
 		for(int i = 0; i < elements.length(); i++)
 		{
 			JSONObject inObject = elements.getJSONObject(i);
@@ -92,16 +97,18 @@ public class PageGen {
 			String initialValue = inObject.getString("initialvalue");
 			String ulc_x = inObject.getString("ulc_x");
 			String ulc_y = inObject.getString("ulc_y");
-			
-			String width = inObject.getString("width");
-			String height = inObject.getString("height");
-			
-            String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
-            String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
-			
-			System.out.println(id);
-			
 					
+			double width = inObject.getDouble("width") - 2 * padding_perc;
+			double height = inObject.getDouble("height") - 2 * padding_perc;
+
+    		String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
+    		String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
+
+    		String maxInputChars = inObject.has("maxlength") ? inObject.getString("maxlength") : "30";
+
+			System.out.println(id);
+
+
 			if(type.equalsIgnoreCase("title"))
 			{
 				if(titleCounter == 1)
@@ -109,70 +116,73 @@ public class PageGen {
 					System.err.println("Error! More than 1 HTML title. Exiting");
 					System.exit(1);
 				}
-				
-				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"vh; position:absolute\">" + initialValue + "</h2>\n");
-				
+
+				elementHtmlString.append("<h2 style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
+
 				//form action
-				elementHtmlString.append("<form action=\""+ form_action + "\">");
+				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
+				//hidden data
+				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_type" + "\" value=\""+ "input_form" + "\"/>");
+				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_id" + "\" value=\""+ pageName + "\"/>");
 				titleCounter++;
 			}
-			
+
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;height:" + height + "vh;width:" + width + "%;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
-			
+				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;height:" + height + "%;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
+
 			}
-			
+
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
-						+ "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue
+						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
-			
+
+			else if(type.equalsIgnoreCase("button"))
+			{
+				elementHtmlString.append("<input type=\"submit\" value=\"" + initialValue + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+			}
+
+			else if(type.equalsIgnoreCase("checkbox"))
+			{
+				elementHtmlString.append("<input type=\"checkbox\"  name =\"" + id + "\" value=\"" + id + "\" style=\"height:" + height + "%;width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+			}
+
 			else if(type.equalsIgnoreCase("label"))
 			{
-
-				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "vh;position:absolute;font-family:1em" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
+				elementHtmlString.append("<label style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
 			}
-			
+
 			divCounter++;
-			
-			
-		    Double vert_mul = 100.0 / vspaceInt;
-	        // Convert vspace and height from vh to percentage relative to the green border
-			Double ulc_y_d = Double.parseDouble(ulc_y) * vert_mul;
-			Double height_d = Double.parseDouble(height) * vert_mul;
-			
-			
-			inObject.put("ulc_y", String.valueOf(ulc_y_d));
-			inObject.put("height", String.valueOf(height_d));
+
 
 		}
 		elementHtmlString.append("</form>\n</div>");
 
-		htmlFile.replaceAll("!!font!!", global_font);
-		htmlFile.replaceAll("!!letter_spacing!!", font_spacing);
-		
-		// ----- Generate the main .html file		
+		htmlFile = htmlFile.replaceAll("!!font!!", global_font);
+		htmlFile = htmlFile.replaceAll("!!letter_spacing!!", font_spacing);
+
+		// ----- Generate the main .html file
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
 		// Write out both files
 		fw.write(htmlFile);    fw.close();
-		
-		// ----- Generate the _unicorn.html file		
+
+		// ----- Generate the _unicorn.html file
 		// Add the additional styling to make the UI elements colored
 		htmlFile = htmlFile.replaceAll("<!--place-for-unicorn-styling-->",
 				"label {background: #ffbdbd;} "
 				+ "h1, h2, h3, h4, h5, h6 {background: #c9c9ff;}"
-				+ "input {background: #e1f7d5;}");		
+				+ "input {background: #e1f7d5;}");
 		fwu.write(htmlFile);  fwu.close();
-		
-		
-		// --- Generate the _specs.json file
-		jsonSpecsFile.write(jObject.toString(2)); jsonSpecsFile.close();
-		
+
 		System.out.println("Page generated");
-		
+
+		String urlName = generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
+		return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" +
+				"\nJSON spec file => " + urlName + pageFileName + ".json";
+
 	}
 
 }
