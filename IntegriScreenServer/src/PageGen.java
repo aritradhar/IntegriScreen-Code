@@ -127,7 +127,7 @@ public class PageGen {
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type=" + type + " name =" + "integriscreen_" + id + " value=\"" + initialValue 
+				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue 
 						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 			
