@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -49,7 +47,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -80,13 +77,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
     private int v_border_perc = 47;
-    Point upper_left, lower_right;
+    private Point upper_left, lower_right;
 
-    int skin_hue_estimate = 26;
-    int color_border_hue = 120;
+    private int skin_hue_estimate = 26;
+    private int color_border_hue = 120;
 
     // the form created based on specs received from Server
-    TargetForm targetForm;
+    private TargetForm targetForm;
 
     private HashMap<String, String> knownForms;
     private String formsPrefix = "http://tildem.inf.ethz.ch/generated/";
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CustomCameraView _cameraBridgeViewBase;
 
     // TextRecognizer is the native vision API for text extraction
-    TextRecognizer textRecognizer;
+    private TextRecognizer textRecognizer;
 
 
     private enum ISState { INITIALIZING,          // Set up global vars, etc.
@@ -109,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     EVERYTHING_OK,         // Tell the user that everything is OK
                                     DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
-    ISState currentISState;
+    private ISState currentISState;
     boolean submitDataClicked;
     boolean activityDetected;
 
@@ -262,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
+                    Log.d("TAG", "Permission granted");
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -424,27 +422,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
 
-            // TODO: determine the area where to draw this.
-            int frame_h = currentFrameMat.height();
-//            int frame_w = currentFrameMat.width();
-            // TODO: it could happen in some cases that this gives us too large width!
-            int frame_w = (int)Math.round(frame_h * form.ratio_w / (double)form.ratio_h);
-
-            long x = Math.round(element.box.x * frame_w / (double)form.resolution);
-            long y = Math.round(element.box.y * frame_h / (double)form.resolution);
-            long width = Math.round(element.box.width * frame_w / (double)form.resolution);
-            long height = Math.round(element.box.height * frame_h / (double)form.resolution);
-
-            // --- Add offsets ---
-            long offset = 0; // Offset to ensure that OCR does not fail due to tight limits on rectangles
-            Point P1 = new Point(
-                    Math.min(Math.max(x - offset, 0), currentFrameMat.width() - 1),   // make sure that it is between 0 and currentFrameMat.height() and currentFrameMat.width()
-                    Math.min(Math.max(y - offset, 0), currentFrameMat.height() - 1));
-            Point P2 = new Point(
-                    Math.min(x + width + offset, currentFrameMat.width()),   // prevent overflows
-                    Math.min(y + height + offset, currentFrameMat.height()));
-
-            String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(new Rect(P1, P2)));
+            Log.d("box: ", element.box.toString() + "|" + currentFrameMat.size());
+            String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(element.box));
 
             Scalar rectangle_color;
             if (detected.equals(element.defaultVal)) {
@@ -453,14 +432,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 rectangle_color = new Scalar( 255, 0, 0);
                 // Output the text on the UI elements
                 int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
-                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(x, y + textHeight + 20),
+                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(element.box.x, element.box.y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
 
                 allElementsAsExpected = false;
             }
 
             // Plot the borders of the UI elements
-            Imgproc.rectangle(currentFrameMat, P1, P2, rectangle_color, 4);
+            Imgproc.rectangle(currentFrameMat, element.box.tl(), element.box.br(), rectangle_color, 4);
         }
 
         return allElementsAsExpected;
@@ -559,20 +538,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         src_blurred.release();
     }
 
-    public boolean loadFormBasedOnName(Mat currentFrameMat) {
-        Rect formTitleBox = new Rect(0, 0, currentFrameMat.width() / 2, currentFrameMat.height() / 8); // about 15%
+    // this one will probably be of size 1080 / 960 -> since the form needs to know how much height it is allowed to take
+    public boolean loadFormBasedOnName(Mat rotatedUpperFrameMat, int maxScreenHeight) {
+        Rect formTitleBox = new Rect(0, 0, rotatedUpperFrameMat.width() / 2, rotatedUpperFrameMat.height() / 8); // about 15%
 
-        Imgproc.rectangle(currentFrameMat, formTitleBox.tl(), formTitleBox.br(), new Scalar(255, 0, 0), 4);
+        Imgproc.rectangle(rotatedUpperFrameMat, formTitleBox.tl(), formTitleBox.br(), new Scalar(255, 0, 0), 4);
 
-        // TODO: we should probably implement this by loading a list of forms from some static address
         // At the moment we are strongly and implicitly!!! hardcoding the values "string -> URL"
-        String formToLoad = concatTextBlocks(detect_text(currentFrameMat.submat(formTitleBox)));
-
+        String formToLoad = concatTextBlocks(detect_text(rotatedUpperFrameMat.submat(formTitleBox)));
 
         formToLoad = formToLoad.replaceAll("\\s+","");
+        // TODO: we should probably implement this by loading a list of forms from some static address instead of having a static HashMap
         String urlToLoad = knownForms.get(formToLoad);
         if (urlToLoad != null) {
-            targetForm = new TargetForm(getApplicationContext(), formsPrefix + urlToLoad, this);
+            Log.d("box: curr: ", rotatedUpperFrameMat.size().toString());
+            targetForm = new TargetForm(getApplicationContext(), formsPrefix + urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
             outputOnToast("Loading form: " + formToLoad);
         } else
             return false;
@@ -762,7 +742,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentISState == ISState.DETECTING_FRAME) {
-            if (loadFormBasedOnName(rotatedScreenPart)) { // It is important that this function only returns true if such a form exists!
+            if (loadFormBasedOnName(rotatedScreenPart, currentFrameMat.width())) { // It is important that this function only returns true if such a form exists!
                 transitionISSTo(ISState.LOADING_FORM);
             }
         }
@@ -797,7 +777,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
-            mid_delim = Math.round((double) currentFrameMat.height() * targetForm.ratio_h / targetForm.ratio_w);
+            mid_delim = Math.round((double) currentFrameMat.height() * targetForm.form_ratio_h / targetForm.form_ratio_w);
             if (currentISState == ISState.LOADING_FORM)
                 transitionISSTo(ISState.REALIGNING_AFTER_FORM_LOAD);
         }

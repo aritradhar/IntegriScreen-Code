@@ -4,17 +4,12 @@ package com.example.integriscreen;
 
 import org.opencv.core.Rect;
 
-import java.util.ArrayList;
-
-/**
- * Created by eulqinaku on 11/04/2018.
- */
 
 public class UIElement {
     public String id;
     public String editable;      // 0-No, 1-Yes, 2-Enumerate
     public String type;         // label, textbox, radio, checkbox, textarea
-    Rect box;              // location of the UI in the screen
+    Rect box;                   // location of the UI on the screen, in apsolute coordinates!
     public String defaultVal;   // default value of the UI element
     public String currentVal;   // current value of the UI element extracted through OCR
     public boolean found;       // true if the UI element is found on the screen through OCR

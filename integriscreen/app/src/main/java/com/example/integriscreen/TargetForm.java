@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -20,22 +19,18 @@ import org.json.JSONObject;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by eulqinaku on 11/04/2018.
- */
 
 public class TargetForm {
     private String TAG = "TargetForm";
-    Context applicationContext;
+    private Context applicationContext;
     public String formUrl;
 
     // Instantiate the RequestQueue.
-    RequestQueue queue;
+    private RequestQueue queue;
 
     // store UI elements
     public ArrayList<UIElement> allElements;
@@ -45,15 +40,11 @@ public class TargetForm {
     public double timeTurnedActive;
 
     // This defines the max values of the coordinates
-    public int resolution = 10000;
-
-    public int inner_h, inner_w;
-    public int border;
+    public int resolution = 100;
 
     // form ratio
-    public int ratio_w, ratio_h;
+    public int form_ratio_w, form_ratio_h;
 
-    public int horizontal_denom;
     // form page id
     public String pageId;
 
@@ -63,14 +54,19 @@ public class TargetForm {
     private String submitURL;
 
     private OnDataLoadedEventListener parentActivity;
+    public int form_w_abs, form_h_abs;  // the total amount of space available to draw the form
+    public int maxScreenH;
 
-    public TargetForm(Context context, String targetUrl, OnDataLoadedEventListener parent) {
+    public TargetForm(Context context, String targetUrl, int screenWidth, int maxScreenHeight, OnDataLoadedEventListener parent) {
         parentActivity = parent;
         pageId = "";
         formUrl = targetUrl;
         isLoaded = false;
         activEl = "";
         timeTurnedActive = 0;
+        form_w_abs = screenWidth;
+        // form_h_abs can not yet be computed -> we need to find out the form ratio first.
+        maxScreenH = maxScreenHeight;
         allElements = null;
         applicationContext = context;
         submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
@@ -152,6 +148,8 @@ public class TargetForm {
         allElements.set(index, element);
     }
 
+    // if X is < low, return low, if larger than high, return high
+    private long limitLowHigh(long x, long low, long high) { return Math.min(Math.max(x, low), high); }
 
     public String toString() {
         String outputString = "formUrl: " + formUrl;
@@ -184,18 +182,11 @@ public class TargetForm {
                     String ratio = response.getString("ratio");
 
                     String[] parts = ratio.split(":");  // ATM 3:2 means width:height
-                    ratio_w = Integer.parseInt(parts[0]);
-                    ratio_h = Integer.parseInt(parts[1]);
+                    form_ratio_w = Integer.parseInt(parts[0]);
+                    form_ratio_h = Integer.parseInt(parts[1]);
 
-                    // TODO: sto su stvarni ratio_w i ratio_h
-
-                    // This is a factor by which I multiply all values that are based on vx or percentages
-                    int res_scale = resolution / 100;
-
-                    // vspace and border are in the same unit!
-                    inner_h = res_scale * response.getInt("vspace");
-                    border = res_scale * response.getInt("border_thickness");
-                    inner_w = (int)Math.round((double)inner_h * ratio_w / ratio_h);
+                    form_h_abs = Math.min((int)Math.round(form_w_abs * form_ratio_h / (double) form_ratio_w),
+                                            maxScreenH);  // this one we compute based on the form ratios
 
 
                     pageId = response.getString("page_id");
@@ -207,46 +198,35 @@ public class TargetForm {
 
                     allElements = new ArrayList<UIElement>();
 
-                    // iterate through all elements
+                    // iterate through all elements, compute their absolute coordinates
                     for (int i = 0; i < JSONElements.length(); i++) {
-                        JSONObject tmpObject = JSONElements.getJSONObject(i);
-//                        Log.d(TAG, "Parsing JSONObject: " + tmpObject.toString());
-                        String id = tmpObject.getString("id");
-                        String editable = tmpObject.getString("editable");
-                        String type = tmpObject.getString("type");
+                        JSONObject currEl = JSONElements.getJSONObject(i);
+//                        Log.d(TAG, "Parsing JSONObject: " + currEl.toString());
+                        String id = currEl.getString("id");
+                        String editable = currEl.getString("editable");
+                        String type = currEl.getString("type");
 
-                        String defaultVal = tmpObject.getString("initialvalue");
+                        String defaultVal = currEl.getString("initialvalue");
 
-                        double x1 = res_scale * tmpObject.getDouble("ulc_x");
-                        double y1 = res_scale * tmpObject.getDouble("ulc_y");
-                        double w1 = res_scale * tmpObject.getDouble("width");
-                        double h1 = res_scale * tmpObject.getDouble("height");
-
-                        /*
-                        // Coefficients to convert from the coordinate system in which (0,0) is in
-                        //   the internal corner of the green border to the coord. system
-                        //   in which (0, 0) is in the external corner of the green border.
-                        double x_coef = ((double)border + inner_w) / (2 * border + inner_w);
-                        // delta values need to be in percentages
-                        double x_delta = (double)100 * res_scale * border / (2 * border + inner_w);
-                        double y_coef = ((double)border + inner_h) / (2 * border + inner_h);;
-                        double y_delta = (double)100 * res_scale * border / (2 * border + inner_h);
-                        double w_coef = (double)inner_w / (2 * border + inner_w);
-                        double h_coef = (double)inner_h / (2 * border + inner_h);
-
-                        int x = (int)Math.round(x_delta + x1 * x_coef);
-                        int y = (int)Math.round(y_delta + y1 * y_coef) ;
-                        int h = (int)Math.round(h1 * h_coef);
-                        int w = (int)Math.round(w1 * w_coef);
-*/
-                        int x = (int)Math.round(x1);
-                        int y = (int)Math.round(y1) ;
-                        int h = (int)Math.round(h1);
-                        int w = (int)Math.round(w1);
+                        long a_x1 = Math.round(currEl.getDouble("ulc_x") * form_w_abs / (double)resolution);
+                        long a_y1 = Math.round(currEl.getDouble("ulc_y") * form_h_abs / (double) resolution);
+                        long a_width = Math.round(currEl.getDouble("width") * form_w_abs / (double) resolution);
+                        long a_height = Math.round(currEl.getDouble("height") * form_h_abs / (double) resolution);
+                        long a_x2 = a_x1 + a_width;
+                        long a_y2 = a_y1 + a_height;
 
 
-                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(x, y, w, h), defaultVal);
-                        Log.d(TAG, tmpElement.toString());
+                        // --- If needed, add offsets ---
+                        long offset = 0; // Offset to ensure that OCR does not fail due to tight limits on rectangles
+                        a_x1 = limitLowHigh(a_x1 - offset, 0, form_w_abs-1);
+                        a_y1 = limitLowHigh(a_y1 - offset, 0, form_h_abs -1);
+                        a_x2 = limitLowHigh(a_x1 + a_width + offset, a_x1+1, form_w_abs);   // prevent overflows
+                        a_y2 = limitLowHigh(a_y1 + a_height + offset, a_y1+1 , form_h_abs);   // prevent overflows
+
+
+
+                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(new Point(a_x1, a_y1), new Point(a_x2, a_y2)), defaultVal);
+                        Log.d(TAG+" parsed element: ", tmpElement.toString());
 
                         // add the element in the arraylist of all UI elements
                         allElements.add(tmpElement);
