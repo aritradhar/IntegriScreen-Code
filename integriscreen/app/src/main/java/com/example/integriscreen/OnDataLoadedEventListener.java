@@ -1,5 +1,7 @@
 package com.example.integriscreen;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 public interface OnDataLoadedEventListener{
@@ -7,4 +9,6 @@ public interface OnDataLoadedEventListener{
 
     // callback when picture is taken
     public void onPicTaken(byte[] data);
+
+    public void onResponseReceived(JSONObject responseJSON);
 }

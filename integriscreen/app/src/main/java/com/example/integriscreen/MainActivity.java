@@ -125,8 +125,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     private ISState currentISState;
-    boolean submitDataClicked;
-    boolean activityDetected;
+    private boolean submitDataClicked;
+    private boolean activityDetected;
+    private JSONObject receivedJSONObject;
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -374,6 +375,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
 //        Toast.makeText(getApplicationContext(),
 //                targetForm.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    public void onResponseReceived(JSONObject responseJSON) {
+        receivedJSONObject = responseJSON;
+        outputOnUILabel(responseJSON.toString());
+        try {
+            if (receivedJSONObject.getString("Response").equals("Match"))
+                transitionISSTo(ISState.EVERYTHING_OK);
+            else
+                transitionISSTo(ISState.DATA_MISSMATCH);
+
+            outputOnToast(receivedJSONObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d(TAG + "error:", "responseJSON" + responseJSON.toString() + "|" + e.getMessage());
+        }
     }
 
     // Callback when picture is taken
@@ -750,6 +767,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             // TODO(enis,daniele): this is where we attempt to submit data to the server
             outputOnUILabel("Submitting data to the server (TODO)...");
+        } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISSMATCH) {
+            outputOnUILabel(receivedJSONObject.toString());
         } else {
             extractAndDisplayTextFromFrame(rotatedUpperPart);
         }

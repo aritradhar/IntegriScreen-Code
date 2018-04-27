@@ -285,6 +285,7 @@ public class TargetForm {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG + "submitform", "Reply of form submit" + response.toString());
+                        parentActivity.onResponseReceived(response);
                     }
                 },
 
