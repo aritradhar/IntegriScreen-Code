@@ -73,9 +73,9 @@ public class PageGen {
 		int vspaceInt = Integer.parseInt(vspace);
 		
 		//container div
-		elementHtmlString.append("<div style=\"height:" + vspace + "%; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "%; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		elementHtmlString.append("<div style=\"height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
 		// green border overlay
-		elementHtmlString.append("<div style=\"border:" + border_thickness + "% solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
+		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
 		
 		int titleCounter = 0;
 		
