@@ -30,9 +30,6 @@ public class TargetForm {
     private Context applicationContext;
     public String formUrl;
 
-    // Instantiate the RequestQueue.
-    private RequestQueue queue;
-
     // store UI elements
     public ArrayList<UIElement> allElements;
 
@@ -71,7 +68,6 @@ public class TargetForm {
         allElements = null;
         applicationContext = context;
         submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
-        queue = Volley.newRequestQueue(applicationContext);
         makeJsonObjectRequest(targetUrl);
     }
 
@@ -204,7 +200,7 @@ public class TargetForm {
                         JSONObject currEl = JSONElements.getJSONObject(i);
 //                        Log.d(TAG, "Parsing JSONObject: " + currEl.toString());
                         String id = currEl.getString("id");
-                        String editable = currEl.getString("editable");
+                        Boolean editable = currEl.getBoolean("editable");
                         String type = currEl.getString("type");
 
                         String defaultVal = currEl.getString("initialvalue");
@@ -256,30 +252,40 @@ public class TargetForm {
         });
 
         // Adding request to request queue
-        queue.add(jsonObjReq);
+        MainActivity.queue.add(jsonObjReq);
     }
 
     /**
      * This method sends a POST request to the server with a json including form data
      */
-    public void submitFormData() {
+    public void submitFormData(String url) {
+        Log.d("submitform", "Submit form with id: " + pageId);
         Map<String, String> postParam = new HashMap<String, String>();
+        postParam.put("page_id", pageId);
 
-        //store all pairs of elements in a hashmap
-//        for (int i = 0; i < allElements.size(); i++) {
-//            UIElement tmpEl = allElements.get(i);
-//            postParam.put(tmpEl.id, tmpEl.currentVal);
-//        }
+//        store all pairs of elements in a hashmap
+        for (int i = 0; i < allElements.size(); i++) {
+            UIElement tmpEl = allElements.get(i);
 
-        postParam.put("key", "value");
-        postParam.put("key1", "value1");
+            if (!tmpEl.editable) // skip elements that take no input
+                continue;
+
+            postParam.put(tmpEl.id, tmpEl.defaultVal); //TODO eu: change defaultVal with currentVal
+            Log.d("submitform", "key: " + tmpEl.id + " -> " + tmpEl.defaultVal);
+        }
+
+//        postParam.put("page_id", "email_960");
+//        postParam.put("email", "recipient@bla.com");
+//        postParam.put("subject", "Initial Subject");
+//        postParam.put("body", "Hi Bla, blabla. Regards, Bla");
+
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
-                submitURL, new JSONObject(postParam),
+                url, new JSONObject(postParam),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, response.toString());
+                        Log.d(TAG, "Reply of form submit" + response.toString());
                     }
                 },
 
@@ -287,20 +293,21 @@ public class TargetForm {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         VolleyLog.d(TAG, "Error: " + error.getMessage());
-                        Log.d(TAG, error.getMessage());
+                        Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
                     }
                 }
         ) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("enctype", "multipart/form-data");
+                params.put("Content-Type", "multipart/mixed");
                 return params;
             }
         };
 
         // Adding request to request queue
-        queue.add(jsonObjReq);
+        MainActivity.queue.add(jsonObjReq);
     }
+
 
 }

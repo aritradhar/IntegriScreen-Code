@@ -21,10 +21,21 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -48,6 +59,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -83,11 +95,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int skin_hue_estimate = 26;
     private int color_border_hue = 120;
 
+    // Store the RequestQueue.
+    public static RequestQueue queue;
+
     // the form created based on specs received from Server
     private TargetForm targetForm;
 
+    // static address of the server to fetch list of forms
+    public static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
+
     private HashMap<String, String> knownForms;
-    private String formsPrefix = "http://tildem.inf.ethz.ch/data/";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -169,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
+        // initialize the RequestQueue of volley
+        queue = Volley.newRequestQueue(getApplicationContext());
+
         currentOutputSelection = OutputSelection.RAW;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -188,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-        _cameraBridgeViewBase.enableFpsMeter();
+//        _cameraBridgeViewBase.enableFpsMeter();
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
@@ -200,10 +220,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         knownForms = new HashMap<String, String>();
         //TODO eu: add here the method to download form pairs
+        getListOfForms(serverURL);
+
         // We store without spaces to prevent problems with whitespace in OCR
-        knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
-        knownForms.put("ComposeEmail1080x960", "email_1080_960.json");
-        knownForms.put("ComposeEmail", "email.json");
+//        knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
+//        knownForms.put("ComposeEmail1080x960", "email_1080_960.json");
+//        knownForms.put("ComposeEmail", "email.json");
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -302,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         submitDataClicked = true;
 
         //submit the form
-        targetForm.submitFormData();
+        targetForm.submitFormData(serverURL + "?page_type=mobile_form");
     }
 
     public void onClickShowDiff(View view) {
@@ -568,11 +590,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         String formToLoad = concatTextBlocks(detect_text(rotatedUpperFrameMat.submat(formTitleBox)));
 
         formToLoad = formToLoad.replaceAll("\\s+","");
-        // TODO: we should probably implement this by loading a list of forms from some static address instead of having a static HashMap
+
         String urlToLoad = knownForms.get(formToLoad);
         if (urlToLoad != null) {
             Log.d("box: curr: ", rotatedUpperFrameMat.size().toString());
-            targetForm = new TargetForm(getApplicationContext(), formsPrefix + urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
+            targetForm = new TargetForm(getApplicationContext(), urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
             outputOnToast("Loading form: " + formToLoad);
         } else
             return false;
@@ -761,7 +783,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             realign_perspective(rotatedScreenPart.getNativeObjAddr());
         }
 
-        if (currentISState == ISState.DETECTING_FRAME) {
+        if (currentISState == ISState.DETECTING_FRAME && !knownForms.isEmpty()) {   // make sure that forms are already downloaded
             if (loadFormBasedOnName(rotatedScreenPart, currentFrameMat.width())) { // It is important that this function only returns true if such a form exists!
                 transitionISSTo(ISState.LOADING_FORM);
             }
@@ -997,6 +1019,57 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
         return textConcat;
+    }
+
+    private void getListOfForms(String url) {
+        Log.d("ListOfForms", "trying to get the listOfForms from: " + url);
+
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
+                url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("ListOfForms", "response: " + response.toString());
+
+                        try {
+                            // Parsing json object response
+                            JSONArray JSONElements = response.getJSONArray("response");
+                            Log.d("ListOfForms", "ArrayList: " + JSONElements.toString());
+
+                            // iterate through all elements
+                            for (int i = 0; i < JSONElements.length(); i++) {
+                                JSONObject currEl = JSONElements.getJSONObject(i);
+                                String formID = currEl.getString("page_title");
+                                formID = formID.replaceAll("\\s+","");
+                                String formJson = currEl.getString("json");
+                                Log.d(TAG, "FormID: " + formID + " -> " + formJson);
+                                knownForms.put(formID, formJson);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.d("ListOfForms", e.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.d("ListOfForms", "Error: " + error.getMessage());
+                        Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
+                    }
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Content-Type", "multipart/form-data");
+                return params;
+            }
+        };
+
+        // Adding request to request queue
+        queue.add(jsonObjReq);
     }
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);

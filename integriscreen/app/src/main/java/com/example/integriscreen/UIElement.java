@@ -7,7 +7,7 @@ import org.opencv.core.Rect;
 
 public class UIElement {
     public String id;
-    public String editable;      // 0-No, 1-Yes, 2-Enumerate
+    public Boolean editable;      // 0-No, 1-Yes, 2-Enumerate
     public String type;         // label, textbox, radio, checkbox, textarea
     Rect box;                   // location of the UI on the screen, in apsolute coordinates!
     public String defaultVal;   // default value of the UI element
@@ -19,7 +19,7 @@ public class UIElement {
 //    public int certainity;      // store the confidence
 
 
-    public UIElement(String i, String ed, String tp, Rect bounding_box, String dV) {
+    public UIElement(String i, Boolean ed, String tp, Rect bounding_box, String dV) {
         id = i;
         editable = ed;
         type = tp;

@@ -1,5 +1,7 @@
 package com.example.integriscreen;
 
+import java.util.HashMap;
+
 public interface OnDataLoadedEventListener{
     public void onFormLoaded();
 
