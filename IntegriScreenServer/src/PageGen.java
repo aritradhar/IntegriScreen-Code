@@ -108,7 +108,7 @@ public class PageGen {
 					System.exit(1);
 				}
 
-				elementHtmlString.append("<h2 style=\"width:" + width + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
+				elementHtmlString.append("<h2 style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
 
 				//form action
 				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
@@ -128,22 +128,22 @@ public class PageGen {
 			{
 
 				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue
-						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 
 			else if(type.equalsIgnoreCase("button"))
 			{
-				elementHtmlString.append("<input type=\"submit\" value=\"" + initialValue + "\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+				elementHtmlString.append("<input type=\"submit\" value=\"" + initialValue + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
 			}
 
 			else if(type.equalsIgnoreCase("checkbox"))
 			{
-				elementHtmlString.append("<input type=\"checkbox\"  name =\"" + id + "\" value=\"" + id + "\" style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+				elementHtmlString.append("<input type=\"checkbox\"  name =\"" + id + "\" value=\"" + id + "\" style=\"height:" + height + "%;width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
 			}
 
 			else if(type.equalsIgnoreCase("label"))
 			{
-				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
+				elementHtmlString.append("<label style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
 			}
 
 			divCounter++;
