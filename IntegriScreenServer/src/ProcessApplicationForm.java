@@ -99,7 +99,7 @@ public class ProcessApplicationForm {
 			}
 
 			if(match) {
-				responseBuffer.append("{\"Response\":\"Match\"");
+				responseBuffer.append("{\"Response\":\"Match\"}");
 				response.getWriter().write(responseBuffer.toString());
 			} else {
 				String jString = "{\"Response\":\"" + responseBuffer.toString() +  "\"}";
