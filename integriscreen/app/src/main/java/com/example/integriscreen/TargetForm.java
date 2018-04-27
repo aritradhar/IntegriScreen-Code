@@ -285,14 +285,14 @@ public class TargetForm {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Reply of form submit" + response.toString());
+                        Log.d(TAG + "submitform", "Reply of form submit" + response.toString());
                     }
                 },
 
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d(TAG, "Error: " + error.getMessage());
+                        VolleyLog.d(TAG+ "submitform", "Error: " + error.getMessage());
                         Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
                     }
                 }
