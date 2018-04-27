@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load data/NAME.json as input and generate generated/NAME.html as output

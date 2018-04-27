@@ -114,7 +114,7 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;height:" + height + "%;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
+				elementHtmlString.append("<textarea name="+ id + " style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;height:" + height + "%;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
 
 			}
 

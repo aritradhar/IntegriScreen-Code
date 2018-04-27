@@ -67,6 +67,8 @@ public class ProcessApplicationForm {
 		StringBuffer responseBuffer = new StringBuffer();
 		String jsonString = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
 		JSONObject jObject = new JSONObject(jsonString);
+		
+		System.out.println("JSON String:" + jObject.toString(1));
 		String page_id = jObject.getString("page_id");
 		
 		boolean match = true;
@@ -81,26 +83,45 @@ public class ProcessApplicationForm {
 			Iterator<String> keys = keySet.iterator();
 			HashMap<String, String> params = data.get(page_id);
 			
+			HashMap<String, String> jsonParams = new HashMap<>();
+			
+			for(String key:keySet)
+				jsonParams.put(key, jObject.getString(key));
+			
+			
 			while(keys.hasNext())
 			{
 				String key = keys.next();
-				if(key.equals("page_id"))
+				if(key.equals("page_id") || key.equals("page_type"))
 					continue;
 				
 				if(params.containsKey(key))
 				{
 					if(!jObject.getString(key).equals(params.get(key)))
 					{
-						responseBuffer.append("Phone contains : " + key + " : " + jObject.getString(key) + " browser response contains " +  key + " : " + params.get(key) + "\n");
+						responseBuffer.append("Phone contains : |" + key + "| : |" + jObject.getString(key) + "| browser response contains |" +  key + "| : |" + params.get(key) + "\n");
 						match = false;
 					}
 				}
 				else
 				{
-					responseBuffer.append("Phone contains : " + key + " but missing in browser response\n");
+					responseBuffer.append("Phone contains : |" + key + "| but missing in browser response\n");
 					match = false;
 				}
 			}
+
+			
+			for(String browserKey:params.keySet())
+			{
+				if(browserKey.equals("page_type"))
+					continue;
+				if(!jsonParams.containsKey(browserKey))
+				{
+					responseBuffer.append("Browser response contains : |" + browserKey + "| but missing in phone response\n");
+					match = false;
+				}
+			}
+			
 			
 			if(match)
 			{
