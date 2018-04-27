@@ -49,7 +49,7 @@ public class TargetForm {
     public boolean isLoaded;
 
     // url to submit the form
-    private String submitURL;
+//    private String submitURL;
 
     private OnDataLoadedEventListener parentActivity;
     public int form_w_abs, form_h_abs;  // the total amount of space available to draw the form
@@ -67,7 +67,7 @@ public class TargetForm {
         maxScreenH = maxScreenHeight;
         allElements = null;
         applicationContext = context;
-        submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
+//        submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
         makeJsonObjectRequest(targetUrl);
     }
 
@@ -187,7 +187,6 @@ public class TargetForm {
 
 
                     pageId = response.getString("page_id");
-                    submitURL += "&pageid=" + pageId; //Todo eu: check if variable is fine
 
                     // Parsing json object response
                     JSONArray JSONElements = response.getJSONArray("elements");
