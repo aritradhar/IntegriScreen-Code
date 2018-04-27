@@ -102,8 +102,8 @@ public class ProcessApplicationForm {
 				responseBuffer.append("{\"Response\":\"Match\"");
 				response.getWriter().write(responseBuffer.toString());
 			} else {
-				jString = "{\"Response\":\"" + responseBuffer.toString() +  ""\"";
-				response.getWrite().write(jString);
+				String jString = "{\"Response\":\"" + responseBuffer.toString() +  "\"}";
+				response.getWriter().write(jString);
 			}
 			response.flushBuffer();
 		}
