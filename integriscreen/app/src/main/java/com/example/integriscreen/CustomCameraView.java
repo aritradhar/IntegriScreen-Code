@@ -1,6 +1,5 @@
 package com.example.integriscreen;
 
-import java.io.FileOutputStream;
 import java.util.List;
 
 import org.opencv.android.JavaCameraView;
@@ -12,9 +11,6 @@ import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
 
-/**
- * Created by eulqinaku on 09/04/2018.
- */
 
 public class CustomCameraView extends JavaCameraView implements PictureCallback {
 
@@ -89,6 +85,8 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
     public void takePicture(OnDataLoadedEventListener parent) {
         Log.i(TAG, "Taking picture");
         parentActivity = parent;
+        // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
+        // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
         mCamera.setPreviewCallback(null);
 
         // PictureCallback is implemented by the current class
