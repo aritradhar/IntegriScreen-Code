@@ -136,6 +136,11 @@ public class PageGen {
 				elementHtmlString.append("<input type=\"submit\" value=\"upload\" style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
 			}
 			
+			else if(type.equalsIgnoreCase("checkbox"))
+			{
+				elementHtmlString.append("<input type=\"checkbox\"  name =\"" + id + "\" value=\"" + id + "\" style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+			}
+			
 			else if(type.equalsIgnoreCase("label"))
 			{
 				elementHtmlString.append("<label style=\"width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
