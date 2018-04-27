@@ -28,7 +28,7 @@
       "ulc_x": "55",
       "ulc_y": "2",
       "width": "40",
-      "height": "3"
+      "height": "4"
     },
 
 
@@ -41,7 +41,7 @@
       "ulc_x": "10",
       "ulc_y": "10",
       "width": "10",
-      "height": "3"
+      "height": "4"
     },
 
      {
@@ -52,7 +52,7 @@
       "width": "40",
       "ulc_x": "20",
       "ulc_y": "10",
-      "height": "3"
+      "height": "4"
     },
 
     {
@@ -63,7 +63,7 @@
       "ulc_x": "10",
       "ulc_y": "16",
       "width": "10",
-      "height": "3"
+      "height": "4"
     },
 
     {
@@ -74,7 +74,7 @@
       "width": "40",
       "ulc_x": "20",
       "ulc_y": "16",
-      "height": "3"
+      "height": "4"
     },
     {
       "id": "body_label",
@@ -84,7 +84,7 @@
       "ulc_x": "10",
       "ulc_y": "23",
       "width": "10",
-      "height": "3"
+      "height": "4"
     },
 
     {
@@ -97,7 +97,7 @@
       "width": "50",
       "height": "15"
     },
-	
+
 	{
       "id": "submit_button",
       "type": "button",
@@ -106,7 +106,7 @@
       "ulc_x": "10",
       "ulc_y": "42",
       "width": "25",
-      "height": "15"
+      "height": "4"
     },
 
     {
@@ -117,7 +117,7 @@
       "ulc_x": "75",
       "ulc_y": "55",
       "width": "22",
-      "height": "3"
+      "height": "4"
     },
 
     {
@@ -128,7 +128,7 @@
       "ulc_x": "2",
       "ulc_y": "55",
       "width": "22",
-      "height": "3"
+      "height": "4"
     }
   ]
 }
