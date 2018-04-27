@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private TargetForm targetForm;
 
     private HashMap<String, String> knownForms;
-    private String formsPrefix = "http://tildem.inf.ethz.ch/generated/";
+    private String formsPrefix = "http://tildem.inf.ethz.ch/data/";
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -199,9 +199,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         knownForms = new HashMap<String, String>();
         // We store without spaces to prevent problems with whitespace in OCR
-        knownForms.put("ComposeEmail1920x1080", "email_1920_1080_specs.json");
-        knownForms.put("ComposeEmail1080x960", "email_1080_960_specs.json");
-        knownForms.put("ComposeEmail", "email_specs.json");
+        knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
+        knownForms.put("ComposeEmail1080x960", "email_1080_960.json");
+        knownForms.put("ComposeEmail", "email.json");
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
