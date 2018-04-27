@@ -5,7 +5,7 @@
   "border_thickness":"1",
   "font_family": "'Helvetica', sans-serif",
   "letter_spacing": "normal",
-  "form_action":"/action_page.php",
+  "form_action":"/IntegriScreenServer/MainServer",
   "elements": [
     {
       "id": "form_title",
@@ -37,7 +37,7 @@
       "ulc_x": "65",
       "ulc_y": "55",
       "width": "25",
-      "height": "10"
+      "height": "8"
     },
 
 

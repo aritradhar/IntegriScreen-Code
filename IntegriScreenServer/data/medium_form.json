@@ -5,7 +5,7 @@
   "border_thickness":"1",
   "font_family": "'Helvetica', sans-serif",
   "letter_spacing": "normal",
-  "form_action":"/action_page.php",
+  "form_action":"/IntegriScreenServer/MainServer",
   "elements": [
     {
       "id": "form_title",
@@ -26,7 +26,7 @@
       "ulc_x": "15",
       "ulc_y": "20",
       "width": "25",
-      "height": "10"
+      "height": "4"
     },
 
     {
@@ -37,7 +37,7 @@
       "ulc_x": "50",
       "ulc_y": "20",
       "width": "25",
-      "height": "10"
+      "height": "4"
     },
     
     {
@@ -46,9 +46,9 @@
       "editable": "true",
       "initialvalue": "username",
       "ulc_x": "15",
-      "ulc_y": "35",
+      "ulc_y": "27",
       "width": "40",
-      "height": "10"
+      "height": "4"
     },
 
     {
@@ -57,9 +57,9 @@
       "editable": "false",
       "initialvalue": "@gmail.com",
       "ulc_x": "60",
-      "ulc_y": "35",
+      "ulc_y": "27",
       "width": "30",
-      "height": "10"
+      "height": "6"
     },
 
     
@@ -69,9 +69,9 @@
       "editable": "true",
       "initialvalue": "Password",
       "ulc_x": "15",
-      "ulc_y": "45",
+      "ulc_y": "35",
       "width": "25",
-      "height": "10"
+      "height": "4"
     },
 
     {
@@ -80,9 +80,9 @@
       "editable": "true",
       "initialvalue": "Retype password",
       "ulc_x": "50",
-      "ulc_y": "45",
+      "ulc_y": "35",
       "width": "25",
-      "height": "10"
+      "height": "4"
     },
     
     {
@@ -91,9 +91,9 @@
       "editable": "true",
       "initialvalue": "Register",
       "ulc_x": "55",
-      "ulc_y": "55",
+      "ulc_y": "42",
       "width": "25",
-      "height": "10"
+      "height": "8"
     },
     
     {
