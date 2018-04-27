@@ -69,7 +69,7 @@ public class ProcessApplicationForm {
 		
 		if(!data.containsKey(page_id))
 		{
-			response.getWriter().write("No data yet!");
+			response.getWriter().write("{\"Response\" : \"No data yet!\"");
 		}
 		else
 		{
@@ -99,7 +99,7 @@ public class ProcessApplicationForm {
 			}
 			
 			if(match)
-				responseBuffer.append("Match");
+				responseBuffer.append("{\"Response\":\"Match\"");
 			
 			response.getWriter().write(responseBuffer.toString());
 			response.flushBuffer();
