@@ -41,6 +41,7 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -198,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
 
         knownForms = new HashMap<String, String>();
+        //TODO eu: add here the method to download form pairs
         // We store without spaces to prevent problems with whitespace in OCR
         knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
         knownForms.put("ComposeEmail1080x960", "email_1080_960.json");
@@ -298,6 +300,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void onClickSubmitData(View view) {
         submitDataClicked = true;
+
+        //submit the form
+        targetForm.submitFormData();
     }
 
     public void onClickShowDiff(View view) {
@@ -355,32 +360,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d(TAG, "onPicTaken: " + System.currentTimeMillis());
 
         // store plain pic
-        storePic(data, "_byte");
+        storePic(data, genFileName("_byte"));
 
         //convert to mat
         matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
         Log.d(TAG, "afterImdecode: " + System.currentTimeMillis());
+
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
         Mat origMatPic = matPic.clone();
         matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
+        // detect the green framebox
         color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
+        // realign and crop the pic into the framebox
         realign_perspective(matPic.getNativeObjAddr());
+        // rotate the mat so we get the proper orientation
         rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
-//        Log.d("TextDetection", "Detected: " + concatTextBlocks(detect_text(matPic)));
+
         Log.d("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
-        storePic(matPic, "_mat");
+
+        // store mat image in drive
+        storePic(matPic, genFileName("_mat"));
     }
 
-    private void storePic(byte[] data, String extension) {
+    private void storePic(byte[] data, String fileName) {
         // Write the image in a file (in jpeg format)
         try {
-            Log.d(TAG, "Saving byte[] to file");
-            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
-            String fileName = Environment.getExternalStorageDirectory().getPath()
-                    + "/DCIM/integriscreen" +
-                    "/IS_" + sdf.format(new Date()) + extension + ".jpg";
+            Log.d(TAG, "Saving byte[] to file: " + fileName);
+
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(data);
             fos.close();
@@ -390,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void storePic(Mat mat, String extension) {
+    private void storePic(Mat mat, String fileName) {
 
         //convert Mat to Bitmap
         Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
@@ -399,11 +407,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Write the image in a file (in jpeg format)
         try {
-            Log.d(TAG, "Saving bitmap to file");
-            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
-            String fileName = Environment.getExternalStorageDirectory().getPath()
-                    + "/DCIM/integriscreen" +
-                    "/IS_" + sdf.format(new Date()) + extension + ".jpg";
+            Log.d(TAG, "Saving bitmap to file: " + fileName);
+
             FileOutputStream fos = new FileOutputStream(fileName);
 //            fos.write(data);
             bmpPic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
@@ -413,6 +418,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } catch (java.io.IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }
+    }
+
+    private String genFileName(String extension) {
+        // check if directory exists
+        File dirIS = new File(Environment.getExternalStorageDirectory(), "Integriscreen");
+        if(!dirIS.exists()) {
+            dirIS.mkdirs();
+        }
+
+        // generate filename
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
+        String fileName = dirIS.getPath() +
+                "/IS_" + sdf.format(new Date()) + extension + ".jpg";
+
+        return fileName;
     }
 
 

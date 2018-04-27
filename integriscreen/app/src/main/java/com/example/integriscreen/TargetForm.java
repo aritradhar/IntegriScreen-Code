@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -208,6 +209,7 @@ public class TargetForm {
 
                         String defaultVal = currEl.getString("initialvalue");
 
+
                         long a_x1 = Math.round(currEl.getDouble("ulc_x") * form_w_abs / (double)resolution);
                         long a_y1 = Math.round(currEl.getDouble("ulc_y") * form_h_abs / (double) resolution);
                         long a_width = Math.round(currEl.getDouble("width") * form_w_abs / (double) resolution);
@@ -264,27 +266,38 @@ public class TargetForm {
         Map<String, String> postParam = new HashMap<String, String>();
 
         //store all pairs of elements in a hashmap
-        for (int i = 0; i < allElements.size(); i++) {
-            UIElement tmpEl = allElements.get(i);
-            postParam.put(tmpEl.id, tmpEl.currentVal);
-        }
+//        for (int i = 0; i < allElements.size(); i++) {
+//            UIElement tmpEl = allElements.get(i);
+//            postParam.put(tmpEl.id, tmpEl.currentVal);
+//        }
 
+        postParam.put("key", "value");
+        postParam.put("key1", "value1");
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
-                submitURL, new JSONObject(postParam), new Response.Listener<JSONObject>() {
+                submitURL, new JSONObject(postParam),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, response.toString());
+                    }
+                },
 
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.d(TAG, "Error: " + error.getMessage());
+                        Log.d(TAG, error.getMessage());
+                    }
+                }
+        ) {
             @Override
-            public void onResponse(JSONObject response) {
-                Log.d(TAG, response.toString());
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("enctype", "multipart/form-data");
+                return params;
             }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-                Log.d(TAG, error.getMessage());
-            }
-        });
+        };
 
         // Adding request to request queue
         queue.add(jsonObjReq);
