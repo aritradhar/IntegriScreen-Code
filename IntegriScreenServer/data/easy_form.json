@@ -37,7 +37,7 @@
       "ulc_x": "65",
       "ulc_y": "55",
       "width": "25",
-      "height": "8"
+      "height": "10"
     },
 
 
@@ -49,7 +49,7 @@
       "ulc_x": "75",
       "ulc_y": "90",
       "width": "22",
-      "height": "3"
+      "height": "5"
     },
 
     {
@@ -60,7 +60,7 @@
       "ulc_x": "2",
       "ulc_y": "90",
       "width": "22",
-      "height": "3"
+      "height": "5"
     }
   ]
 }

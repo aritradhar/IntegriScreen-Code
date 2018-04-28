@@ -60,6 +60,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.opencv.imgproc.Imgproc.blur;
 import static org.opencv.imgproc.Imgproc.line;
@@ -114,20 +116,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private TextRecognizer textRecognizer;
 
 
-    private enum ISState { INITIALIZING,          // Set up global vars, etc.
-                                    DETECTING_FRAME,       // Start detecting the green frame
-                                    DETECTING_TITLE,       // Start OCR-ing to find the title
-                                    LOADING_FORM,          // Load the form based on title
-                                    REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
-                                    VERIFYING_UI,          // Start verifying that the UI is as expected
-                                    SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
-                                    SUBMITTING_DATA,       // Keep sending user data until server responds
-                                    EVERYTHING_OK,         // Tell the user that everything is OK
-                                    DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
-                                    ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
+    private enum ISState {  DETECTING_FRAME,       // Start detecting the green frame
+                            DETECTING_TITLE,       // Start OCR-ing to find the title
+                            LOADING_FORM,          // Load the form based on title
+                            REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
+                            VERIFYING_UI,          // Start verifying that the UI is as expected
+                            SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
+                            SUBMITTING_DATA,       // Keep sending user data until server responds
+                            EVERYTHING_OK,         // Tell the user that everything is OK
+                            DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
+                            ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     private ISState currentISState;
     private boolean activityDetected;
     private JSONObject receivedJSONObject;
+    private Timer submitDataTimer;
+    private TimerTask submitDataTimerTask;
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -322,16 +325,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickSubmitData(View view) {
-        // TODO: submit every second
-        outputOnToast("Starting to submit data to the server every second...");
-        targetForm.submitFormData(serverURL + serverPageTypeURLParam);
+        Log.d("clickSubmit", currentISState.name());
 
-        transitionISSTo(ISState.SUBMITTING_DATA);
+        if (targetForm.isLoaded)
+            transitionISSTo(ISState.SUBMITTING_DATA);
+        else
+            outputOnToast("The form is not loaded yet!");
     }
 
     public void onClickShowDiff(View view) {
-        previousFrameMat.release();
-        previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
+        cleanSharedPreviousMats();
         currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
@@ -359,8 +362,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickStartIS(View view) {
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
-        realignCheckbox.setChecked(true);
-        transitionISSTo(ISState.INITIALIZING);
+        transitionISSTo(ISState.DETECTING_FRAME);
+        outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
     }
 
     // Button callback to handle taking a picture
@@ -379,14 +382,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onResponseReceived(JSONObject responseJSON) {
+        if (currentOutputSelection != OutputSelection.INTEGRISCREEN)
+            cancelTimers();
+
         receivedJSONObject = responseJSON;
         outputOnUILabel(responseJSON.toString());
         try {
             String responseVal = receivedJSONObject.getString("response");
-            if (responseVal.equals("match"))
+            if (responseVal.equals("match")) {
                 transitionISSTo(ISState.EVERYTHING_OK);
-            else if (responseVal.equals("nomatch"))
+            }
+            else if (responseVal.equals("nomatch")) {
                 transitionISSTo(ISState.DATA_MISMATCH);
+            }
 
             outputOnToast(receivedJSONObject.toString());
         } catch (JSONException e) {
@@ -636,16 +644,68 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return true;
     }
 
+    private void cancelTimers() {
+        if (submitDataTimer != null) outputOnToast("Cancelling the existing timer.");
 
-    void transitionISSTo(ISState newState)
+        if (submitDataTimerTask != null) submitDataTimerTask.cancel();
+        if (submitDataTimer != null) submitDataTimer.cancel();
+    }
+
+    private void cleanSharedPreviousMats() {
+        // Clean previous data
+        previousFrameMat.release();
+        previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
+        previousFrameMat2.release();
+        previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
+    }
+
+    private void executeISStateEntryActions(ISState newState)
     {
+        if (newState == ISState.DETECTING_FRAME) {
+            cancelTimers();
+            cleanSharedPreviousMats();
+
+            realignCheckbox.setChecked(true);
+        }
+        else if (newState == ISState.VERIFYING_UI) {
+            // we do not want to refocus anymore!
+            _cameraBridgeViewBase.stopRefocusing();
+
+        }
+        else if (newState == ISState.SUBMITTING_DATA) {
+            cancelTimers();
+            outputOnToast("Polling the server every 5 seconds...");
+
+            submitDataTimer = new Timer();
+            submitDataTimerTask= new TimerTask() {
+                @Override
+                public void run() {
+                    outputOnToast("Sending: " + (new Date()).toString());
+                    targetForm.submitFormData(serverURL + serverPageTypeURLParam);
+                }
+            };
+
+            submitDataTimer.schedule(submitDataTimerTask, 0, 5000);
+        }
+        else if (newState == ISState.EVERYTHING_OK) {
+            cancelTimers();
+        }
+        else if (newState == ISState.DATA_MISMATCH) {
+            cancelTimers();
+        }
+
+    }
+
+    private void transitionISSTo(ISState newState)
+    {
+        executeISStateEntryActions(newState);
         currentISState = newState;
         // outputOnToast("Entering State: " + newState.name());
         outputOnUILabel("Current State: " + newState.name());
     }
 
 
-    void detectHandsAndUpdateActivity(Mat currentFrameMat, long mid_delim)
+    private void detectHandsAndUpdateActivity(Mat currentFrameMat, long mid_delim)
     {
         // ===== 2) Handle the lower part
         // -- apply detect_color(human_skin)
@@ -752,7 +812,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
 
             if (numComponents > 1 && !activityDetected)
-                outputOnToast("Warning: UI changes, but no hand movement!");
+                outputOnUILabel("Warning: UI changes, but no hand movement!");
 
             // Convert back to RGBA to be shown on the phone
             Imgproc.cvtColor(rotatedUpperPartBW, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
@@ -763,7 +823,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             matCentroids.release();
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
-            Log.d("SubmitingData", "bla");
+            Log.d("SubmittingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH) {
             outputOnUILabel(receivedJSONObject.toString());
         } else {
@@ -789,8 +849,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
-                // we do not want to refocus anymore!
-                _cameraBridgeViewBase.stopRefocusing();
                 transitionISSTo(ISState.VERIFYING_UI);
             }
         }
@@ -820,17 +878,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // This function runs a state machine, which will in each frame transition to the next state if specific conditions are met.
     public Mat executeISStateMachine(Mat currentFrameMat) {
         long mid_delim = currentFrameMat.width() / 2; // By default, take a half of the screen size
-
-        if (currentISState == ISState.INITIALIZING) {
-            // Clean previous data
-            previousFrameMat.release();
-            previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
-            previousFrameMat2.release();
-            previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
-
-            transitionISSTo(ISState.DETECTING_FRAME);
-            outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
-        }
 
         if (targetForm != null && targetForm.isLoaded) { // If form is loaded, start realinging to its shape, recompute the params
             mid_delim = Math.round((double) currentFrameMat.height() * targetForm.form_ratio_h / targetForm.form_ratio_w);
