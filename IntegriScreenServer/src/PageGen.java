@@ -25,7 +25,8 @@ public class PageGen {
 		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
 		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
 
-		System.out.println("Opening File: " + pageFileName + ".html");
+		
+		System.out.println("--------------Opening File: " + pageFileName + ".html-----------------");
 
 
 		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
@@ -162,7 +163,7 @@ public class PageGen {
 				+ "input {background: #e1f7d5;}");
 		fwu.write(htmlFile);  fwu.close();
 
-		System.out.println("Page generated");
+		System.out.println("----------------Page generated----------------");
 		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		
