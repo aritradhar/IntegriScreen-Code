@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
                                     SUBMITTING_DATA,       // Keep sending user data until server responds
                                     EVERYTHING_OK,         // Tell the user that everything is OK
-                                    DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
+                                    DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     private ISState currentISState;
     private boolean activityDetected;
@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (responseVal.equals("match"))
                 transitionISSTo(ISState.EVERYTHING_OK);
             else if (responseVal.equals("nomatch"))
-                transitionISSTo(ISState.DATA_MISSMATCH);
+                transitionISSTo(ISState.DATA_MISMATCH);
 
             outputOnToast(receivedJSONObject.toString());
         } catch (JSONException e) {
@@ -764,7 +764,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             Log.d("SubmitingData", "bla");
-        } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISSMATCH) {
+        } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH) {
             outputOnUILabel(receivedJSONObject.toString());
         } else {
             extractAndDisplayTextFromFrame(rotatedUpperPart);
@@ -849,10 +849,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // =============================================
 
 
-        // Draw the separating line, choose color depending on activity
-        Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
-        line(currentFrameMat, new Point(mid_delim, currentFrameMat.height()), new Point(mid_delim, 0), lineColor, 3);
-
+        if (currentISState == ISState.EVERYTHING_OK) {
+            Imgproc.putText(currentFrameMat, "EVERYTHING OK!", new Point(500, 500),
+                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
+        } else if (currentISState == ISState.DATA_MISMATCH) {
+            Imgproc.putText(currentFrameMat, "DATA MISMATCH!", new Point(500, 500),
+                    Core.FONT_HERSHEY_SIMPLEX, 5, new Scalar(255, 0, 0), 5);
+        } else {
+            // Draw the separating line, choose color depending on activity
+            Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
+            line(currentFrameMat, new Point(mid_delim, currentFrameMat.height()), new Point(mid_delim, 0), lineColor, 3);
+        }
 
         return currentFrameMat;
     }
