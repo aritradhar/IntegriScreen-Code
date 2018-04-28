@@ -262,22 +262,14 @@ public class TargetForm {
         Map<String, String> postParam = new HashMap<String, String>();
         postParam.put("page_id", pageId);
 
-//        store all pairs of elements in a hashmap
-        for (int i = 0; i < allElements.size(); i++) {
-            UIElement tmpEl = allElements.get(i);
-
-            if (!tmpEl.editable) // skip elements that take no input
+        // Store all pairs editable elements in a hashmap
+        for (UIElement currentElement: allElements) {
+            if (!currentElement.editable) // skip elements that take no input
                 continue;
 
-            postParam.put(tmpEl.id, tmpEl.defaultVal); //TODO eu: change defaultVal with currentVal
-            Log.d("submitform", "key: " + tmpEl.id + " -> " + tmpEl.defaultVal);
+            postParam.put(currentElement.id, currentElement.currentVal);
+            Log.d("submitform", "key: " + currentElement.id + " -> " + currentElement.currentVal);
         }
-
-//        postParam.put("page_id", "email_960");
-//        postParam.put("email", "recipient@bla.com");
-//        postParam.put("subject", "Initial Subject");
-//        postParam.put("body", "Hi Bla, blabla. Regards, Bla");
-
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
                 url, new JSONObject(postParam),

@@ -102,7 +102,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private TargetForm targetForm;
 
     // static address of the server to fetch list of forms
-    public static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
+    private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
+    private static String serverPageTypeURLParam = "?page_type=mobile_form";
 
     private HashMap<String, String> knownForms;
 
@@ -125,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                                     DATA_MISSMATCH,        // There was a mismatch on the server. Show the diff to the user.
                                     ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
     private ISState currentISState;
-    private boolean submitDataClicked;
     private boolean activityDetected;
     private JSONObject receivedJSONObject;
 
@@ -322,10 +322,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickSubmitData(View view) {
-        submitDataClicked = true;
+        // TODO: submit every second
+        outputOnToast("Starting to submit data to the server every second...");
+        targetForm.submitFormData(serverURL + serverPageTypeURLParam);
 
-        //submit the form
-        targetForm.submitFormData(serverURL + "?page_type=mobile_form");
+        transitionISSTo(ISState.SUBMITTING_DATA);
     }
 
     public void onClickShowDiff(View view) {
@@ -381,9 +382,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         receivedJSONObject = responseJSON;
         outputOnUILabel(responseJSON.toString());
         try {
-            if (receivedJSONObject.getString("Response").equals("Match"))
+            String responseVal = receivedJSONObject.getString("response");
+            if (responseVal.equals("match"))
                 transitionISSTo(ISState.EVERYTHING_OK);
-            else
+            else if (responseVal.equals("nomatch"))
                 transitionISSTo(ISState.DATA_MISSMATCH);
 
             outputOnToast(receivedJSONObject.toString());
@@ -706,7 +708,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         if (currentISState == ISState.VERIFYING_UI) {
             if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
-                submitDataClicked = false;
                 // storePic(rotatedUpperPart, "_UIVerified");
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
             }
@@ -761,12 +762,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             matStats.release();
             matCentroids.release();
 
-            if (submitDataClicked) {
-                transitionISSTo(ISState.SUBMITTING_DATA);
-            }
         } else if (currentISState == ISState.SUBMITTING_DATA) {
-            // TODO(enis,daniele): this is where we attempt to submit data to the server
-            outputOnUILabel("Submitting data to the server (TODO)...");
+            Log.d("SubmitingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISSMATCH) {
             outputOnUILabel(receivedJSONObject.toString());
         } else {
@@ -830,8 +827,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
             previousFrameMat2.release();
             previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
-
-            submitDataClicked = false;
 
             transitionISSTo(ISState.DETECTING_FRAME);
             outputOnUILabel("Make the green frame visible in the top part, then click Realign.");

@@ -17,7 +17,7 @@
       "width": "55",
       "height": "6"
     },
-    
+
     {
       "id": "name_l",
       "type": "label",
@@ -39,7 +39,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "address_l1",
       "type": "label",
@@ -61,7 +61,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "address_l2",
       "type": "label",
@@ -83,7 +83,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "city_l",
       "type": "label",
@@ -105,7 +105,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "state_l",
       "type": "label",
@@ -127,7 +127,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "zip_l",
       "type": "label",
@@ -149,7 +149,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "country_l",
       "type": "label",
@@ -171,7 +171,7 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "shipping_default",
       "type": "checkbox",
@@ -193,18 +193,18 @@
       "width": "55",
       "height": "4"
     },
-    
+
     {
       "id": "submit",
       "type": "button",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Ship to this address",
       "ulc_x": "5",
       "ulc_y": "60",
       "width": "25",
       "height": "8"
     },
-    
+
     {
       "id": "test_label_LR",
       "type": "label",

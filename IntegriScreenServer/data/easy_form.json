@@ -17,7 +17,7 @@
       "width": "50",
       "height": "6"
     },
-    
+
     {
       "id": "body",
       "type": "textarea",
@@ -28,11 +28,11 @@
       "width": "70",
       "height": "30"
     },
-    
+
     {
       "id": "post",
       "type": "button",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Grab Likes",
       "ulc_x": "65",
       "ulc_y": "55",
