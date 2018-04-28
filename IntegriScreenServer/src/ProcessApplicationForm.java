@@ -103,7 +103,7 @@ public class ProcessApplicationForm {
 		}
 		
 		// Output the generated JSON
-		response.getWriter().write(outJson.toString());
+		response.getWriter().write(outJson.toString(1));
 		response.flushBuffer();
 	}
 }
