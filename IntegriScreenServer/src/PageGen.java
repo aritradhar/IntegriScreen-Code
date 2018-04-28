@@ -91,7 +91,7 @@ public class PageGen {
 
     		String maxInputChars = inObject.has("maxlength") ? inObject.getString("maxlength") : "30";
 
-			System.out.println(id);
+			//System.out.println(id);
 
 
 			if(type.equalsIgnoreCase("title"))
