@@ -421,9 +421,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
         // detect the green framebox
         // TODO(ivo): allow specifying the size of realignment shape
-        color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
+        Mat tmpClone = matPic.clone();
+        color_detector(tmpClone.getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
+
         // realign and crop the pic into the framebox
-        realign_perspective(matPic.clone().getNativeObjAddr(), matPic.getNativeObjAddr());
+        tmpClone = matPic.clone();
+        realign_perspective(tmpClone.getNativeObjAddr(), matPic.getNativeObjAddr());
+        tmpClone.release();
         // rotate the mat so we get the proper orientation
         rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
 
@@ -670,7 +674,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         else if (newState == ISState.VERIFYING_UI) {
             // we do not want to refocus anymore!
             _cameraBridgeViewBase.stopRefocusing();
-            takePicHighRes();
+            // takePicHighRes();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
@@ -700,7 +704,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     {
         executeISStateEntryActions(newState);
         currentISState = newState;
-        // outputOnToast("Entering State: " + newState.name());
+        outputOnToast("Entering State: " + newState.name());
         outputOnUILabel("Current State: " + newState.name());
     }
 
@@ -767,7 +771,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // ---------------- Based on the state that we are in, handle the upper part ------
 
         if (currentISState == ISState.VERIFYING_UI) {
-            storePic(rotatedUpperPart, "_UI_Verification");
+            // storePic(rotatedUpperPart, genFileName("_UI_Verification"));
             if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
 
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
@@ -847,7 +851,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
-            color_detector(rotatedScreenPart.clone().getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+            Mat tmpClone = rotatedScreenPart.clone();
+            color_detector(tmpClone.getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+            tmpClone.release();
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 transitionISSTo(ISState.VERIFYING_UI);
@@ -855,7 +861,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            realign_perspective(rotatedScreenPart.clone().getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+            Mat tmpClone = rotatedScreenPart.clone();
+            realign_perspective(tmpClone.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+            tmpClone.release();
         }
 
         if (currentISState == ISState.DETECTING_FRAME && !knownForms.isEmpty()) {   // make sure that forms are already downloaded
@@ -936,10 +944,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (realignCheckbox.isChecked()) {
             if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
                 int hueCenter = color_border_hue / 2;
-                color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
+                Mat tmpClone = currentFrameMat.clone();
+                color_detector(tmpClone.getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
+                tmpClone.release();
             }
 
-            realign_perspective(currentFrameMat.clone().getNativeObjAddr(), currentFrameMat.getNativeObjAddr());
+            Mat outputMat = new Mat(currentFrameMat.rows(), currentFrameMat.cols() / 2, currentFrameMat.type());
+            Mat tmpClone = currentFrameMat.clone();
+            realign_perspective(tmpClone.getNativeObjAddr(), outputMat.getNativeObjAddr());
+            tmpClone.release();
+            outputMat.copyTo(currentFrameMat.submat(0, currentFrameMat.rows(), 0, currentFrameMat.cols() / 2));
+            outputMat.release();
         }
 
         if (currentOutputSelection == OutputSelection.RAW) {
