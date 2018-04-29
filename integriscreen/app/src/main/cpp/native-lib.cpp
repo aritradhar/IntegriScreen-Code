@@ -182,9 +182,12 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         JNIEnv *env, jobject instance,
         jlong matRGBAddr,
         jlong hueCenter,
-        jlong detectionMethod) {
+        jlong detectionMethod,
+        jlong lambdaAddr) {
 
     Mat &originalMat = *(Mat *)matRGBAddr;
+
+    Mat &lambdaExternal = *(Mat *)lambdaAddr;
 
     Mat colorMask;
     detect_specific_color(originalMat, colorMask, hueCenter);
@@ -199,8 +202,10 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         colorMask.copyTo(originalMat);
     } else if (detectionMethod == 1) { // Rectangle
         potentialCorners = detect_rectangle_corners(colorMask, originalMat);
-        if (update_input_quads(potentialCorners))
+        if (update_input_quads(potentialCorners)) {
             lambda = getPerspectiveTransform(inputQuad, outputQuad);
+            lambda.copyTo(lambdaExternal);
+        }
     } else if (detectionMethod == 2) { // Circle
         potentialCorners = detect_circles(colorMask, originalMat);
         if (update_input_quads(potentialCorners))

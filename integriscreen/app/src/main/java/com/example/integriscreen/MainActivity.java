@@ -422,7 +422,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // detect the green framebox
         // TODO(ivo): allow specifying the size of realignment shape
         Mat tmpClone = matPic.clone();
-        color_detector(tmpClone.getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
+        Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
+        color_detector(tmpClone.getNativeObjAddr(), 63, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
+        lambda.release();
 
         // realign and crop the pic into the framebox
         tmpClone = matPic.clone();
@@ -718,7 +720,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
-        color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0);
+        Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
+        color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0, lambda.getNativeObjAddr());
+        lambda.release();
 
         // Since handsPart will get changed in the process, store the current purely black and white version now for later.
         handsPart.copyTo(tmpMat2);
@@ -852,7 +856,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
             Mat tmpClone = rotatedScreenPart.clone();
-            color_detector(tmpClone.getNativeObjAddr(), color_border_hue / 2, 1); // 0 - None; 1 - rectangle; 2 - circle
+            Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
+            color_detector(tmpClone.getNativeObjAddr(), color_border_hue / 2, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
+            lambda.release();
             tmpClone.release();
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
@@ -936,7 +942,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
             int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
             int detection_option = detectPicker.getProgress();
-            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option); // 0 - None; 1 - rectangle; 2 - circle
+            Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
+            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
+            lambda.release();
 
             return currentFrameMat;
         }
@@ -945,7 +953,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
                 int hueCenter = color_border_hue / 2;
                 Mat tmpClone = currentFrameMat.clone();
-                color_detector(tmpClone.getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
+                Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
+                color_detector(tmpClone.getNativeObjAddr(), hueCenter, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
+                lambda.release();
                 tmpClone.release();
             }
 
@@ -1158,7 +1168,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
-    public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
+    public native void color_detector(long matAddrRGB, long hueCenter, long detection_option, long lambda);
     public native void realign_perspective(long inputAddr, long outputAddr);
     public native void rotate90(long inputAddr, long outputAddr);
     public native void rotate270(long inputAddr, long outputAddr);
