@@ -37,12 +37,14 @@ extern "C"
 
 Mat lambda;
 
+// TODO(ivo): add realignment size here
 void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
-        jlong inputAddr)
+        jlong inputAddr,
+        jlong outputAddr)
 {
     Mat &input = *(Mat *)inputAddr;
-    Mat output(input.rows, input.cols, input.type());
+    Mat &output = *(Mat *)outputAddr;
 
     if (!quadsInitialized) {
         // I need to set both here since detect has not been called and I want to make sure we don't crash
@@ -54,8 +56,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     }
 
     // Apply the Perspective Transform that I just computed to the src image
-    warpPerspective(input, output, lambda, input.size());
-    output.copyTo(input);
+    warpPerspective(input, output, lambda, output.size());
 }
 
 void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, jobject instance,

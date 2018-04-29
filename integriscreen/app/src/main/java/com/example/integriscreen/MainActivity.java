@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-//        _cameraBridgeViewBase.enableFpsMeter();
+        _cameraBridgeViewBase.enableFpsMeter();
 
         // Deal with the UI element bindings
         colorLabel = (TextView)findViewById(R.id.colorLabel);
@@ -223,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
 
         knownForms = new HashMap<String, String>();
-        //TODO eu: add here the method to download form pairs
         getListOfForms(serverURL);
 
         // We store without spaces to prevent problems with whitespace in OCR
@@ -418,12 +417,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
-        Mat origMatPic = matPic.clone();
+        // Mat origMatPic = matPic.clone();
         matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
         // detect the green framebox
+        // TODO(ivo): allow specifying the size of realignment shape
         color_detector(matPic.clone().getNativeObjAddr(), 63, 1); // 0 - None; 1 - rectangle; 2 - circle
         // realign and crop the pic into the framebox
-        realign_perspective(matPic.getNativeObjAddr());
+        realign_perspective(matPic.clone().getNativeObjAddr(), matPic.getNativeObjAddr());
         // rotate the mat so we get the proper orientation
         rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
 
@@ -670,7 +670,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         else if (newState == ISState.VERIFYING_UI) {
             // we do not want to refocus anymore!
             _cameraBridgeViewBase.stopRefocusing();
-
+            takePicHighRes();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
@@ -767,8 +767,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // ---------------- Based on the state that we are in, handle the upper part ------
 
         if (currentISState == ISState.VERIFYING_UI) {
+            storePic(rotatedUpperPart, "_UI_Verification");
             if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
-                // storePic(rotatedUpperPart, "_UIVerified");
+
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
             }
 
@@ -854,7 +855,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            realign_perspective(rotatedScreenPart.getNativeObjAddr());
+            realign_perspective(rotatedScreenPart.clone().getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
         }
 
         if (currentISState == ISState.DETECTING_FRAME && !knownForms.isEmpty()) {   // make sure that forms are already downloaded
@@ -938,7 +939,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 color_detector(currentFrameMat.clone().getNativeObjAddr(), hueCenter, 1); // 0 - None; 1 - rectangle; 2 - circle
             }
 
-            realign_perspective(currentFrameMat.getNativeObjAddr());
+            realign_perspective(currentFrameMat.clone().getNativeObjAddr(), currentFrameMat.getNativeObjAddr());
         }
 
         if (currentOutputSelection == OutputSelection.RAW) {
@@ -1143,7 +1144,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void color_detector(long matAddrRGB, long hueCenter, long detection_option);
-    public native void realign_perspective(long inputAddr);
+    public native void realign_perspective(long inputAddr, long outputAddr);
     public native void rotate90(long inputAddr, long outputAddr);
     public native void rotate270(long inputAddr, long outputAddr);
 }
