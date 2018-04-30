@@ -69,8 +69,6 @@ public class PageGen {
 
 		int titleCounter = 0;
 		
-
-		double padding_perc = 1; // we pad all elements with 1% space by default!
 		String page_title_h2 = null;
 
 		for(int i = 0; i < elements.length(); i++)
@@ -83,8 +81,8 @@ public class PageGen {
 			String ulc_x = inObject.getString("ulc_x");
 			String ulc_y = inObject.getString("ulc_y");
 					
-			double width = inObject.getDouble("width") - 2 * padding_perc;
-			double height = inObject.getDouble("height") - 2 * padding_perc;
+			double width = inObject.getDouble("width");
+			double height = inObject.getDouble("height");
 
     		String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
     		String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
