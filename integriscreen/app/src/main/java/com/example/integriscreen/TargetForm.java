@@ -84,6 +84,16 @@ public class TargetForm {
         }
     }
 
+    public UIElement getElementById(String elementId) {
+        for(UIElement el : allElements) {
+            if (el.id.equals(elementId))
+                return el;
+        }
+        return null;
+    }
+
+
+
     /**
      * Set the active element based on the rectangle where the diff happens
      */

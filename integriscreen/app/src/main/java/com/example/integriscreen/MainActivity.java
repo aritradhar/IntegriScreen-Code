@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Mat outputMat;
 
     private Mat matPic;
-    private Mat fullResolutionUIPicture;
 
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
@@ -399,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 transitionISSTo(ISState.DATA_MISMATCH);
             }
 
-            outputOnToast(receivedJSONObject.toString());
+            // outputOnToast(receivedJSONObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d(TAG + "error:", "responseJSON" + responseJSON.toString() + "|" + e.getMessage());
@@ -661,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (urlToLoad != null) {
             Log.d("box: curr: ", rotatedUpperFrameMat.size().toString());
             targetForm = new TargetForm(getApplicationContext(), urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
-            outputOnToast("Loading form: " + formToLoad);
+            // outputOnToast("Loading form: " + formToLoad);
         } else
             return false;
 
@@ -675,7 +674,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         List<ISState> dontDetectTransformation = Arrays.asList(
                 ISState.VERIFYING_UI,
                 ISState.SUPERVISING_USER_INPUT,
-                ISState.SUBMITTING_DATA);
+                ISState.SUBMITTING_DATA,
+                ISState.EVERYTHING_OK,
+                ISState.DATA_MISMATCH);
 
         if (dontDetectTransformation.contains(currentISState))
             return false;
@@ -684,7 +685,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void cancelTimers() {
-        if (submitDataTimer != null) outputOnToast("Cancelling the existing timer.");
+        // if (submitDataTimer != null) outputOnToast("Cancelling the existing timer.");
 
         if (submitDataTimerTask != null) submitDataTimerTask.cancel();
         if (submitDataTimer != null) submitDataTimer.cancel();
@@ -729,11 +730,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             submitDataTimer.schedule(submitDataTimerTask, 0, 5000);
         }
         else if (newState == ISState.EVERYTHING_OK) {
-            realignCheckbox.setChecked(false);
+            // realignCheckbox.setChecked(false);
             cancelTimers();
         }
         else if (newState == ISState.DATA_MISMATCH) {
-            realignCheckbox.setChecked(false);
+            // realignCheckbox.setChecked(false);
             cancelTimers();
         }
 
@@ -743,7 +744,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     {
         executeISStateEntryActions(newState);
         currentISState = newState;
-        outputOnToast("Entering State: " + newState.name());
+        // outputOnToast("Entering State: " + newState.name());
         outputOnUILabel("Current State: " + newState.name());
     }
 
@@ -895,8 +896,43 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             Log.d("SubmittingData", "bla");
-        } else if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH) {
-            outputOnUILabel(receivedJSONObject.toString());
+        } else if (currentISState == ISState.EVERYTHING_OK) {
+            //          outputOnUILabel(receivedJSONObject.toString());
+        } else if (currentISState == ISState.DATA_MISMATCH) {
+            //    outputOnUILabel(receivedJSONObject.toString());
+
+            try {
+                JSONArray mismatchElements = receivedJSONObject.getJSONArray("diffs");
+
+                // iterate through all elements
+                // for(JSONObject currDiff : mismatchElements) {
+                for(int i = 0; i < mismatchElements.length(); ++i) {
+                    JSONObject currDiff = mismatchElements.getJSONObject(i);
+
+                    String elementID = currDiff.getString("key");
+                    String phoneVal = currDiff.getString("phone");
+                    String browserVal = currDiff.getString("browser");
+
+                    Log.d("diffs", elementID + "|" + browserVal);
+
+                    UIElement currentElement = targetForm.getElementById(elementID);
+
+                    int textHeight = (int)Imgproc.getTextSize(browserVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 2, new int[1]).height;
+                    Imgproc.putText(rotatedUpperPart, browserVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y+textHeight+10),
+                            Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 255), 2);
+
+                    textHeight = textHeight + (int)Imgproc.getTextSize(phoneVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 2, new int[1]).height;
+                    Imgproc.putText(rotatedUpperPart, phoneVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 20),
+                            Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 0), 2);
+
+                    Imgproc.rectangle(rotatedUpperPart, currentElement.box.tl(), currentElement.box.br(), new Scalar(255, 0, 0), 4);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.d("ListOfForms", e.getMessage());
+            }
+
         } else {
             extractAndDisplayTextFromFrame(rotatedUpperPart);
         }
@@ -966,12 +1002,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // =============================================
 
 
+        int textX = 1000;
+        int textY = 500;
         if (currentISState == ISState.EVERYTHING_OK) {
-            Imgproc.putText(currentFrameMat, "EVERYTHING OK!", new Point(500, 500),
+            Imgproc.putText(currentFrameMat, "EVERYTHING OK!", new Point(textX, textY),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
         } else if (currentISState == ISState.DATA_MISMATCH) {
-            Imgproc.putText(currentFrameMat, "DATA MISMATCH!", new Point(500, 500),
+            Imgproc.putText(currentFrameMat, "MISMATCH!", new Point(textX, textY),
                     Core.FONT_HERSHEY_SIMPLEX, 5, new Scalar(255, 0, 0), 5);
+
+            Imgproc.putText(currentFrameMat, "BROWSER", new Point(textX, textY + 200),
+                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 255), 5);
+
+            Imgproc.putText(currentFrameMat, "PHONE", new Point(textX, textY + 300),
+                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0), 5);
+
         } else {
             // Draw the separating line, choose color depending on activity
             Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
