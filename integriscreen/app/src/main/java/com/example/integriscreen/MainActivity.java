@@ -55,6 +55,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -803,6 +804,73 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         handsPart.release();
     }
 
+    // This changes the frameMat and also computes the locations of all changes
+    List<Rect> diffFramesAndGetAllChangeLocations(Mat frameMat, int morphSize, int downscaleFactor) {
+
+        // TODO(ivo): I need to play with parameters for min area, etc.
+
+        // Convert to black and white
+        Mat frameMatBW = new Mat(frameMat.size(), CvType.CV_8UC1);
+        Imgproc.cvtColor(frameMat, frameMatBW, Imgproc.COLOR_RGBA2GRAY);
+
+        // Since frameMatBW will get changed, store the current purely black and white version now for later.
+        frameMatBW.copyTo(tmpMat);
+
+        // If we don't have a stored previous frame, just use the latest one
+        if (!previousFrameMat.size().equals(frameMatBW.size()) ||
+                previousFrameMat.type() != frameMatBW.type()) {
+            frameMatBW.copyTo(previousFrameMat);
+        }
+
+        // TODO(ivo): allow specifying diff parameteres from here (threshold, min size, etc.)
+        // TODO(ivo): diffing should also probably be a separate class given the "previous frame"
+        compute_diff(frameMatBW.getNativeObjAddr(),
+                previousFrameMat.getNativeObjAddr(),
+                frameMatBW.getNativeObjAddr(),
+                morphSize, downscaleFactor);
+
+        // Store for the next frame
+        tmpMat.copyTo(previousFrameMat);
+
+
+
+        Mat labeled = new Mat(frameMatBW.size(), frameMatBW.type());
+
+        // Extract components
+        Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
+        Mat centComponents = Mat.zeros(new Size(0, 0), 0);
+        Imgproc.connectedComponentsWithStats(frameMatBW, labeled, rectComponents, centComponents);
+
+        // Collect regions info
+        int[] rectangleInfo = new int[5];
+        double[] centroidInfo = new double[2];
+
+        List<Rect> allRects = new ArrayList<>();
+        for(int i = 1; i < rectComponents.rows(); i++) {
+            // Extract bounding box
+            rectComponents.row(i).get(0, 0, rectangleInfo);
+            Rect rectangle = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
+            allRects.add(rectangle);
+
+            // Extract centroids
+//            centComponents.row(i).get(0, 0, centroidInfo);
+//            Point centroid = new Point(centroidInfo[0], centroidInfo[1]);
+
+            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
+            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
+        }
+
+        // Convert back to RGBA to be shown on the screen
+        Imgproc.cvtColor(frameMatBW, frameMat, Imgproc.COLOR_GRAY2RGBA);
+
+        frameMatBW.release();
+        labeled.release();
+        rectComponents.release();
+        centComponents.release();
+
+        return allRects;
+    }
+
     void processRotatedUpperPart(Mat rotatedUpperPart)
     {
         // HANDLE THE UPPER PART!
@@ -815,63 +883,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            List<Rect> changedLocations = diffFramesAndGetAllChangeLocations(rotatedUpperPart, 2, 1);
 
-            // TODO(ivo): call a function that takes two frames as input, and returns an array of rectangles
+            // TODO(enis): this is where you continue
 
+            outputOnUILabel("DIFF components: " + changedLocations.size());
 
-
-
-            // TODO continue(ivo): something similar to diff should start happening here!
-
-            // Convert to black and white
-            Mat rotatedUpperPartBW = new Mat(rotatedUpperPart.size(), CvType.CV_8UC1);
-            Imgproc.cvtColor(rotatedUpperPart, rotatedUpperPartBW, Imgproc.COLOR_RGBA2GRAY);
-
-            // Since rotatedUpperPartBW will get changed, store the current purely black and white version now for later.
-            rotatedUpperPartBW.copyTo(tmpMat);
-
-            // If we don't have a stored previous frame, just use the latest one
-            if (!previousFrameMat.size().equals(rotatedUpperPartBW.size()) ||
-                    previousFrameMat.type() != rotatedUpperPartBW.type()) {
-                rotatedUpperPartBW.copyTo(previousFrameMat);
-            }
-
-            // TODO: allow specifying diff parameteres from here (threshold, min size, etc.)
-            compute_diff(rotatedUpperPartBW.getNativeObjAddr(),
-                    previousFrameMat.getNativeObjAddr(),
-                    rotatedUpperPartBW.getNativeObjAddr(),
-                    2, 1);
-
-            // Store for the next frame
-            tmpMat.copyTo(previousFrameMat);
-
-            // TODO(Enis): this is where the code should be
-
-            // This is where we start computing the components
-            Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
-            Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
-
-            int numComponents = find_components(rotatedUpperPartBW.getNativeObjAddr(),
-                    matLabels.getNativeObjAddr(),
-                    matStats.getNativeObjAddr(),
-                    matCentroids.getNativeObjAddr());
-            Log.d("num_comp", String.valueOf(numComponents));
-
-            outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
-
-            if (numComponents > 1 && !activityDetected)
+//            Log.d("num_comp", String.valueOf(numComponents));
+            if (changedLocations.size() > 1 && !activityDetected)
                 outputOnUILabel("Warning: UI changes, but no hand movement!");
-
-            // Convert back to RGBA to be shown on the phone
-            Imgproc.cvtColor(rotatedUpperPartBW, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
-
-            // array
-
-            rotatedUpperPartBW.release();
-            matLabels.release();
-            matStats.release();
-            matCentroids.release();
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             Log.d("SubmittingData", "bla");
@@ -1039,37 +1059,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
 
-                // TODO(ivo): continue playing with connected components here
-                // ------------------------------
-
-
-                Mat labeled = new Mat(currentFrameMat.size(), currentFrameMat.type());
-
-                // Extract components
-                Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
-                Mat centComponents = Mat.zeros(new Size(0, 0), 0);
-                Imgproc.connectedComponentsWithStats(currentFrameMat, labeled, rectComponents, centComponents);
-
-                // Collect regions info
-                int[] rectangleInfo = new int[5];
-                double[] centroidInfo = new double[2];
-
-                for(int i = 1; i < rectComponents.rows(); i++) {
-                    // Extract bounding box
-                    rectComponents.row(i).get(0, 0, rectangleInfo);
-                    Rect rectangle = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
-
-                    // Extract centroids
-                    centComponents.row(i).get(0, 0, centroidInfo);
-                    Point centroid = new Point(centroidInfo[0], centroidInfo[1]);
-
-                    Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
-                    Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
-                }
-
-                // ------------------
-
-
                 int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
                         matLabels.getNativeObjAddr(),
                         matStats.getNativeObjAddr(),
@@ -1224,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         queue.add(jsonObjReq);
     }
 
-    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);
+    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morphSize, long downscaleFactor);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
     public native void rotate90(long inputAddr, long outputAddr);
     public native void rotate270(long inputAddr, long outputAddr);
