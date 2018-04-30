@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Timer submitDataTimer;
     private TimerTask submitDataTimerTask;
 
+    private PerspectiveRealigner cameraFrameRealigner;
+    private PerspectiveRealigner ISUpperFrameContinuousRealigner;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -224,6 +226,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         knownForms = new HashMap<String, String>();
         getListOfForms(serverURL);
+
+        cameraFrameRealigner = new PerspectiveRealigner();
+        ISUpperFrameContinuousRealigner = new PerspectiveRealigner();
 
         // We store without spaces to prevent problems with whitespace in OCR
 //        knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
@@ -417,15 +422,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
-        // Mat origMatPic = matPic.clone();
-        // TODO: should we still be taking only the upper half?
-        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
+//        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
 
         // detect the green framebox
-        PerspectiveRealigner myPerspective = new PerspectiveRealigner(63);
-        myPerspective.detectFrameAndComputeTransformation(matPic, matPic.width(), matPic.height());
-
-        storePic(matPic, genFileName("_before_realign"));
+        PerspectiveRealigner myPerspective = new PerspectiveRealigner();
+        myPerspective.detectFrameAndComputeTransformation(matPic, color_border_hue, matPic.width(), matPic.height());
         myPerspective.realignImage(matPic);
 
         // rotate the mat so we get the proper orientation
@@ -720,9 +721,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
-        Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-        color_detector(handsPart.getNativeObjAddr(),skin_hue_estimate / 2, 0, lambda.getNativeObjAddr());
-        lambda.release();
+        PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
         // Since handsPart will get changed in the process, store the current purely black and white version now for later.
         handsPart.copyTo(tmpMat2);
@@ -855,11 +854,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
-            Mat tmpClone = rotatedScreenPart.clone();
-            Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-            color_detector(tmpClone.getNativeObjAddr(), color_border_hue / 2, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
-            lambda.release();
-            tmpClone.release();
+            Log.d("mytransf", "prije" + currentISState.name());
+            ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue);
+            Log.d("mytransf", "poslije" + currentISState.name());
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 transitionISSTo(ISState.VERIFYING_UI);
@@ -867,9 +864,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            Mat tmpClone = rotatedScreenPart.clone();
-            realign_perspective(tmpClone.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
-            tmpClone.release();
+            ISUpperFrameContinuousRealigner.realignImage(rotatedScreenPart);
         }
 
         if (currentISState == ISState.DETECTING_FRAME && !knownForms.isEmpty()) {   // make sure that forms are already downloaded
@@ -940,32 +935,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.DETECT_TRANSFORMATION) {
-            int hueCenter = huePicker.getProgress() / 2; // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
+            int hueCenter = huePicker.getProgress(); // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
             int detection_option = detectPicker.getProgress();
-            Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-            color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, detection_option, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
-            lambda.release();
+            if (detection_option == 0) // just show the color detection
+                cameraFrameRealigner.detectColor(currentFrameMat, currentFrameMat, hueCenter);
+            else
+                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, hueCenter,
+                        currentFrameMat.width(), currentFrameMat.height(), true);
 
             return currentFrameMat;
         }
 
         if (realignCheckbox.isChecked()) {
             if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
-                int hueCenter = color_border_hue / 2;
-                Mat tmpClone = currentFrameMat.clone();
-                Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-                color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
-                lambda.release();
-                tmpClone.release();
+                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, color_border_hue, currentFrameMat.width(), currentFrameMat.height());
             }
 
-            Mat outputMat = currentFrameMat.clone();
-            Mat tmpClone = currentFrameMat.clone();
-            realign_perspective(tmpClone.getNativeObjAddr(), outputMat.getNativeObjAddr());
-            tmpClone.release();
-
-            outputMat.submat(currentFrameMat.rows(), outputMat.rows(), currentFrameMat.cols(), outputMat.cols()).copyTo(currentFrameMat);
-            outputMat.release();
+            cameraFrameRealigner.realignImage(currentFrameMat, currentFrameMat);
         }
 
         if (currentOutputSelection == OutputSelection.RAW) {
@@ -1169,8 +1155,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public native void compute_diff(long matFirst, long matSecond, long matDiff, long morhpSize, long downscaleFactor);
     public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
-    public native void color_detector(long matAddrRGB, long hueCenter, long detection_option, long lambda);
-    public native void realign_perspective(long inputAddr, long outputAddr);
     public native void rotate90(long inputAddr, long outputAddr);
     public native void rotate270(long inputAddr, long outputAddr);
 }

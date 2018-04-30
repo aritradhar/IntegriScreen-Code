@@ -4,30 +4,42 @@ import android.util.Log;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class PerspectiveRealigner {
     private Mat lambda;
     public int hueCenter;
+    public long outWidth, outHeight;
+    private int defaultHueCenter = 120;
 
-    public PerspectiveRealigner(int colorHueToDetect) {
-        lambda = new Mat(1, 1, CvType.CV_8UC1);
-        hueCenter = colorHueToDetect;
+
+    public static void detectColor(Mat currentFrameMat, Mat outputMat, int hueCenter)
+    {
+        color_detector(currentFrameMat.getNativeObjAddr(), outputMat.getNativeObjAddr(), hueCenter);
     }
 
-    public void detectFrameAndComputeTransformation(Mat currentFrameMat, long outWidth, long outHeight) {
-        Mat tmpClone = currentFrameMat.clone();
-        Log.d("lambda", lambda.toString());
-        color_detector(tmpClone.getNativeObjAddr(), outWidth, outHeight, hueCenter, 1, lambda.getNativeObjAddr());
-        Log.d("lambda", lambda.toString());
-        tmpClone.release();
+    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, long _outWidth, long _outHeight, boolean shouldReturnColorMask) {
+        outWidth = _outWidth;
+        outHeight = _outHeight;
+        hueCenter = _hueCenter;
+
+        if (lambda == null)
+            lambda = new Mat(1, 1, CvType.CV_8UC1);
+
+        Mat colorMask = new Mat(1, 1, CvType.CV_8SC1);
+        detectColor(currentFrameMat, colorMask, hueCenter);
+        compute_transformation(colorMask.getNativeObjAddr(), outWidth, outHeight, lambda.getNativeObjAddr());
+
+        if (shouldReturnColorMask)
+            colorMask.copyTo(currentFrameMat);
+        colorMask.release();
     }
 
     public void realignImage(Mat inputMat, Mat outputMat) {
-        Mat tmpClone = inputMat.clone();
+        if (lambda == null)
+            detectFrameAndComputeTransformation(inputMat, defaultHueCenter, outputMat.width(), outputMat.height());
+
         Imgproc.warpPerspective(inputMat, outputMat, lambda, outputMat.size());
-        tmpClone.release();
     }
 
     public void realignImage(Mat inputMat) {
@@ -37,5 +49,17 @@ public class PerspectiveRealigner {
         outputMat.release();
     }
 
-    public native void color_detector(long matAddrRGB, long width, long height, long hueCenter, long shouldUpdate, long lambda);
+
+    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter, long outWidth, long outHeight) {
+        detectFrameAndComputeTransformation(currentFrameMat, hueCenter, outWidth, outHeight, false);
+    }
+
+    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter) {
+        detectFrameAndComputeTransformation(currentFrameMat, hueCenter, currentFrameMat.width(), currentFrameMat.height(), false);
+    }
+
+
+
+    public native void compute_transformation(long colorMask, long width, long height, long lambda);
+    public static native void color_detector(long matInput, long matOutput, long hueCenter);
 }

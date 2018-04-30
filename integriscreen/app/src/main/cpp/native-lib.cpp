@@ -11,52 +11,15 @@
 using namespace std;
 using namespace cv;
 
-void set_mock_input_quads(int rows, int cols);
-void set_output_quads(int rows, int cols);
 void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
-bool update_input_quads(vector<Point2f> potentialPoints);
 vector<Point2f> detect_circles(const Mat &inputMat, Mat &outputMat);
 vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, const vector<Point2f>& outputQuadNew);
 double my_dist(Point2f A, Point2f B);
 void reorder_points(vector<Point2f> &points, vector<Point2f> &outputPoints);
 Rect update_bounding_box(Rect A, Rect B);
 
-// The 4 points that select quadilateral on the input , from top-left in clockwise order
-// These four pts are the sides of the rect box used as input
-// Input Quadilateral or Image plane coordinates
-vector<Point2f> inputQuad(4);
-
-// Output Quadilateral or World plane coordinates - they are usually constant
-// The 4 points where the mapping is to be done , from top-left in clockwise order
-vector<Point2f> outputQuad(4);
-
-bool quadsInitialized = false;
-
 extern "C"
 {
-
-Mat lambda;
-
-void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
-        JNIEnv *env, jobject instance,
-        jlong inputAddr,
-        jlong outputAddr)
-{
-    Mat &input = *(Mat *)inputAddr;
-    Mat &output = *(Mat *)outputAddr;
-
-    if (!quadsInitialized) {
-        // I need to set both here since detect has not been called and I want to make sure we don't crash
-        set_mock_input_quads(input.rows, input.cols);
-        set_output_quads(input.rows, input.cols);
-
-        // If needed, update the lambda with some mock values
-        lambda = getPerspectiveTransform(inputQuad, outputQuad);
-    }
-
-    // Apply the Perspective Transform that I just computed to the src image
-    warpPerspective(input, output, lambda, output.size());
-}
 
 
 void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, jobject instance,
@@ -139,8 +102,6 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
     // TODO: 45 seemed like a good threshold for a bit more conservative diff detection
     uchar black_white_threshold = 30;
 
-//    Mat &matA = *(Mat *) matAddrFirst;
-//    Mat &matB = *(Mat *) matAddrSecond;
     Mat matA, matB;
     Mat &matAFull = *(Mat *) matAddrFirst;
     Mat &matBFull = *(Mat *) matAddrSecond;
@@ -178,57 +139,29 @@ void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
 }
 
 
-void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
-        JNIEnv *env, jobject instance,
-        jlong matRGBAddr,
-        jlong hueCenter,
-        jlong detectionMethod,
-        jlong lambdaAddr) {
-
-    Mat &originalMat = *(Mat *)matRGBAddr;
-
-    Mat &lambdaExternal = *(Mat *)lambdaAddr;
-
-    Mat colorMask;
-    detect_specific_color(originalMat, colorMask, hueCenter);
-
-    set_output_quads(originalMat.rows, originalMat.cols);
-    if (!quadsInitialized) {  // For now, set them to some mock values if I have never set them before
-        set_mock_input_quads(originalMat.rows, originalMat.cols);
-    }
-
-    vector<Point2f> potentialCorners;
-    if (detectionMethod == 0) {
-        colorMask.copyTo(originalMat);
-    } else if (detectionMethod == 1) { // Rectangle
-        potentialCorners = detect_rectangle_corners(colorMask, originalMat, outputQuad);
-        if (update_input_quads(potentialCorners)) {
-            lambda = getPerspectiveTransform(inputQuad, outputQuad);
-            lambda.copyTo(lambdaExternal);
-        }
-    } else if (detectionMethod == 2) { // Circle
-        potentialCorners = detect_circles(colorMask, originalMat);
-        if (update_input_quads(potentialCorners))
-            lambda = getPerspectiveTransform(inputQuad, outputQuad);
-    }
-
-}
-
 void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_color_1detector(
         JNIEnv *env, jobject instance,
         jlong matRGBAddr,
-        jlong width,
-        jlong height,
-        jlong hueCenter,
-        jlong shouldUpdate,
-        jlong lambdaAddr) {
+        jlong outputMatAddr,
+        jlong hueCenter) {
 
-    Mat &originalMat = *(Mat *)matRGBAddr;
-
-    Mat &lambdaExternal = *(Mat *)lambdaAddr;
+    Mat &originalMat = *(Mat *) matRGBAddr;
+    Mat &outputMat = *(Mat *) outputMatAddr;
 
     Mat colorMask;
     detect_specific_color(originalMat, colorMask, hueCenter);
+    colorMask.copyTo(outputMat);
+}
+
+void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_compute_1transformation(
+        JNIEnv *env, jobject instance,
+        jlong colorMaskAddr,
+        jlong width,
+        jlong height,
+        jlong lambdaAddr) {
+
+    Mat &colorMask = *(Mat *)colorMaskAddr;
+    Mat &lambdaExternal = *(Mat *)lambdaAddr;
 
     // Output Quadilateral or World plane coordinates - they are usually constant
     // The 4 points where the mapping is to be done , from top-left in clockwise order
@@ -239,24 +172,12 @@ void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_color_1detector
     outputQuadNew[2] = Point2f(width - 1, height - 1);
     outputQuadNew[3] = Point2f(0, height - 1);
 
-    vector<Point2f> inputQuadNew(4);
-    // This are some random defaults...
-    inputQuadNew[0] = Point2f(0, 100);
-    inputQuadNew[1] = Point2f(width - 50, 100);
-    inputQuadNew[2] = Point2f(width - 100, height - 50);
-    inputQuadNew[3] = Point2f(200, height - 50);
-
-
     vector<Point2f> potentialCorners;
-    if (shouldUpdate) {
-        potentialCorners = detect_rectangle_corners(colorMask, originalMat, outputQuadNew);
-        reorder_points(potentialCorners, outputQuadNew);
-        for (int i = 0; i < 4; ++i)
-            inputQuadNew[i] = potentialCorners[i];
+    potentialCorners = detect_rectangle_corners(colorMask, colorMask, outputQuadNew);
+    reorder_points(potentialCorners, outputQuadNew);
 
-        getPerspectiveTransform(inputQuadNew, outputQuadNew).copyTo(lambdaExternal);
-    } else
-        colorMask.copyTo(originalMat);
+
+    getPerspectiveTransform(potentialCorners, outputQuadNew).copyTo(lambdaExternal);
 }
 
 
@@ -267,8 +188,9 @@ void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
     Mat hsvMat(1, 1, CV_8UC1);
 
     // hue values need to be between 0 and 179
-    int lower_hue = ( (int)hueCenter - 10 + 180 ) % 180;
-    int upper_hue = ( (int)hueCenter + 10 ) % 180;
+    int hueCenterOpenCV = hueCenter / 2;
+    int lower_hue = ( (int)hueCenterOpenCV - 10 + 180 ) % 180;
+    int upper_hue = ( (int)hueCenterOpenCV + 10 ) % 180;
 
     cvtColor(inputMat, hsvMat, COLOR_RGB2HSV);
 
@@ -292,38 +214,6 @@ void reorder_points(vector<Point2f> &points, vector<Point2f> &outputQuadsNew)
     }
 }
 
-void set_mock_input_quads(int rows, int cols)
-{
-    // This is some random default...
-    inputQuad[0] = Point2f(0, 100);
-    inputQuad[1] = Point2f(cols - 50, 100);
-    inputQuad[2] = Point2f(cols - 100, rows - 50);
-    inputQuad[3] = Point2f(200, rows - 50);
-
-    quadsInitialized = true;
-}
-
-void set_output_quads(int rows, int cols)
-{
-    // This stretches the across the whole frame
-    outputQuad[0] = Point2f(0, 0);
-    outputQuad[1] = Point2f(cols - 1, 0);
-    outputQuad[2] = Point2f(cols - 1, rows - 1);
-    outputQuad[3] = Point2f(0, rows - 1);
-}
-
-
-
-bool update_input_quads(vector<Point2f> potentialPoints) {
-    // The part that updates the 4 coordinates!
-    if ((int)potentialPoints.size() == 4) {
-        reorder_points(potentialPoints, outputQuad);
-        for(int i = 0; i < 4; ++i ) inputQuad[i] = potentialPoints[i];\
-        return true;
-    }
-
-    return false;
-}
 
 vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, const vector<Point2f>& outputQuadNew) {
     /*
