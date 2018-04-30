@@ -131,7 +131,8 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("checkbox"))
 			{
-				elementHtmlString.append("<input type=\"checkbox\"  name =\"" + id + "\" value=\"" + id + "\" style=\"height:" + height + "%;width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+				elementHtmlString.append("<input type=\"hidden\" id =\"" + id + "_hidden\" name =\"" + id + "\" value=\"False\" >");
+				elementHtmlString.append("<input type=\"checkbox\" id =\"" + id + "\" name =\"" + id + "\" value=\"True\" style=\"height:" + height + "%;width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
 			}
 
 			else if(type.equalsIgnoreCase("label"))
