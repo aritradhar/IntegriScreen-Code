@@ -14,11 +14,11 @@ using namespace cv;
 void set_mock_input_quads(int rows, int cols);
 void set_output_quads(int rows, int cols);
 void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
-bool update_input_quads(vector<Point2i> potentialPoints);
-vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat);
-vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat);
+bool update_input_quads(vector<Point2f> potentialPoints);
+vector<Point2f> detect_circles(const Mat &inputMat, Mat &outputMat);
+vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, const vector<Point2f>& outputQuadNew);
 double my_dist(Point2f A, Point2f B);
-void reorder_points(vector<Point2f> &points);
+void reorder_points(vector<Point2f> &points, vector<Point2f> &outputPoints);
 Rect update_bounding_box(Rect A, Rect B);
 
 // The 4 points that select quadilateral on the input , from top-left in clockwise order
@@ -37,7 +37,6 @@ extern "C"
 
 Mat lambda;
 
-// TODO(ivo): add realignment size here
 void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
         JNIEnv *env, jobject instance,
         jlong inputAddr,
@@ -58,6 +57,7 @@ void JNICALL Java_com_example_integriscreen_MainActivity_realign_1perspective(
     // Apply the Perspective Transform that I just computed to the src image
     warpPerspective(input, output, lambda, output.size());
 }
+
 
 void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, jobject instance,
                                                                   jlong inputAddr, jlong outputAddr)
@@ -197,11 +197,11 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
         set_mock_input_quads(originalMat.rows, originalMat.cols);
     }
 
-    vector<Point2i> potentialCorners;
+    vector<Point2f> potentialCorners;
     if (detectionMethod == 0) {
         colorMask.copyTo(originalMat);
     } else if (detectionMethod == 1) { // Rectangle
-        potentialCorners = detect_rectangle_corners(colorMask, originalMat);
+        potentialCorners = detect_rectangle_corners(colorMask, originalMat, outputQuad);
         if (update_input_quads(potentialCorners)) {
             lambda = getPerspectiveTransform(inputQuad, outputQuad);
             lambda.copyTo(lambdaExternal);
@@ -213,6 +213,52 @@ void JNICALL Java_com_example_integriscreen_MainActivity_color_1detector(
     }
 
 }
+
+void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_color_1detector(
+        JNIEnv *env, jobject instance,
+        jlong matRGBAddr,
+        jlong width,
+        jlong height,
+        jlong hueCenter,
+        jlong shouldUpdate,
+        jlong lambdaAddr) {
+
+    Mat &originalMat = *(Mat *)matRGBAddr;
+
+    Mat &lambdaExternal = *(Mat *)lambdaAddr;
+
+    Mat colorMask;
+    detect_specific_color(originalMat, colorMask, hueCenter);
+
+    // Output Quadilateral or World plane coordinates - they are usually constant
+    // The 4 points where the mapping is to be done , from top-left in clockwise order
+    vector<Point2f> outputQuadNew(4);
+    // This stretches the across the whole frame
+    outputQuadNew[0] = Point2f(0, 0);
+    outputQuadNew[1] = Point2f(width - 1, 0);
+    outputQuadNew[2] = Point2f(width - 1, height - 1);
+    outputQuadNew[3] = Point2f(0, height - 1);
+
+    vector<Point2f> inputQuadNew(4);
+    // This are some random defaults...
+    inputQuadNew[0] = Point2f(0, 100);
+    inputQuadNew[1] = Point2f(width - 50, 100);
+    inputQuadNew[2] = Point2f(width - 100, height - 50);
+    inputQuadNew[3] = Point2f(200, height - 50);
+
+
+    vector<Point2f> potentialCorners;
+    if (shouldUpdate) {
+        potentialCorners = detect_rectangle_corners(colorMask, originalMat, outputQuadNew);
+        reorder_points(potentialCorners, outputQuadNew);
+        for (int i = 0; i < 4; ++i)
+            inputQuadNew[i] = potentialCorners[i];
+
+        getPerspectiveTransform(inputQuadNew, outputQuadNew).copyTo(lambdaExternal);
+    } else
+        colorMask.copyTo(originalMat);
+}
+
 
 } /// end of "extern C"
 
@@ -234,12 +280,12 @@ void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
 double my_dist(Point2f A, Point2f B) { double dx = A.x - B.x; double dy = A.y - B.y; return dx * dx + dy * dy; }
 
 // this function will reorder the input points so that points[0] is the one closest to output[0], etc.
-void reorder_points(vector<Point2i> &points)
+void reorder_points(vector<Point2f> &points, vector<Point2f> &outputQuadsNew)
 {
     for(int i = 0; i < 4; ++i) {
         int closest = i;
         for(int j = i + 1; j < 4; ++j) {
-            if (my_dist(points[j], outputQuad[i]) < my_dist(points[closest], outputQuad[i]))
+            if (my_dist(points[j], outputQuadsNew[i]) < my_dist(points[closest], outputQuadsNew[i]))
                 closest = j;
         }
         swap(points[i], points[closest]);
@@ -268,10 +314,10 @@ void set_output_quads(int rows, int cols)
 
 
 
-bool update_input_quads(vector<Point2i> potentialPoints) {
+bool update_input_quads(vector<Point2f> potentialPoints) {
     // The part that updates the 4 coordinates!
     if ((int)potentialPoints.size() == 4) {
-        reorder_points(potentialPoints);
+        reorder_points(potentialPoints, outputQuad);
         for(int i = 0; i < 4; ++i ) inputQuad[i] = potentialPoints[i];\
         return true;
     }
@@ -279,7 +325,7 @@ bool update_input_quads(vector<Point2i> potentialPoints) {
     return false;
 }
 
-vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
+vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, const vector<Point2f>& outputQuadNew) {
     /*
     /// Apply the specified morphology operation
     int morph_size = 1;
@@ -317,7 +363,7 @@ vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
 
     // From the largest component, find the 4 extremal points (closest to the edges)
     // TODO: this does not work ideally when there is rotation or large angles
-    vector<Point2i> points;
+    vector<Point2f> points;
     for (int i = 0; i < labels.cols; ++i)
         for (int j = 0; j < labels.rows; ++j) {
             if (labels.at<uint16_t>(j, i) != maxEnclosingIndex)
@@ -326,10 +372,10 @@ vector<Point2i> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat) {
             Point2i currentPoint(i, j);
 
             if (points.size() == 0)
-                points = vector<Point2i>(4, currentPoint);
+                points = vector<Point2f>(4, currentPoint);
 
             for (int k = 0; k < 4; ++k)
-                if (my_dist(currentPoint, outputQuad[k]) < my_dist(points[k], outputQuad[k]) )
+                if (my_dist(currentPoint, outputQuadNew[k]) < my_dist(points[k], outputQuadNew[k]) )
                     points[k] = currentPoint;
         }
 
@@ -359,7 +405,7 @@ Rect update_bounding_box(Rect A, Rect B)
     return Rect(U.x, U.y, U.width - U.x, U.height - U.y);
 }
 
-vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat)
+vector<Point2f> detect_circles(const Mat &inputMat, Mat &outputMat)
 {
     /// Reduce the noise so we avoid false circle detection
     GaussianBlur( inputMat, outputMat, Size(7, 7), 2, 2 );
@@ -369,7 +415,7 @@ vector<Point2i> detect_circles(const Mat &inputMat, Mat &outputMat)
     /// Apply the Hough Transform to find the circles
     HoughCircles( outputMat, circles, CV_HOUGH_GRADIENT, 1, outputMat.rows/14, 35, 10, 0, 0 );
 
-    vector<Point2i> interestingCenters;
+    vector<Point2f> interestingCenters;
     /// Draw the circles detected
     for( size_t i = 0; i < circles.size(); i++ )
     {

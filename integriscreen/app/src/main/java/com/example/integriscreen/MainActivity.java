@@ -418,18 +418,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
         // Mat origMatPic = matPic.clone();
+        // TODO: should we still be taking only the upper half?
         matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
-        // detect the green framebox
-        // TODO(ivo): allow specifying the size of realignment shape
-        Mat tmpClone = matPic.clone();
-        Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-        color_detector(tmpClone.getNativeObjAddr(), 63, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
-        lambda.release();
 
-        // realign and crop the pic into the framebox
-        tmpClone = matPic.clone();
-        realign_perspective(tmpClone.getNativeObjAddr(), matPic.getNativeObjAddr());
-        tmpClone.release();
+        // detect the green framebox
+        PerspectiveRealigner myPerspective = new PerspectiveRealigner(63);
+        myPerspective.detectFrameAndComputeTransformation(matPic, matPic.width(), matPic.height());
+
+        storePic(matPic, genFileName("_before_realign"));
+        myPerspective.realignImage(matPic);
+
         // rotate the mat so we get the proper orientation
         rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
 
@@ -694,9 +692,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             submitDataTimer.schedule(submitDataTimerTask, 0, 5000);
         }
         else if (newState == ISState.EVERYTHING_OK) {
+            realignCheckbox.setChecked(false);
             cancelTimers();
         }
         else if (newState == ISState.DATA_MISMATCH) {
+            realignCheckbox.setChecked(false);
             cancelTimers();
         }
 
@@ -954,16 +954,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 int hueCenter = color_border_hue / 2;
                 Mat tmpClone = currentFrameMat.clone();
                 Mat lambda = new Mat(1, 1, CvType.CV_8UC1);
-                color_detector(tmpClone.getNativeObjAddr(), hueCenter, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
+                color_detector(currentFrameMat.getNativeObjAddr(), hueCenter, 1, lambda.getNativeObjAddr()); // 0 - None; 1 - rectangle; 2 - circle
                 lambda.release();
                 tmpClone.release();
             }
 
-            Mat outputMat = new Mat(currentFrameMat.rows(), currentFrameMat.cols() / 2, currentFrameMat.type());
+            Mat outputMat = currentFrameMat.clone();
             Mat tmpClone = currentFrameMat.clone();
             realign_perspective(tmpClone.getNativeObjAddr(), outputMat.getNativeObjAddr());
             tmpClone.release();
-            outputMat.copyTo(currentFrameMat.submat(0, currentFrameMat.rows(), 0, currentFrameMat.cols() / 2));
+
+            outputMat.submat(currentFrameMat.rows(), outputMat.rows(), currentFrameMat.cols(), outputMat.cols()).copyTo(currentFrameMat);
             outputMat.release();
         }
 
