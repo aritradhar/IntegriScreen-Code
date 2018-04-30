@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Mat outputMat;
 
     private Mat matPic;
+    private Mat fullResolutionUIPicture;
 
     // this is currently for "limited OCR"
     private int h_border_perc = 30;
@@ -379,10 +380,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // Callback which is called by TargetForm class once the data is ready.
     public void onFormLoaded() {
         Log.d(TAG, "Form loaded!" + targetForm.toString());
-        Toast.makeText(getApplicationContext(),
-                "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
-//        Toast.makeText(getApplicationContext(),
-//                targetForm.toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
     }
 
     public void onResponseReceived(JSONObject responseJSON) {
@@ -409,20 +407,48 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // Callback when picture is taken
     public void onPicTaken(byte[] data) {
-        Log.d(TAG, "onPicTaken callback");
         Log.d(TAG, "onPicTaken: " + System.currentTimeMillis());
-
-        // store plain pic
-        storePic(data, genFileName("_byte"));
 
         //convert to mat
         matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
         Log.d(TAG, "afterImdecode: " + System.currentTimeMillis());
 
+        if (currentISState == ISState.VERIFYING_UI) {
+            Mat rotatedFullRes = new Mat(1, 1, 1);
+            rotate90(matPic.getNativeObjAddr(), rotatedFullRes.getNativeObjAddr());
+            Rect frameLimit = targetForm.getFrameSize(matPic.height(), matPic.width());
+
+//            storePic(rotatedFullRes, "_rotated");
+
+            Mat croppedRotatedFullRes = new Mat(1, 1, 1);
+            rotatedFullRes.submat(frameLimit).copyTo(croppedRotatedFullRes);
+
+            PerspectiveRealigner fullResolutionPerspective = new PerspectiveRealigner();
+            fullResolutionPerspective.detectFrameAndComputeTransformation(croppedRotatedFullRes, color_border_hue);
+            fullResolutionPerspective.realignImage(croppedRotatedFullRes);
+
+            if (validateAndPlotForm(croppedRotatedFullRes, targetForm)) {
+                transitionISSTo(ISState.SUPERVISING_USER_INPUT);
+            }
+            else {
+                outputOnToast("Validation based on high-res photo failed");
+                storePic(croppedRotatedFullRes, "_validation");
+            }
+
+            rotatedFullRes.release();
+            croppedRotatedFullRes.release();
+            return;
+        }
+
+        // ------------
+        // We keep this for now mainly for testing
+        // store plain pic
+         storePic(data, "_byte");
+
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
         Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
 
-//        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
+        //        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
 
         // detect the green framebox
         PerspectiveRealigner myPerspective = new PerspectiveRealigner();
@@ -435,10 +461,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
 
         // store mat image in drive
-        storePic(matPic, genFileName("_mat"));
+        storePic(matPic, "_mat");
     }
 
-    private void storePic(byte[] data, String fileName) {
+    private void storePic(byte[] data, String extension) {
+        String fileName = genFileName(extension);
+
         // Write the image in a file (in jpeg format)
         try {
             Log.d(TAG, "Saving byte[] to file: " + fileName);
@@ -452,7 +480,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void storePic(Mat mat, String fileName) {
+    private void storePic(Mat mat, String extension) {
+        String fileName = genFileName(extension);
 
         //convert Mat to Bitmap
         Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
@@ -493,11 +522,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
         boolean allElementsAsExpected = true;
 
+        double scaleX = (double)currentFrameMat.width() / form.form_w_abs;
+        double scaleY = (double)currentFrameMat.height() / form.form_h_abs;
+
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
+            Rect rescaledBox = element.getRescaledBox(scaleX, scaleY);
 
-            Log.d("box: ", element.box.toString() + "|" + currentFrameMat.size());
-            String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(element.box));
+            Log.d("box: ", rescaledBox.toString() + "|" + currentFrameMat.size());
+            String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(rescaledBox));
 
             Scalar rectangle_color;
             if (detected.equals(element.defaultVal)) {
@@ -506,14 +539,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 rectangle_color = new Scalar( 255, 0, 0);
                 // Output the text on the UI elements
                 int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
-                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(element.box.x, element.box.y + textHeight + 20),
+                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(rescaledBox.x, rescaledBox.y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
 
                 allElementsAsExpected = false;
             }
 
             // Plot the borders of the UI elements
-            Imgproc.rectangle(currentFrameMat, element.box.tl(), element.box.br(), rectangle_color, 4);
+            Imgproc.rectangle(currentFrameMat, rescaledBox.tl(), rescaledBox.br(), rectangle_color, 4);
         }
 
         return allElementsAsExpected;
@@ -673,9 +706,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             realignCheckbox.setChecked(true);
         }
         else if (newState == ISState.VERIFYING_UI) {
-            // we do not want to refocus anymore!
+            // Once it is ready, we use this to verify as well
+            takePicHighRes();
+
+            // Stop refocusing!
             _cameraBridgeViewBase.stopRefocusing();
-            // takePicHighRes();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
@@ -774,13 +809,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // ---------------- Based on the state that we are in, handle the upper part ------
 
         if (currentISState == ISState.VERIFYING_UI) {
-            // storePic(rotatedUpperPart, genFileName("_UI_Verification"));
+            // storePic(rotatedUpperPart, "_UI_Verification");
             if (validateAndPlotForm(rotatedUpperPart, targetForm) || limitAreaCheckbox.isChecked()) {
-
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
             }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+
+            // TODO(ivo): call a function that takes two frames as input, and returns an array of rectangles
+
+
+
+
             // TODO continue(ivo): something similar to diff should start happening here!
 
             // Convert to black and white
@@ -796,6 +836,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 rotatedUpperPartBW.copyTo(previousFrameMat);
             }
 
+            // TODO: allow specifying diff parameteres from here (threshold, min size, etc.)
             compute_diff(rotatedUpperPartBW.getNativeObjAddr(),
                     previousFrameMat.getNativeObjAddr(),
                     rotatedUpperPartBW.getNativeObjAddr(),
@@ -804,7 +845,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Store for the next frame
             tmpMat.copyTo(previousFrameMat);
 
-
+            // TODO(Enis): this is where the code should be
 
             // This is where we start computing the components
             Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
@@ -824,6 +865,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // Convert back to RGBA to be shown on the phone
             Imgproc.cvtColor(rotatedUpperPartBW, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+
+            // array
 
             rotatedUpperPartBW.release();
             matLabels.release();
@@ -854,9 +897,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
-            Log.d("mytransf", "prije" + currentISState.name());
             ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue);
-            Log.d("mytransf", "poslije" + currentISState.name());
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 transitionISSTo(ISState.VERIFYING_UI);
@@ -881,7 +922,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Combine the two parts
         screenPart.copyTo(currentFrameMat.submat(screenBox));
-        // TODO PERF: I shouldn't be recreating and then releasing, but re-using Mats
         screenPart.release();
     }
 
@@ -998,6 +1038,37 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
                 Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
+
+                // TODO(ivo): continue playing with connected components here
+                // ------------------------------
+
+
+                Mat labeled = new Mat(currentFrameMat.size(), currentFrameMat.type());
+
+                // Extract components
+                Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
+                Mat centComponents = Mat.zeros(new Size(0, 0), 0);
+                Imgproc.connectedComponentsWithStats(currentFrameMat, labeled, rectComponents, centComponents);
+
+                // Collect regions info
+                int[] rectangleInfo = new int[5];
+                double[] centroidInfo = new double[2];
+
+                for(int i = 1; i < rectComponents.rows(); i++) {
+                    // Extract bounding box
+                    rectComponents.row(i).get(0, 0, rectangleInfo);
+                    Rect rectangle = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
+
+                    // Extract centroids
+                    centComponents.row(i).get(0, 0, centroidInfo);
+                    Point centroid = new Point(centroidInfo[0], centroidInfo[1]);
+
+                    Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
+                    Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
+                }
+
+                // ------------------
+
 
                 int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
                         matLabels.getNativeObjAddr(),

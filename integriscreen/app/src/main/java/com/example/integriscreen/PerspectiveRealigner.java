@@ -8,17 +8,17 @@ import org.opencv.imgproc.Imgproc;
 
 public class PerspectiveRealigner {
     private Mat lambda;
-    public int hueCenter;
-    public long outWidth, outHeight;
+    private int hueCenter;
+    private long outWidth, outHeight;
     private int defaultHueCenter = 120;
 
 
-    public static void detectColor(Mat currentFrameMat, Mat outputMat, int hueCenter)
+    static void detectColor(Mat currentFrameMat, Mat outputMat, int hueCenter)
     {
         color_detector(currentFrameMat.getNativeObjAddr(), outputMat.getNativeObjAddr(), hueCenter);
     }
 
-    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, long _outWidth, long _outHeight, boolean shouldReturnColorMask) {
+    void detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, long _outWidth, long _outHeight, boolean shouldReturnColorMask) {
         outWidth = _outWidth;
         outHeight = _outHeight;
         hueCenter = _hueCenter;
@@ -35,14 +35,14 @@ public class PerspectiveRealigner {
         colorMask.release();
     }
 
-    public void realignImage(Mat inputMat, Mat outputMat) {
+    void realignImage(Mat inputMat, Mat outputMat) {
         if (lambda == null)
             detectFrameAndComputeTransformation(inputMat, defaultHueCenter, outputMat.width(), outputMat.height());
 
         Imgproc.warpPerspective(inputMat, outputMat, lambda, outputMat.size());
     }
 
-    public void realignImage(Mat inputMat) {
+    void realignImage(Mat inputMat) {
         Mat outputMat = inputMat.clone();
         realignImage(inputMat, outputMat);
         outputMat.copyTo(inputMat);
@@ -50,11 +50,11 @@ public class PerspectiveRealigner {
     }
 
 
-    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter, long outWidth, long outHeight) {
+    void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter, long outWidth, long outHeight) {
         detectFrameAndComputeTransformation(currentFrameMat, hueCenter, outWidth, outHeight, false);
     }
 
-    public void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter) {
+    void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter) {
         detectFrameAndComputeTransformation(currentFrameMat, hueCenter, currentFrameMat.width(), currentFrameMat.height(), false);
     }
 

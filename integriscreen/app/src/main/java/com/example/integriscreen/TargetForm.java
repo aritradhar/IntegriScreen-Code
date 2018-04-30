@@ -164,6 +164,18 @@ public class TargetForm {
         return allElements.size();
     }
 
+    public Rect getFrameSize(int maxScreenW, int maxScreenH) {
+        int frame_w = maxScreenW;
+        int frame_h = maxScreenH / 2;  // initially, we assume to take the half of the screen height
+
+        if (isLoaded) { // if the form is loaded, we can be more precise about how much height do we take
+            frame_h = Math.min((int) Math.round(frame_w * form_ratio_h / (double) form_ratio_w),
+                    maxScreenH);  // this one we compute based on the form ratios
+        }
+
+        return new Rect(new Point(0, 0), new Point(frame_w, frame_h));
+    }
+
     /**
      * Method to make json object request where json response starts wtih {
      * */

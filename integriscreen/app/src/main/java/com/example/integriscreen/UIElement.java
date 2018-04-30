@@ -30,6 +30,13 @@ public class UIElement {
         lastUpdated = System.currentTimeMillis();
     }
 
+    public Rect getRescaledBox(double scaleX, double scaleY) {
+        return new Rect((int)Math.round(box.tl().x * scaleX),
+                        (int)Math.round(box.tl().y * scaleY),
+                        (int)Math.round(box.width * scaleX),
+                        (int)Math.round(box.height * scaleY));
+    }
+
     public String toString() {
         return "UI element[id: " + id + ", editable: " + editable + ", type: " + type
                 + ", position: (" + box.x + ", " + box.y + ", "
