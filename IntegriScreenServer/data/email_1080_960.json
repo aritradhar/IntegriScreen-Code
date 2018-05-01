@@ -10,7 +10,7 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Compose Email 1080x960",
+      "initialvalue": "Compose 1080x960",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "2",
@@ -27,8 +27,8 @@
       "initialvalue": "https://tinyurl.com/y7mwg5e3",
       "ulc_x": "55",
       "ulc_y": "2",
-      "width": "40",
-      "height": "4"
+      "width": "49",
+      "height": "6"
     },
 
 
@@ -37,11 +37,11 @@
       "id": "label_recipient",
       "type": "label",
       "editable": "false",
-      "initialvalue": "To",
+      "initialvalue": "Recipient",
       "ulc_x": "10",
       "ulc_y": "10",
-      "width": "10",
-      "height": "4"
+      "width": "14",
+      "height": "6"
     },
 
      {
@@ -50,9 +50,9 @@
       "editable": "true",
       "initialvalue": "recipient@bla.com",
       "width": "40",
-      "ulc_x": "20",
+      "ulc_x": "25",
       "ulc_y": "10",
-      "height": "4"
+      "height": "6"
     },
 
     {
@@ -61,9 +61,9 @@
       "editable": "false",
       "initialvalue": "Subject",
       "ulc_x": "10",
-      "ulc_y": "16",
-      "width": "10",
-      "height": "4"
+      "ulc_y": "18",
+      "width": "14",
+      "height": "6"
     },
 
     {
@@ -72,9 +72,9 @@
       "editable": "true",
       "initialvalue": "Initial Subject",
       "width": "40",
-      "ulc_x": "20",
-      "ulc_y": "16",
-      "height": "4"
+      "ulc_x": "25",
+      "ulc_y": "18",
+      "height": "6"
     },
     {
       "id": "body_label",
@@ -82,9 +82,9 @@
       "editable": "false",
       "initialvalue": "Body",
       "ulc_x": "10",
-      "ulc_y": "23",
+      "ulc_y": "24",
       "width": "10",
-      "height": "4"
+      "height": "6"
     },
 
     {
@@ -93,7 +93,7 @@
       "editable": "true",
       "initialvalue": "Hi Bla, blabla. Regards, Bla",
       "ulc_x": "10",
-      "ulc_y": "27",
+      "ulc_y": "30",
       "width": "50",
       "height": "15"
     },
@@ -104,7 +104,7 @@
       "editable": "false",
       "initialvalue": "Send",
       "ulc_x": "10",
-      "ulc_y": "44",
+      "ulc_y": "48",
       "width": "25",
       "height": "8"
     },
@@ -113,11 +113,11 @@
       "id": "test_label_LR",
       "type": "label",
       "editable": "false",
-      "initialvalue": "LR 1234.abcdefgh",
-      "ulc_x": "75",
-      "ulc_y": "55",
-      "width": "22",
-      "height": "4"
+      "initialvalue": "LR 1234.abcde fgh",
+      "ulc_x": "70",
+      "ulc_y": "90",
+      "width": "28",
+      "height": "9"
     },
 
     {
@@ -125,10 +125,10 @@
       "type": "label",
       "editable": "false",
       "initialvalue": "LL 1234.abcdefgh",
-      "ulc_x": "2",
-      "ulc_y": "55",
-      "width": "22",
-      "height": "4"
+      "ulc_x": "0",
+      "ulc_y": "90",
+      "width": "30",
+      "height": "9"
     }
   ]
 }

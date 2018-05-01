@@ -10,7 +10,7 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Compose Email 1920x1080",
+      "initialvalue": "Compose 1920x1080",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "2",
@@ -80,7 +80,7 @@
       "editable": "false",
       "initialvalue": "Body",
       "ulc_x": "10",
-      "ulc_y": "35",
+      "ulc_y": "32",
       "width": "10",
       "height": "7"
     },
@@ -111,10 +111,10 @@
       "type": "label",
       "editable": "false",
       "initialvalue": "LR 1234.abcdefgh",
-      "ulc_x": "80",
+      "ulc_x": "79",
       "ulc_y": "90",
-      "width": "15",
-      "height": "7"
+      "width": "20",
+      "height": "9"
     },
 
     {
@@ -122,10 +122,10 @@
       "type": "label",
       "editable": "false",
       "initialvalue": "LL 1234.abcdefgh",
-      "ulc_x": "2",
+      "ulc_x": "0",
       "ulc_y": "90",
       "width": "20",
-      "height": "7"
+      "height": "9"
     }
   ]
 }
