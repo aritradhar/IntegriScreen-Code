@@ -1,7 +1,7 @@
 {
   "ratio": "1080:960",
   "vspace": "80",
-  "page_id": "email_960",
+  "page_id": "email_1080_960",
   "border_thickness":"1",
   "font_family": "'Verdana', sans-serif",
   "letter_spacing": "normal",

@@ -231,11 +231,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         cameraFrameRealigner = new PerspectiveRealigner();
         ISUpperFrameContinuousRealigner = new PerspectiveRealigner();
 
-        // We store without spaces to prevent problems with whitespace in OCR
-//        knownForms.put("ComposeEmail1920x1080", "email_1920_1080.json");
-//        knownForms.put("ComposeEmail1080x960", "email_1080_960.json");
-//        knownForms.put("ComposeEmail", "email.json");
-
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -1225,11 +1220,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                             // iterate through all elements
                             for (int i = 0; i < JSONElements.length(); i++) {
                                 JSONObject currEl = JSONElements.getJSONObject(i);
-                                String formID = currEl.getString("page_title");
-                                formID = formID.replaceAll("\\s+","");
-                                String formJson = currEl.getString("json");
-                                Log.d(TAG, "FormID: " + formID + " -> " + formJson);
-                                knownForms.put(formID, formJson);
+                                String pageTitle = currEl.getString("page_title");
+                                pageTitle = pageTitle.replaceAll("\\s+","");
+                                String formJsonURL = currEl.getString("json");
+                                Log.d(TAG, "FormID: " + pageTitle + " -> " + formJsonURL);
+                                knownForms.put(pageTitle, formJsonURL);
                             }
 
                         } catch (JSONException e) {
