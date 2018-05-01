@@ -60,7 +60,7 @@
         android:layout_toEndOf="@+id/liveCheckbox"
         android:layout_below="@id/detect_frame"
         android:background="@android:color/holo_green_light"
-        android:text="240"
+        android:text="130"
         android:textColor="@android:color/white" />
 
     <SeekBar

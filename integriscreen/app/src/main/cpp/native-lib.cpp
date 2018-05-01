@@ -12,86 +12,15 @@ using namespace std;
 using namespace cv;
 
 void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter);
-vector<Point2f> detect_circles(const Mat &inputMat, Mat &outputMat);
 vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, const vector<Point2f>& outputQuadNew);
 double my_dist(Point2f A, Point2f B);
 void reorder_points(vector<Point2f> &points, vector<Point2f> &outputPoints);
-Rect update_bounding_box(Rect A, Rect B);
+
 
 extern "C"
 {
 
-
-void JNICALL Java_com_example_integriscreen_MainActivity_rotate90(JNIEnv *env, jobject instance,
-                                                                  jlong inputAddr, jlong outputAddr)
-{
-    Mat &inputMat = *(Mat *)inputAddr;
-    Mat &outputMat = *(Mat *)outputAddr;
-
-    Mat transposedMat;
-    transpose(inputMat, transposedMat);
-    flip(transposedMat, outputMat, +1);
-}
-
-void JNICALL Java_com_example_integriscreen_MainActivity_rotate270(JNIEnv *env, jobject instance,
-                                                                  jlong inputAddr, jlong outputAddr)
-{
-    Mat &inputMat = *(Mat *)inputAddr;
-    Mat &outputMat = *(Mat *)outputAddr;
-
-    transpose(inputMat, inputMat);
-    flip(inputMat, outputMat,0); //transpose+flip(0)=CCW
-}
-
-
-jint JNICALL Java_com_example_integriscreen_MainActivity_find_1components(
-        JNIEnv *env, jobject instance,
-        jlong matInputAddr,
-        jlong matLabels,
-        jlong matStats,
-        jlong matCentroids)
-{
-
-    Mat &matInput = *(Mat *) matInputAddr;
-    Mat &labels = *(Mat *) matLabels;
-    Mat &stats = *(Mat *) matStats;
-    Mat &centroids = *(Mat *) matCentroids;
-    int numComponents = connectedComponentsWithStats(matInput, labels, stats, centroids, 4, CV_16U);
-
-    ALOG("|%d|", numComponents);
-
-    int min_area_to_count = 40; // TODO: this should probably be relative to the screen resolution
-
-    Rect bounding_box(matInput.cols, matInput.rows, -matInput.cols, -matInput.rows);
-
-    int large_components = 0;
-    // component 0 is the background
-    for (int i = 1; i < numComponents; ++i) {
-        int component_area = stats.at<int>(i, CC_STAT_AREA);
-
-        Rect new_bound(stats.at<int>(i, CC_STAT_LEFT),
-                       stats.at<int>(i, CC_STAT_TOP),
-                       stats.at<int>(i, CC_STAT_WIDTH),
-                       stats.at<int>(i, CC_STAT_HEIGHT));
-
-        if (component_area > min_area_to_count) {
-            ++large_components;
-
-            bounding_box = update_bounding_box(bounding_box, new_bound);
-        }
-    }
-
-    // This is just to showcase what I am finding
-    labels.convertTo(labels, CV_8UC1, 50.0);
-
-    if (large_components > 0)
-        rectangle(matInput, bounding_box, Scalar(255, 0, 0), 2);
-
-
-    return large_components;
-}
-
-void JNICALL Java_com_example_integriscreen_MainActivity_compute_1diff(
+void JNICALL Java_com_example_integriscreen_ISImageProcessor_apply_1diff__JJJJJ(
          JNIEnv *env, jobject instance,
          jlong matAddrFirst,
          jlong matAddrSecond,
@@ -281,18 +210,6 @@ vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, co
     }
 
     return points;
-}
-
-Rect update_bounding_box(Rect A, Rect B)
-{
-    Rect U(min(A.x, B.x),
-           min(A.y, B.y),
-           max(A.x + A.width, B.x + B.width),
-           max(A.y + A.height, B.y + B.height));
-    // U has been calculated as upper-left and lower-right corner.
-
-    // Before returning, convert it to upper-left and width, height
-    return Rect(U.x, U.y, U.width - U.x, U.height - U.y);
 }
 
 vector<Point2f> detect_circles(const Mat &inputMat, Mat &outputMat)

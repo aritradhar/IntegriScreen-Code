@@ -48,14 +48,12 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,9 +62,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static org.opencv.imgproc.Imgproc.blur;
+import static com.example.integriscreen.ISImageProcessor.applyCanny;
+import static com.example.integriscreen.ISImageProcessor.rotate270;
+import static com.example.integriscreen.ISImageProcessor.rotate90;
 import static org.opencv.imgproc.Imgproc.line;
-import static org.opencv.imgproc.Imgproc.rectangle;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener {
 
@@ -83,10 +82,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CheckBox liveCheckbox;
 
     private Mat previousFrameMat;
-    private Mat tmpMat;
-    private Mat previousFrameMat2;
-    private Mat tmpMat2;
-    private Mat outputMat;
 
     private Mat matPic;
 
@@ -96,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Point upper_left, lower_right;
 
     private int skin_hue_estimate = 26;
-    private int color_border_hue = 120;
+    private int color_border_hue = 130;
 
     // Store the RequestQueue.
     public static RequestQueue queue;
@@ -135,6 +130,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private PerspectiveRealigner cameraFrameRealigner;
     private PerspectiveRealigner ISUpperFrameContinuousRealigner;
+    private ISImageProcessor upperFrameISImageProcessor;
+    private ISImageProcessor lowerFrameISImageProcessor;
+    private ISImageProcessor wholeFrameISImageProcessor;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -230,6 +228,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         cameraFrameRealigner = new PerspectiveRealigner();
         ISUpperFrameContinuousRealigner = new PerspectiveRealigner();
+        upperFrameISImageProcessor = new ISImageProcessor();
+        lowerFrameISImageProcessor = new ISImageProcessor();
+        wholeFrameISImageProcessor = new ISImageProcessor();
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -334,7 +335,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickShowDiff(View view) {
-        cleanSharedPreviousMats();
         currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             cancelTimers();
 
         receivedJSONObject = responseJSON;
-        outputOnUILabel(responseJSON.toString());
+        // outputOnUILabel(responseJSON.toString());
         try {
             String responseVal = receivedJSONObject.getString("response");
             if (responseVal.equals("match")) {
@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         if (currentISState == ISState.VERIFYING_UI) {
             Mat rotatedFullRes = new Mat(1, 1, 1);
-            rotate90(matPic.getNativeObjAddr(), rotatedFullRes.getNativeObjAddr());
+            rotate90(matPic, rotatedFullRes);
             Rect frameLimit = targetForm.getFrameSize(matPic.height(), matPic.width());
 
 //            storePic(rotatedFullRes, "_rotated");
@@ -451,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         myPerspective.realignImage(matPic);
 
         // rotate the mat so we get the proper orientation
-        rotate90(matPic.getNativeObjAddr(), matPic.getNativeObjAddr());
+        rotate90(matPic, matPic);
 
         Log.d("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
 
@@ -603,41 +603,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onCameraViewStarted(int width, int height) {
-        outputMat = new Mat(1, 1, CvType.CV_8UC4);
         previousFrameMat = new Mat(1, 1, CvType.CV_8UC4);
-        tmpMat = new Mat(1, 1, CvType.CV_8UC1);
-        previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC4);
-        tmpMat2 = new Mat(1, 1, CvType.CV_8UC1);
     }
 
     public void onCameraViewStopped() {
-        outputMat.release();
         previousFrameMat.release();
-        tmpMat.release();
-        previousFrameMat2.release();
-        tmpMat2.release();
-    }
-
-    // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
-    // This is using Java-based openCV
-    public void applyCanny(Mat input_gray, Mat output_gray) {
-        double lowThreshold = 30;
-        double ratio = 2;
-        int kernel_size = 3;
-
-        Mat src_blurred = new Mat(3, 3, CvType.CV_8UC4);
-
-        /// Reduce noise with a kernel 3x3
-        blur( input_gray, src_blurred, new Size(3,3) );
-
-        /// Canny detector
-        Imgproc.Canny( src_blurred, output_gray, lowThreshold, lowThreshold*ratio, kernel_size, true );
-
-        // This copies using the "detected_edges" as a mask
-        // src_gray.copyTo( dst, detected_edges);
-
-
-        src_blurred.release();
     }
 
     // this one will probably be of size 1080 / 960 -> since the form needs to know how much height it is allowed to take
@@ -686,19 +656,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (submitDataTimer != null) submitDataTimer.cancel();
     }
 
-    private void cleanSharedPreviousMats() {
-        // Clean previous data
-        previousFrameMat.release();
-        previousFrameMat = new Mat(1, 1, CvType.CV_8UC1);
-        previousFrameMat2.release();
-        previousFrameMat2 = new Mat(1, 1, CvType.CV_8UC1);
-    }
-
     private void executeISStateEntryActions(ISState newState)
     {
         if (newState == ISState.DETECTING_FRAME) {
             cancelTimers();
-            cleanSharedPreviousMats();
 
             realignCheckbox.setChecked(true);
         }
@@ -755,116 +716,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
-        // Since handsPart will get changed in the process, store the current purely black and white version now for later.
-        handsPart.copyTo(tmpMat2);
+        List<Rect> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart, 2, 1, 40);
 
-        // If we don't have a stored previous frame, just use the latest one
-        if (!previousFrameMat2.size().equals(handsPart.size()) ||
-                previousFrameMat2.type() != handsPart.type()) {
-            handsPart.copyTo(previousFrameMat2);
-        }
-
-        compute_diff(handsPart.getNativeObjAddr(),
-                previousFrameMat2.getNativeObjAddr(),
-                handsPart.getNativeObjAddr(),
-                2, 1);
-
-        // This is where we start computing the components
-        Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
-        Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
-        Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
-        int numComponents = find_components(handsPart.getNativeObjAddr(),
-                matLabels.getNativeObjAddr(),
-                matStats.getNativeObjAddr(),
-                matCentroids.getNativeObjAddr());
-        Log.d("num_comp", String.valueOf(numComponents));
-
-        if (numComponents > 1)
+        if (changedLocations.size() > 1)
             activityDetected = true;
         else
             activityDetected = false;
 
-        matLabels.release();
-        matStats.release();
-        matCentroids.release();
-
-        // Store for the next frame
-        tmpMat2.copyTo(previousFrameMat2);
-
-        // --------------------------------------
-
-        // Convert back to 4 channel colors
-        Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
-
         handsPart.copyTo(currentFrameMat.submat(handsBox));
         handsPart.release();
-    }
-
-    // This changes the frameMat and also computes the locations of all changes
-    List<Rect> diffFramesAndGetAllChangeLocations(Mat frameMat, int morphSize, int downscaleFactor) {
-
-        // TODO(ivo): I need to play with parameters for min area, etc.
-
-        // Convert to black and white
-        Mat frameMatBW = new Mat(frameMat.size(), CvType.CV_8UC1);
-        Imgproc.cvtColor(frameMat, frameMatBW, Imgproc.COLOR_RGBA2GRAY);
-
-        // Since frameMatBW will get changed, store the current purely black and white version now for later.
-        frameMatBW.copyTo(tmpMat);
-
-        // If we don't have a stored previous frame, just use the latest one
-        if (!previousFrameMat.size().equals(frameMatBW.size()) ||
-                previousFrameMat.type() != frameMatBW.type()) {
-            frameMatBW.copyTo(previousFrameMat);
-        }
-
-        // TODO(ivo): allow specifying diff parameteres from here (threshold, min size, etc.)
-        // TODO(ivo): diffing should also probably be a separate class given the "previous frame"
-        compute_diff(frameMatBW.getNativeObjAddr(),
-                previousFrameMat.getNativeObjAddr(),
-                frameMatBW.getNativeObjAddr(),
-                morphSize, downscaleFactor);
-
-        // Store for the next frame
-        tmpMat.copyTo(previousFrameMat);
-
-
-
-        Mat labeled = new Mat(frameMatBW.size(), frameMatBW.type());
-
-        // Extract components
-        Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
-        Mat centComponents = Mat.zeros(new Size(0, 0), 0);
-        Imgproc.connectedComponentsWithStats(frameMatBW, labeled, rectComponents, centComponents);
-
-        // Collect regions info
-        int[] rectangleInfo = new int[5];
-        double[] centroidInfo = new double[2];
-
-        List<Rect> allRects = new ArrayList<>();
-        for(int i = 1; i < rectComponents.rows(); i++) {
-            // Extract bounding box
-            rectComponents.row(i).get(0, 0, rectangleInfo);
-            Rect rectangle = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
-            allRects.add(rectangle);
-
-            // Extract centroids
-//            centComponents.row(i).get(0, 0, centroidInfo);
-//            Point centroid = new Point(centroidInfo[0], centroidInfo[1]);
-
-            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
-            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
-        }
-
-        // Convert back to RGBA to be shown on the screen
-        Imgproc.cvtColor(frameMatBW, frameMat, Imgproc.COLOR_GRAY2RGBA);
-
-        frameMatBW.release();
-        labeled.release();
-        rectComponents.release();
-        centComponents.release();
-
-        return allRects;
     }
 
     void processRotatedUpperPart(Mat rotatedUpperPart)
@@ -879,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
-            List<Rect> changedLocations = diffFramesAndGetAllChangeLocations(rotatedUpperPart, 2, 1);
+            List<Rect> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(rotatedUpperPart, 2, 1, 40);
 
             // TODO(enis): this is where you continue
 
@@ -894,7 +754,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else if (currentISState == ISState.EVERYTHING_OK) {
             //          outputOnUILabel(receivedJSONObject.toString());
         } else if (currentISState == ISState.DATA_MISMATCH) {
-            //    outputOnUILabel(receivedJSONObject.toString());
+            outputOnUILabel(receivedJSONObject.toString());
 
             try {
                 JSONArray mismatchElements = receivedJSONObject.getJSONArray("diffs");
@@ -945,7 +805,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Mat screenPart = currentFrameMat.submat(screenBox);
 
         Mat rotatedScreenPart = new Mat(1, 1, CvType.CV_8UC1);
-        rotate90(screenPart.getNativeObjAddr(), rotatedScreenPart.getNativeObjAddr());
+        rotate90(screenPart, rotatedScreenPart);
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
             ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue);
@@ -968,7 +828,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Depending on the app state, run detection of text, find changes, etc.
         processRotatedUpperPart(rotatedScreenPart);
 
-        rotate270(rotatedScreenPart.getNativeObjAddr(), screenPart.getNativeObjAddr());
+        rotate270(rotatedScreenPart, screenPart);
         rotatedScreenPart.release();
 
         // Combine the two parts
@@ -996,27 +856,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         detectHandsAndUpdateActivity(currentFrameMat, mid_delim);
         // =============================================
 
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
+            rotate90(currentFrameMat, currentFrameMat);
 
-        int textX = 1000;
-        int textY = 500;
+        int textX = 300;
+        int textY = 1100;
         if (currentISState == ISState.EVERYTHING_OK) {
             Imgproc.putText(currentFrameMat, "EVERYTHING OK!", new Point(textX, textY),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
         } else if (currentISState == ISState.DATA_MISMATCH) {
             Imgproc.putText(currentFrameMat, "MISMATCH!", new Point(textX, textY),
-                    Core.FONT_HERSHEY_SIMPLEX, 5, new Scalar(255, 0, 0), 5);
+                    Core.FONT_HERSHEY_SIMPLEX, 4, new Scalar(255, 0, 0), 5);
 
             Imgproc.putText(currentFrameMat, "BROWSER", new Point(textX, textY + 200),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 255), 5);
 
             Imgproc.putText(currentFrameMat, "PHONE", new Point(textX, textY + 300),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0), 5);
-
         } else {
             // Draw the separating line, choose color depending on activity
             Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
             line(currentFrameMat, new Point(mid_delim, currentFrameMat.height()), new Point(mid_delim, 0), lineColor, 3);
         }
+
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
+            rotate270(currentFrameMat, currentFrameMat);
 
         return currentFrameMat;
     }
@@ -1071,47 +935,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.CANNY) {
-            Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
-            applyCanny(tmpMat, currentFrameMat);
+            applyCanny(currentFrameMat, currentFrameMat);
             return currentFrameMat;
         }
 
         if (currentOutputSelection == OutputSelection.DIFF) {
-            // Convert to black and white
-            Imgproc.cvtColor(currentFrameMat, tmpMat, Imgproc.COLOR_RGB2GRAY);
-
-            tmpMat.copyTo(currentFrameMat);
-
-            if (!previousFrameMat.size().equals(currentFrameMat.size()) ||
-                    previousFrameMat.type() != currentFrameMat.type())
-                currentFrameMat.copyTo(previousFrameMat);
-
-            compute_diff(currentFrameMat.getNativeObjAddr(),
-                    previousFrameMat.getNativeObjAddr(),
-                    currentFrameMat.getNativeObjAddr(),
-                    2, 2);
-
-            // Store for next frame
-            tmpMat.copyTo(previousFrameMat);
-
-            if (liveCheckbox.isChecked()) { // display the frame around the changes
-                Mat matLabels = new Mat(1, 1, CvType.CV_8UC1);
-                Mat matStats = new Mat(1, 1, CvType.CV_8UC1);
-                Mat matCentroids = new Mat(1, 1, CvType.CV_8UC1);
-
-                int numComponents = find_components(currentFrameMat.getNativeObjAddr(),
-                        matLabels.getNativeObjAddr(),
-                        matStats.getNativeObjAddr(),
-                        matCentroids.getNativeObjAddr());
-                Log.d("num_comp", String.valueOf(numComponents));
-
-                outputOnUILabel("DIFF components: " + Integer.toString(numComponents));
-
-                matLabels.release();
-                matStats.release();
-                matCentroids.release();
-            }
-
+            wholeFrameISImageProcessor.diffWithPreviousFrame(currentFrameMat, currentFrameMat, 1, 1);
             return currentFrameMat;
         }
 
@@ -1252,10 +1081,5 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Adding request to request queue
         queue.add(jsonObjReq);
     }
-
-    public native void compute_diff(long matFirst, long matSecond, long matDiff, long morphSize, long downscaleFactor);
-    public native int find_components(long currentFrameMat, long matLabels, long matStats, long matCentroids);
-    public native void rotate90(long inputAddr, long outputAddr);
-    public native void rotate270(long inputAddr, long outputAddr);
 }
 
