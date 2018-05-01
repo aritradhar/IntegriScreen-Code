@@ -164,7 +164,7 @@ public class MainServer extends HttpServlet {
 					System.out.println("Generated : " + pageFileName);
 					
 					JSONObject inJson = new JSONObject();
-					inJson.put("form_id", out[0]);
+					inJson.put("page_id", out[0]);
 					inJson.put("page_title", out[1]);
 					inJson.put("json", out[2]);
 					inJson.put("html", out[3]);

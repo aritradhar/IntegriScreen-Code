@@ -46,9 +46,9 @@ public class ProcessApplicationForm {
 
 		allBrowserResponses.put(pageID, KVPair);
 
-		//response.getWriter().write("Response recorded: " + KVPair.toString());
-	//	response.flushBuffer();
-		response.sendRedirect(pageDefaultLoc + pageID + ".html");
+		// response.getWriter().write("Response recorded: " + KVPair.toString());
+		//	response.flushBuffer();
+		response.sendRedirect(pageDefaultLoc + pageID + ".html?submitted=" + KVPair.toString());
 	}
 	
 	public static void processApplicationFormPhone(HttpServletRequest request, HttpServletResponse response) throws IOException
