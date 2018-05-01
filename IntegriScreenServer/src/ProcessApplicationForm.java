@@ -19,7 +19,8 @@ import org.json.JSONObject;
 public class ProcessApplicationForm {
 
 	public static volatile Map<String, HashMap<String, String>> allBrowserResponses = new ConcurrentHashMap<>();
-
+	
+	public static final String pageDefaultLoc = "http://tildem.inf.ethz.ch/generated/";
 	public static void processApplicationForm(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pageID = request.getParameter("page_id");
@@ -39,8 +40,9 @@ public class ProcessApplicationForm {
 
 		allBrowserResponses.put(pageID, KVPair);
 
-		response.getWriter().write("Response recorded: " + KVPair.toString());
-		response.flushBuffer();
+		//response.getWriter().write("Response recorded: " + KVPair.toString());
+	//	response.flushBuffer();
+		response.sendRedirect(pageDefaultLoc + pageID + ".html");
 	}
 	
 	public static void processApplicationFormPhone(HttpServletRequest request, HttpServletResponse response) throws IOException
