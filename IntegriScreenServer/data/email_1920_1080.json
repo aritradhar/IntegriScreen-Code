@@ -1,6 +1,6 @@
 {
   "ratio": "1920:1080",
-  "vspace": "60",
+  "vspace": "75",
   "page_id": "email_1080",
   "border_thickness":"1",
   "font_family": "'Verdana', sans-serif",
@@ -15,7 +15,7 @@
       "ulc_x": "2",
       "ulc_y": "2",
       "width": "50",
-      "height": "6"
+      "height": "9"
     },
 
     {
@@ -26,7 +26,7 @@
       "ulc_x": "55",
       "ulc_y": "2",
       "width": "40",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -37,7 +37,7 @@
       "ulc_x": "10",
       "ulc_y": "15",
       "width": "10",
-      "height": "4",
+      "height": "7",
       "font": "'Helvetica', sans-serif",
       "spacing": "0.3em"
     },
@@ -50,7 +50,7 @@
       "width": "40",
       "ulc_x": "20",
       "ulc_y": "15",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -61,7 +61,7 @@
       "ulc_x": "10",
       "ulc_y": "25",
       "width": "10",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -72,7 +72,7 @@
       "width": "40",
       "ulc_x": "20",
       "ulc_y": "25",
-      "height": "4"
+      "height": "7"
     },
     {
       "id": "body_label",
@@ -82,7 +82,7 @@
       "ulc_x": "10",
       "ulc_y": "35",
       "width": "10",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -103,7 +103,7 @@
       "ulc_x": "10",
       "ulc_y": "57",
       "width": "25",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -114,7 +114,7 @@
       "ulc_x": "80",
       "ulc_y": "90",
       "width": "15",
-      "height": "4"
+      "height": "7"
     },
 
     {
@@ -125,7 +125,7 @@
       "ulc_x": "2",
       "ulc_y": "90",
       "width": "20",
-      "height": "4"
+      "height": "7"
     }
   ]
 }

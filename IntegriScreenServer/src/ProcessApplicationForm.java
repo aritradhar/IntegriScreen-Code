@@ -78,8 +78,8 @@ public class ProcessApplicationForm {
 				if (key.equals("page_id") || key.equals("page_type"))
 					continue;
 
-				String phoneVal = "__NULL__"; // = phoneDataJson.getString(key);
-				String browserVal = "__NULL__"; // = browserResponse.get(key);
+				String phoneVal = "__NULL__"; 
+				String browserVal = "__NULL__";
 
 				if (phoneResponse.containsKey(key)) phoneVal = phoneResponse.get(key);
 				if (browserResponse.containsKey(key)) browserVal = browserResponse.get(key);
@@ -87,7 +87,7 @@ public class ProcessApplicationForm {
 				if(!phoneVal.equals(browserVal))
 				{
 					JSONObject failJSON = new JSONObject();
-					failJSON.put("key", key);
+					failJSON.put("elementid", key);
 					failJSON.put("phone", phoneVal);
 					failJSON.put("browser", browserVal);
 					failArray.put(failJSON);

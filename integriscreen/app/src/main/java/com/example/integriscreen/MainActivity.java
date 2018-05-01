@@ -909,7 +909,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 for(int i = 0; i < mismatchElements.length(); ++i) {
                     JSONObject currDiff = mismatchElements.getJSONObject(i);
 
-                    String elementID = currDiff.getString("key");
+                    String elementID = currDiff.getString("elementid");
                     String phoneVal = currDiff.getString("phone");
                     String browserVal = currDiff.getString("browser");
 
