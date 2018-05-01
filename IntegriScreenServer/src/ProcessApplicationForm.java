@@ -21,6 +21,12 @@ public class ProcessApplicationForm {
 	public static volatile Map<String, HashMap<String, String>> allBrowserResponses = new ConcurrentHashMap<>();
 	
 	public static final String pageDefaultLoc = "http://tildem.inf.ethz.ch/generated/";
+	/**\
+	 * page_id = title = filname
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	public static void processApplicationForm(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pageID = request.getParameter("page_id");
