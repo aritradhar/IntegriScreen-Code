@@ -54,6 +54,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // the form created based on specs received from Server
     private TargetForm targetForm;
+    private ArrayList<ActiveElementLogs> activeElementLogs;
 
     // static address of the server to fetch list of forms
     private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
@@ -225,6 +227,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         knownForms = new HashMap<String, String>();
         getListOfForms(serverURL);
+
+        // initialize logs
+        activeElementLogs = new ArrayList<>();
 
         cameraFrameRealigner = new PerspectiveRealigner();
         ISUpperFrameContinuousRealigner = new PerspectiveRealigner();
@@ -742,6 +747,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             List<Rect> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(rotatedUpperPart, 2, 1, 40);
 
             // TODO(enis): this is where you continue
+            validateUIChanges(rotatedUpperPart, changedLocations);
 
             outputOnUILabel("DIFF components: " + changedLocations.size());
 
@@ -970,13 +976,72 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     /**
+     * This method takes as input the list of changes on the screen and confirms the integrity
+     * of screen changes
+     */
+    private void validateUIChanges(Mat formOnScreen, List<Rect> changedLocations) {
+        // Todo eu: keep track of active element and update values
+        List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
+        Log.d("ElementChanges", "Total changes: " + changedLocations.size());
+        for (int i = 0; i < changedLocations.size(); i++) {
+            UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i));
+
+            // skip if the change did not happen on an input element or the change is already processed for the same frame
+            if ((currElement == null) || (processedElements.contains(currElement.id)))
+                continue;
+
+            Log.d("ElementChanges", "Element being edited: " + currElement.id);
+
+            // read the element value from the current frame
+            String newValue = concatTextBlocks(detect_text(formOnScreen));
+
+            // check if diff comes from an element value change
+            if (!currElement.currentVal.equals(newValue)) {
+                targetForm.updateElementWithValue(currElement.id, newValue);    // value updated Todo eu: what if the frame is unclear and the change is unreal
+
+                if (targetForm.activEl.equals(currElement.id)) {    // this element is already the active one
+                    targetForm.activeElementLastEdit = System.currentTimeMillis();  //Todo eu: frame timestamp would be more accurate!
+                }
+                else {
+                    String oldElement = targetForm.activEl;
+                    double tsOfNow = System.currentTimeMillis();
+                    targetForm.activeSince = tsOfNow;
+                    targetForm.activeElementLastEdit = tsOfNow;
+                    targetForm.activEl = currElement.id;
+
+                    // store the change in the logs
+                    ActiveElementLogs tmp = new ActiveElementLogs(oldElement, currElement.id, tsOfNow);
+                    activeElementLogs.add(tmp);
+                }
+            }
+
+            processedElements.add(currElement.id);  // add the current elemnt in the processed list
+//            auditActiveElementsLogs();
+        }
+    }
+
+    /**
+     *  This method verifies if the change from oldValue to newValue is legit
+     */
+    private boolean isChangeLegit(String oldValue, String newValue, double duration) {
+
+
+        return true;
+    }
+
+    private void auditActiveElementsLogs(int lastEvents) {
+        // consider #lastEvents in the audit
+
+    }
+
+    /**
      * Returns the value of an UI element that includes a given point
      */
     public String readElementValueAtDiff(Mat currentFrame, Point point) {
         String output = "";
-        int index = targetForm.matchElFromPoint(point);
-        UIElement tmp = targetForm.getElement(index);
-        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
+//        int index = targetForm.matchElFromDiff(point);
+//        UIElement tmp = targetForm.getElement(index);
+//        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
         return output;
     }
 
@@ -985,9 +1050,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     public String readElementValueAtDiff(Mat currentFrame, Rect box) {
         String output = "";
-        int index = targetForm.matchElFromRect(box);
-        UIElement tmp = targetForm.getElement(index);
-        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
+//        int index = targetForm.matchElFromDiff(box);
+//        UIElement tmp = targetForm.getElement(index);
+//        output = concatTextBlocks(detect_text(currentFrame.submat(tmp.box)));
         return output;
     }
 

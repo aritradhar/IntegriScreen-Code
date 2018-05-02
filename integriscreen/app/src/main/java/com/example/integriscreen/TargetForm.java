@@ -7,12 +7,10 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +33,8 @@ public class TargetForm {
 
     // keeps track of active UI element
     public String activEl;
-    public double timeTurnedActive;
+    public double activeSince;
+    public double activeElementLastEdit;
 
     // This defines the max values of the coordinates
     public int resolution = 100;
@@ -61,7 +60,8 @@ public class TargetForm {
         formUrl = targetUrl;
         isLoaded = false;
         activEl = "";
-        timeTurnedActive = 0;
+        activeSince = 0;
+        activeElementLastEdit = 0;
         form_w_abs = screenWidth;
         // form_h_abs can not yet be computed -> we need to find out the form ratio first.
         maxScreenH = maxScreenHeight;
@@ -78,7 +78,7 @@ public class TargetForm {
         for (int i = 0; i < allElements.size(); i++) {
             if (allElements.get(i).box.contains(point)) {
                 activEl = allElements.get(i).id;
-                timeTurnedActive = System.currentTimeMillis();
+                activeSince = System.currentTimeMillis();
                 break;
             }
         }
@@ -105,7 +105,8 @@ public class TargetForm {
             if (allElements.get(i).box.contains(tl) &&
                     allElements.get(i).box.contains(rb)) {
                 activEl = allElements.get(i).id;
-                timeTurnedActive = System.currentTimeMillis();
+                activeSince = System.currentTimeMillis();
+                activeElementLastEdit = System.currentTimeMillis();
                 break;
             }
         }
@@ -114,31 +115,47 @@ public class TargetForm {
     /**
      * This method finds the corresponding Element from a point of diff event
      */
-    public int matchElFromPoint(Point point) {
-        int index = -1; // -1 represents no element is found on the diff location
+    public UIElement matchElFromDiff(Point point) {
+        UIElement currElement = null; // empty string represents no element is found on the diff location
+
         for (int i = 0; i < allElements.size(); i++) {
             if (allElements.get(i).box.contains(point)) {
-                index = i;
+                currElement = allElements.get(i);
                 break;
             }
         }
-        return index;
+        return currElement;
     }
 
     // Returns the index of an element that *fully* contains rect
-    public int matchElFromRect(Rect rect) {
-        int index = -1;
+    public UIElement matchElFromDiff(Rect rect) {
+        UIElement currElement = null; // empty string represents no element is found on the diff location
 
         Point tl = new Point(rect.x, rect.y);
         Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
         for (int i = 0; i < allElements.size(); i++) {
             if (allElements.get(i).box.contains(tl) &&
                     allElements.get(i).box.contains(rb)) {
-                index = i;
+                currElement = allElements.get(i);
                 break;
             }
         }
-        return index;
+        return currElement;
+    }
+
+    /**
+     *  This method updates the value of an input element with the newValue
+     */
+    public void updateElementWithValue(String elementID, String newValue) {
+        for (int i = 0; i < allElements.size(); i++) {
+            UIElement currEl = allElements.get(i);
+            if (currEl.id.equals(elementID)) {
+                Log.d("ElementChanges", "Id: " + currEl.id + ", old: "
+                        + currEl.currentVal + ", new: " + newValue);
+                allElements.get(i).currentVal = newValue;
+                break;
+            }
+        }
     }
 
     /**
@@ -185,6 +202,7 @@ public class TargetForm {
 
         return new Rect(new Point(0, 0), new Point(frame_w, frame_h));
     }
+
 
     /**
      * Method to make json object request where json response starts wtih {
@@ -322,6 +340,4 @@ public class TargetForm {
         // Adding request to request queue
         MainActivity.queue.add(jsonObjReq);
     }
-
-
 }
