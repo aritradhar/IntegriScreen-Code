@@ -36,11 +36,19 @@ public class ProcessApplicationForm {
 		HashMap<String, String> KVPair = new HashMap<>();
 		
 		System.out.println("--- Parameters from browser form ---");
+		String atkMode = null;
+		String atkType = null;
 		while(params.hasMoreElements())
 		{
 			String key = params.nextElement();
-			KVPair.put(key, request.getParameter(key));
-			System.out.println("Key: " + key + " | value: " + request.getParameter(key));
+			if (key.equals("atk_mode"))
+				atkMode = request.getParameter(key);
+			else if (key.equals("atk_type"))
+				atkType = request.getParameter(key);
+			else {
+				KVPair.put(key, request.getParameter(key));
+				System.out.println("Key: " + key + " | value: " + request.getParameter(key));				
+			}
 		}
 
 
@@ -48,7 +56,11 @@ public class ProcessApplicationForm {
 
 		// response.getWriter().write("Response recorded: " + KVPair.toString());
 		//	response.flushBuffer();
-		response.sendRedirect(pageDefaultLoc + pageID + ".html?submitted=" + KVPair.toString());
+		String redirectURL = pageDefaultLoc + pageID + ".html?submitted=" + KVPair.toString();
+		if (atkMode != null && atkType != null)
+			redirectURL = redirectURL + "&atk_mode=" + atkMode + "&atk_type=" + atkType;
+		
+		response.sendRedirect(redirectURL);
 	}
 	
 	public static void processApplicationFormPhone(HttpServletRequest request, HttpServletResponse response) throws IOException
