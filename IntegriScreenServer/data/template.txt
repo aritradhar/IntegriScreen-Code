@@ -45,6 +45,7 @@ html, body, input, select, textarea, button{font-family: !!font!!; letter-spacin
 <script type='text/javascript' src='js/underscore-min.js'></script>
 <script type='text/javascript' src='js/restore.js'></script>
 <script type='text/javascript' src='js/attack.js'></script>
+<script type='text/javascript' src='js/ocr_tester.js'></script>
 </head>
 
 !!body!!
