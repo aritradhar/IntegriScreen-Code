@@ -27,6 +27,11 @@ h1, h2, h3, h4, h5, h6 {
     box-sizing: border-box;
 }
 
+input[type='text'] {
+    border-left-style: solid;
+    border-left-width: 1px;
+}
+
 label, textarea, input, button {	
     padding: 1% 1%;
     box-sizing: border-box;

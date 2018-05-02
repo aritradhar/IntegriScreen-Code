@@ -120,7 +120,7 @@ public class PageGen {
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type=" + type + " name =" + id + " value=\"" + initialValue
+				elementHtmlString.append("<input type='text' name ='" + id + "' value=\"" + initialValue
 						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
 			}
 

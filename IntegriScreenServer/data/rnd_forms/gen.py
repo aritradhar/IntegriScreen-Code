@@ -45,10 +45,10 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
             {
                 "id": "form_title",
                 "type": "title",
-                "initialvalue": "Random " + title,
+                "initialvalue": title,
                 "editable": "false",
                 "ulc_x": "5",
-                "ulc_y": "5",
+                "ulc_y": "2",
                 "width": "50",
                 "height": "5"
             },
