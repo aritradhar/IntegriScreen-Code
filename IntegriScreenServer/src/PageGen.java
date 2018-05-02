@@ -45,7 +45,7 @@ public class PageGen {
 
 		String global_font = jObject.getString("font_family");
 		String font_spacing = jObject.getString("letter_spacing");
-		String elemFont = jObject.has("fontsize") ? jObject.getString("fontsize") : "12pt";
+		String fontsize = jObject.has("fontsize") ? jObject.getString("fontsize") : "12pt";
 
 
 		JSONArray elements = jObject.getJSONArray("elements");
@@ -149,6 +149,7 @@ public class PageGen {
 
 		htmlFile = htmlFile.replaceAll("!!font!!", global_font);
 		htmlFile = htmlFile.replaceAll("!!letter_spacing!!", font_spacing);
+		htmlFile = htmlFile.replaceAll("!!fontsize!!", fontsize);
 
 		// ----- Generate the main .html file
 		htmlFile = htmlFile.replaceAll("!!body!!", elementHtmlString.toString());
