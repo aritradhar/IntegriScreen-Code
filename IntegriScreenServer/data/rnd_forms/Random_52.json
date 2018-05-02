@@ -1,0 +1,121 @@
+{
+  "letter_spacing": "normal", 
+  "vspace": "83", 
+  "elements": [
+    {
+      "width": "50", 
+      "initialvalue": "Random_52", 
+      "editable": "false", 
+      "height": "5", 
+      "type": "title", 
+      "id": "form_title", 
+      "ulc_x": "5", 
+      "ulc_y": "2"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "gite", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "0", 
+      "ulc_x": "11.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "epitaph", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "1", 
+      "ulc_x": "31.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "none", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "bayonets", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "4", 
+      "ulc_x": "71.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "wide", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "5", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "60", 
+      "initialvalue": "sadism", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "6", 
+      "ulc_x": "41.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "60", 
+      "initialvalue": "blacks", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "7", 
+      "ulc_x": "41.8", 
+      "ulc_y": "79"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "clad", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "8", 
+      "ulc_x": "11.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "80", 
+      "initialvalue": "depreciation", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "9", 
+      "ulc_x": "21.8", 
+      "ulc_y": "89"
+    }
+  ], 
+  "ratio": "12:10", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "border_thickness": "1", 
+  "page_id": "Random_52", 
+  "font_family": "\"Arial, sans-serif"
+}

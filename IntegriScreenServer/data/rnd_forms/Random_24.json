@@ -1,0 +1,91 @@
+{
+  "letter_spacing": "normal", 
+  "vspace": "83", 
+  "elements": [
+    {
+      "width": "50", 
+      "initialvalue": "Random_24", 
+      "editable": "false", 
+      "height": "5", 
+      "type": "title", 
+      "id": "form_title", 
+      "ulc_x": "5", 
+      "ulc_y": "2"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "0", 
+      "ulc_x": "21.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "50", 
+      "initialvalue": "wolfed", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "1", 
+      "ulc_x": "51.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "60", 
+      "initialvalue": "baffle", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "11.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "sods", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "71.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "lxiv", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "50", 
+      "initialvalue": "uncoiled", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "5", 
+      "ulc_x": "11.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "6", 
+      "ulc_x": "71.8", 
+      "ulc_y": "79"
+    }
+  ], 
+  "ratio": "13:8", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "border_thickness": "1", 
+  "page_id": "Random_24", 
+  "font_family": "\"Arial, sans-serif"
+}

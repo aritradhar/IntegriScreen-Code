@@ -13,7 +13,7 @@ FONT_POOL = [
 ELEMENT_POOL = [
     "textarea",
     "textfield",
-    "checkbox",
+#    "checkbox",
     "label"
 ]
 
@@ -28,10 +28,9 @@ def random_word(x_space):
 
 def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif', randomfont=False):
 
-    ratio = [np.random.randint(10, 15), np.random.randint(8, 15)]
-    height = np.random.randint(50, 90)
-    if height < 70 and ratio[0] < ratio[1]:
-        ratio[0] = ratio[1]
+    minWidth = 12, maxWidth = 15
+    ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(8, 15)]
+    height = np.random.randint(65, 90)
 
     form = {
         "ratio": "{}:{}".format(*ratio),
@@ -55,7 +54,11 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
         ]
     }
 
-    elements_start_pos = sorted([x if x % 10 != 9 else x - 1 for x in np.random.choice(range(90), num_elements, replace=False)])
+    allbut9 = list(set(range(90)) - set(range(9, 90, 10)))
+    randomPick = np.random.choice(allbut9, num_elements, replace=False)
+    elements_start_pos = sorted(randomPick)
+
+    # Who takes the role of the button?
     button_elem = np.random.choice(range(num_elements))
 
     elements_coords = [(x, min(x + np.random.randint(2, 10), 10 * (x / 10 + 1), elements_start_pos[_i+1] if _i < len(elements_start_pos) - 1 else 90)) for _i, x in enumerate(elements_start_pos)]
@@ -70,7 +73,7 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
             "editable": "true" if elem_type in ["textarea", "textfield", "checkbox"] else "false",
             "ulc_x": (start % 10) * 10 + 1.8,
             "ulc_y": (start / 10) * 10 + 9,
-            "width": (end - start) * 10 - 3,  # ghetto margin
+            "width": (end - start) * 10,  # ghetto margin
             "height": 9
         })
 

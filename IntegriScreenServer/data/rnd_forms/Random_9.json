@@ -1,0 +1,71 @@
+{
+  "letter_spacing": "normal", 
+  "vspace": "73", 
+  "elements": [
+    {
+      "width": "50", 
+      "initialvalue": "Random_9", 
+      "editable": "false", 
+      "height": "5", 
+      "type": "title", 
+      "id": "form_title", 
+      "ulc_x": "5", 
+      "ulc_y": "2"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "0", 
+      "ulc_x": "51.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "toughed", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "1", 
+      "ulc_x": "61.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "chin", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "cylinder", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "21.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "amulets", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
+    }
+  ], 
+  "ratio": "12:10", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "border_thickness": "1", 
+  "page_id": "Random_9", 
+  "font_family": "\"Arial, sans-serif"
+}

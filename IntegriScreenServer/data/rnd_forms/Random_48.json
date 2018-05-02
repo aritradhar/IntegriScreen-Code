@@ -1,0 +1,111 @@
+{
+  "letter_spacing": "normal", 
+  "vspace": "66", 
+  "elements": [
+    {
+      "width": "50", 
+      "initialvalue": "Random_48", 
+      "editable": "false", 
+      "height": "5", 
+      "type": "title", 
+      "id": "form_title", 
+      "ulc_x": "5", 
+      "ulc_y": "2"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "shuffled", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "0", 
+      "ulc_x": "1.8", 
+      "ulc_y": "9"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "hosiers", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "1", 
+      "ulc_x": "71.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "2", 
+      "ulc_x": "81.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "beets", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "3", 
+      "ulc_x": "11.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "50", 
+      "initialvalue": "spiny", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "31.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "kisser", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "5", 
+      "ulc_x": "51.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "hake", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "6", 
+      "ulc_x": "81.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "50", 
+      "initialvalue": "trivets", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "7", 
+      "ulc_x": "1.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "checkbox", 
+      "id": "8", 
+      "ulc_x": "61.8", 
+      "ulc_y": "89"
+    }
+  ], 
+  "ratio": "12:10", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "border_thickness": "1", 
+  "page_id": "Random_48", 
+  "font_family": "\"Arial, sans-serif"
+}
