@@ -68,7 +68,7 @@ import static com.example.integriscreen.ISImageProcessor.rotate270;
 import static com.example.integriscreen.ISImageProcessor.rotate90;
 import static org.opencv.imgproc.Imgproc.line;
 
-public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener {
+public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
 
     private static final String TAG = "MainActivity";
 
@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private ISImageProcessor upperFrameISImageProcessor;
     private ISImageProcessor lowerFrameISImageProcessor;
     private ISImageProcessor wholeFrameISImageProcessor;
+    private EvaluationController myEvaluationController;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -236,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         upperFrameISImageProcessor = new ISImageProcessor();
         lowerFrameISImageProcessor = new ISImageProcessor();
         wholeFrameISImageProcessor = new ISImageProcessor();
+
+        myEvaluationController = new EvaluationController(this);
 
         huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -340,7 +343,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickShowDiff(View view) {
-        currentOutputSelection = OutputSelection.DIFF;
+//        if (limitAreaCheckbox.isChecked()) {
+//            limitAreaCheckbox.setChecked(false);
+            myEvaluationController.startEvaluation();
+//        }
+//        else
+//            currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
         currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
@@ -364,11 +372,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    public void onClickStartIS(View view) {
+    public void startIntegriScreen() {
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
         transitionISSTo(ISState.DETECTING_FRAME);
         outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
+    }
+
+    public void onClickStartIS(View view) {
+        startIntegriScreen();
     }
 
     // Button callback to handle taking a picture
@@ -1146,5 +1158,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Adding request to request queue
         queue.add(jsonObjReq);
     }
+
+    public boolean shouldStopEvaluation() {
+        if (targetForm == null || !targetForm.isLoaded)
+            return false;
+
+        if (targetForm.pageId.equals("__STOP__"))
+            return true;
+
+        return false;
+    }
+
+    public boolean previousFormSuccessfullyVerified() {
+        return (currentISState == ISState.SUPERVISING_USER_INPUT);
+    }
+
+    public void startEvaluation(int startIndex, int endIndex) {
+        // TODO: not implemented yet
+    }
+
 }
 
