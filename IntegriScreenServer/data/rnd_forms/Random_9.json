@@ -1,71 +1,72 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "73", 
+  "vspace": "69", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "ratio": "13:14", 
+  "fontsize": 12, 
+  "border_thickness": "1", 
+  "page_id": "Random_9", 
+  "font_family": "\"Arial, sans-serif", 
   "elements": [
     {
       "width": "50", 
-      "initialvalue": "Random_9", 
+      "initialvalue": "Random 9", 
       "editable": "false", 
-      "height": "5", 
+      "height": "9", 
       "type": "title", 
       "id": "form_title", 
       "ulc_x": "5", 
       "ulc_y": "2"
     }, 
     {
-      "width": "50", 
-      "initialvalue": "hemostat", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "0", 
-      "ulc_x": "51.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "40", 
-      "initialvalue": "unpaired", 
+      "width": "37", 
+      "initialvalue": "elates", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "11.8", 
-      "ulc_y": "29"
+      "id": "0", 
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "self", 
-      "editable": "false", 
+      "width": "17", 
+      "initialvalue": "away", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
+      "id": "1", 
+      "ulc_x": "81.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "puff", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
       "id": "2", 
       "ulc_x": "1.8", 
-      "ulc_y": "49"
+      "ulc_y": "59"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "jail", 
+      "width": "17", 
+      "initialvalue": "wits", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "3", 
       "ulc_x": "21.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "kilowatts", 
-      "editable": "true", 
+      "width": "77", 
+      "initialvalue": "embezzling", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "button", 
       "id": "4", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
+      "ulc_x": "1.8", 
+      "ulc_y": "89"
     }
-  ], 
-  "ratio": "12:12", 
-  "form_action": "/IntegriScreenServer/MainServer", 
-  "border_thickness": "1", 
-  "page_id": "Random_9", 
-  "font_family": "\"Arial, sans-serif"
+  ]
 }

@@ -1,20 +1,26 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "69", 
+  "vspace": "78", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "ratio": "13:14", 
+  "fontsize": 12, 
+  "border_thickness": "1", 
+  "page_id": "Random_5", 
+  "font_family": "\"Arial, sans-serif", 
   "elements": [
     {
       "width": "50", 
-      "initialvalue": "Random_5", 
+      "initialvalue": "Random 5", 
       "editable": "false", 
-      "height": "5", 
+      "height": "9", 
       "type": "title", 
       "id": "form_title", 
       "ulc_x": "5", 
       "ulc_y": "2"
     }, 
     {
-      "width": "80", 
-      "initialvalue": "lapse", 
+      "width": "57", 
+      "initialvalue": "sharping", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
@@ -23,49 +29,44 @@
       "ulc_y": "19"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "butter", 
-      "editable": "true", 
+      "width": "27", 
+      "initialvalue": "wooed", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "1", 
-      "ulc_x": "31.8", 
+      "ulc_x": "21.8", 
       "ulc_y": "29"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "glob", 
+      "width": "27", 
+      "initialvalue": "kenneled", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
+      "ulc_x": "21.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "edgings", 
+      "width": "37", 
+      "initialvalue": "buybacks", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "moot", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "3", 
-      "ulc_x": "61.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "lynx", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
       "id": "4", 
-      "ulc_x": "51.8", 
-      "ulc_y": "49"
+      "ulc_x": "61.8", 
+      "ulc_y": "79"
     }
-  ], 
-  "ratio": "12:14", 
-  "form_action": "/IntegriScreenServer/MainServer", 
-  "border_thickness": "1", 
-  "page_id": "Random_5", 
-  "font_family": "\"Arial, sans-serif"
+  ]
 }

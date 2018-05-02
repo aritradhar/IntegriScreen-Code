@@ -1,110 +1,116 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "65", 
+  "vspace": "74", 
+  "form_action": "/IntegriScreenServer/MainServer", 
+  "ratio": "12:13", 
+  "fontsize": 12, 
+  "border_thickness": "1", 
+  "page_id": "Random_55", 
+  "font_family": "\"Arial, sans-serif", 
   "elements": [
     {
       "width": "50", 
-      "initialvalue": "Random_55", 
+      "initialvalue": "Random 55", 
       "editable": "false", 
-      "height": "5", 
+      "height": "9", 
       "type": "title", 
       "id": "form_title", 
       "ulc_x": "5", 
       "ulc_y": "2"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "tone", 
+      "width": "17", 
+      "initialvalue": "pacy", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "51.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "rusk", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "10", 
-      "initialvalue": "city", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "2", 
       "ulc_x": "21.8", 
       "ulc_y": "29"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "pone", 
+      "width": "77", 
+      "initialvalue": "pyjamas", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "1", 
+      "ulc_x": "1.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "77", 
+      "initialvalue": "sandhog", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "21.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "hops", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "3", 
-      "ulc_x": "31.8", 
-      "ulc_y": "29"
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "indiscipline", 
+      "width": "17", 
+      "initialvalue": "week", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "4", 
       "ulc_x": "41.8", 
-      "ulc_y": "29"
+      "ulc_y": "69"
     }, 
     {
-      "width": "70", 
-      "initialvalue": "cogent", 
+      "width": "17", 
+      "initialvalue": "milf", 
       "editable": "false", 
       "height": "9", 
-      "type": "label", 
+      "type": "button", 
       "id": "5", 
-      "ulc_x": "31.8", 
-      "ulc_y": "39"
+      "ulc_x": "61.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "foil", 
+      "width": "17", 
+      "initialvalue": "curb", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "6", 
-      "ulc_x": "51.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "69"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "mien", 
+      "width": "17", 
+      "initialvalue": "pour", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "7", 
       "ulc_x": "81.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "60", 
-      "initialvalue": "laughing", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "8", 
-      "ulc_x": "21.8", 
       "ulc_y": "79"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "lady", 
+      "width": "37", 
+      "initialvalue": "winked", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "8", 
+      "ulc_x": "41.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "bale", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
@@ -112,10 +118,5 @@
       "ulc_x": "81.8", 
       "ulc_y": "89"
     }
-  ], 
-  "ratio": "13:8", 
-  "form_action": "/IntegriScreenServer/MainServer", 
-  "border_thickness": "1", 
-  "page_id": "Random_55", 
-  "font_family": "\"Arial, sans-serif"
+  ]
 }
