@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    private void outputOnToast(final String outString) {
+    public void outputOnToast(final String outString) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1171,6 +1171,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public boolean previousFormSuccessfullyVerified() {
         return (currentISState == ISState.SUPERVISING_USER_INPUT);
+    }
+
+    public void reportEvaluationResult(int cntSuccess, int cntTotal) {
+        String message = "Success rate: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal;
+        Log.d("Evaluation Finished:", message);
+        outputOnToast(message);
     }
 
     public void startEvaluation(int startIndex, int endIndex) {

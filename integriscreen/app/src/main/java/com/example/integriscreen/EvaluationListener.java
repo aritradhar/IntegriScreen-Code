@@ -8,4 +8,6 @@ public interface EvaluationListener {
     public void startIntegriScreen();
     public boolean shouldStopEvaluation();
     public boolean previousFormSuccessfullyVerified();
+    public void reportEvaluationResult(int success, int total);
+    public void outputOnToast(String message);
 }

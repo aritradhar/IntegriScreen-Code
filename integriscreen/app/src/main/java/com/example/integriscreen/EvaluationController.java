@@ -11,6 +11,8 @@ public class EvaluationController {
     private Timer reloadTimer;
     private TimerTask reloadTimerTask;
 
+    int maxCnt = 200;
+    int secondsToVerify = 10;
 
     private void cancelTimers() {
         // if (submitDataTimer != null) outputOnToast("Cancelling the existing timer.");
@@ -30,8 +32,7 @@ public class EvaluationController {
 
         Log.d("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
 
-        // TODO:
-        // mainActivity.reportEvaluationResult(cntSuccess, cntSuccess);
+        mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
 
     public void startEvaluation() {
@@ -40,7 +41,6 @@ public class EvaluationController {
         reloadTimer = new Timer();
         reloadTimerTask = new TimerTask() {
             int cntSuccess = 0;
-            int maxCnt = 10;
             int cntTotal = 0;
 
             @Override
@@ -48,7 +48,11 @@ public class EvaluationController {
                 if (cntTotal > 0 && mainActivity.previousFormSuccessfullyVerified())
                     ++cntSuccess;
 
-                Log.d("Evaluation in progress:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
+                if (cntTotal > 0) {
+                    String message = "Success rate: " + cntSuccess + " / " + cntTotal + " = " + (double)cntSuccess / cntTotal;
+                    Log.d("Evaluation in progress:", message);
+                    mainActivity.outputOnToast(message);
+                }
 
                 if (cntTotal <= maxCnt && !mainActivity.shouldStopEvaluation())
                     mainActivity.startIntegriScreen();
@@ -60,7 +64,7 @@ public class EvaluationController {
         };
 
         // TODO: note: the time it takes to load the form is also a parameter that we could evaluate: "we are able to load 90% of forms in 2 seconds, and 95% in 5 seconds..."
-        reloadTimer.schedule(reloadTimerTask, 0, 5000);
+        reloadTimer.schedule(reloadTimerTask, 0, 1000 * secondsToVerify);
     }
 
 }
