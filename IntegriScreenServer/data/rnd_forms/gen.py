@@ -44,7 +44,7 @@ def generate_form(title, num_elements=5, fontsize=12, font='"Arial, sans-serif',
         "border_thickness": "1",
         "font_family": font,
         "letter_spacing": "normal",
-        "fontsize": fontsize,
+        "fontsize": str(fontsize),
         "form_action": "/IntegriScreenServer/MainServer",
         "elements": [
             {
