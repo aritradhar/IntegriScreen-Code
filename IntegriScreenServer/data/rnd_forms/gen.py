@@ -28,9 +28,9 @@ def random_word(x_space):
 
 def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif', randomfont=False):
 
-    minWidth = 12; maxWidth = 15    
-    ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(8, 15)]
-    height = np.random.randint(65, 90)
+    minWidth = 12; maxWidth = 15
+    ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(12, 15)]
+    height = np.random.randint(65, 80)
 
     form = {
         "ratio": "{}:{}".format(*ratio),
@@ -44,12 +44,12 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
             {
                 "id": "form_title",
                 "type": "title",
-                "initialvalue": title,
+                "initialvalue": title.replace('_', ' '),
                 "editable": "false",
                 "ulc_x": "5",
                 "ulc_y": "2",
                 "width": "50",
-                "height": "5"
+                "height": "9"
             },
         ]
     }
@@ -73,7 +73,7 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
             "editable": "true" if elem_type in ["textarea", "textfield", "checkbox"] else "false",
             "ulc_x": (start % 10) * 10 + 1.8,
             "ulc_y": (start / 10) * 10 + 9,
-            "width": (end - start) * 10,  # ghetto margin
+            "width": (end - start) * 10 - 3,  # ghetto margin
             "height": 9
         })
 
