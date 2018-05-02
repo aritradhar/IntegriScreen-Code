@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-
+<head>
 <style>
 
 html, body{
@@ -41,6 +41,11 @@ html, body, input, select, textarea, button{font-family: !!font!!; letter-spacin
 
 </style>
 
+<script type='text/javascript' src='js/jquery-latest.min.js'></script>
+<script type='text/javascript' src='js/underscore-min.js'></script>
+<script type='text/javascript' src='js/restore.js'></script>
+<script type='text/javascript' src='js/attack.js'></script>
+</head>
 
 !!body!!
 
