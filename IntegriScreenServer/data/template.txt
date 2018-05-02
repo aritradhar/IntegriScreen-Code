@@ -7,6 +7,7 @@ html, body{
     height: 100%;
     margin: 0 !important;
     padding: 0 !important;
+    fontsize: !!fontsize!!
 }
 
 label {
@@ -32,7 +33,7 @@ input[type='text'] {
     border-left-width: 1px;
 }
 
-label, textarea, input, button {	
+label, textarea, input, button {
     padding: 1% 1%;
     box-sizing: border-box;
     -moz-user-select: none;

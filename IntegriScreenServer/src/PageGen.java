@@ -25,7 +25,7 @@ public class PageGen {
 		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
 		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
 
-		
+
 		System.out.println("--------------Opening File: " + pageFileName + ".html-----------------");
 
 
@@ -45,6 +45,7 @@ public class PageGen {
 
 		String global_font = jObject.getString("font_family");
 		String font_spacing = jObject.getString("letter_spacing");
+		String elemFont = jObject.has("fontsize") ? jObject.getString("fontsize") : "12pt";
 
 
 		JSONArray elements = jObject.getJSONArray("elements");
@@ -68,7 +69,7 @@ public class PageGen {
 		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
 
 		int titleCounter = 0;
-		
+
 		String page_title_h2 = null;
 
 		for(int i = 0; i < elements.length(); i++)
@@ -80,7 +81,7 @@ public class PageGen {
 			String initialValue = inObject.getString("initialvalue");
 			String ulc_x = inObject.getString("ulc_x");
 			String ulc_y = inObject.getString("ulc_y");
-					
+
 			double width = inObject.getDouble("width");
 			double height = inObject.getDouble("height");
 
@@ -165,13 +166,13 @@ public class PageGen {
 		System.out.println("----------------Page generated----------------");
 		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
-		
-		
-		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" + 
+
+
+		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" +
 		//		"\nJSON file => " + urlDataName + pageFileName + ".json";
-		
+
 		return new String[] {pageFileName, page_title_h2, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};
-		
+
 	}
 
 }

@@ -25,8 +25,13 @@ def random_word(x_space):
         word = np.random.choice(WORDS)
     return word
 
+def find_max_end(x, _i, next_element):
+    return min(x + np.random.randint(2, 10),
+               10 * (x / 10 + 1),
+               next_element)
 
-def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif', randomfont=False):
+
+def generate_form(title, num_elements=5, fontsize=12, font='"Arial, sans-serif', randomfont=False):
 
     minWidth = 12; maxWidth = 15
     ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(12, 15)]
@@ -39,6 +44,7 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
         "border_thickness": "1",
         "font_family": font,
         "letter_spacing": "normal",
+        "fontsize": fontsize,
         "form_action": "/IntegriScreenServer/MainServer",
         "elements": [
             {
@@ -54,14 +60,15 @@ def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif',
         ]
     }
 
-    allbut9 = list(set(range(90)) - set(range(9, 90, 10)))
+    allbut9 = list(set(range(0, 90, 2)))
     randomPick = np.random.choice(allbut9, num_elements, replace=False)
     elements_start_pos = sorted(randomPick)
 
     # Who takes the role of the button?
     button_elem = np.random.choice(range(num_elements))
 
-    elements_coords = [(x, min(x + np.random.randint(2, 10), 10 * (x / 10 + 1), elements_start_pos[_i+1] if _i < len(elements_start_pos) - 1 else 90)) for _i, x in enumerate(elements_start_pos)]
+
+    elements_coords = [(x, find_max_end(x, _i, elements_start_pos[_i+1] if _i+1 < len(elements_start_pos) else 90)) for _i, x in enumerate(elements_start_pos)]
 
     for _i, (start, end) in zip(range(num_elements), elements_coords):
         elem_type = np.random.choice(ELEMENT_POOL) if _i != button_elem else "button"
