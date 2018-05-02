@@ -28,7 +28,7 @@ def random_word(x_space):
 
 def generate_form(title, num_elements=5, fontsize=10, font='"Arial, sans-serif', randomfont=False):
 
-    minWidth = 12, maxWidth = 15
+    minWidth = 12; maxWidth = 15    
     ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(8, 15)]
     height = np.random.randint(65, 90)
 

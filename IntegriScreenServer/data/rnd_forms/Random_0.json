@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "66", 
+  "vspace": "79", 
   "elements": [
     {
       "width": "50", 
@@ -13,54 +13,54 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "relics", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "0", 
-      "ulc_x": "1.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "50", 
-      "initialvalue": "lexis", 
+      "width": "20", 
+      "initialvalue": "shod", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "1", 
-      "ulc_x": "31.8", 
-      "ulc_y": "19"
+      "id": "0", 
+      "ulc_x": "11.8", 
+      "ulc_y": "9"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "pane", 
+      "width": "40", 
+      "initialvalue": "conked", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "41.8", 
+      "ulc_y": "9"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "stoic", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "2", 
-      "ulc_x": "71.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "29"
     }, 
     {
       "width": "40", 
-      "initialvalue": "sinning", 
+      "initialvalue": "yardarms", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "3", 
-      "ulc_x": "1.8", 
+      "ulc_x": "31.8", 
       "ulc_y": "49"
     }, 
     {
       "width": "40", 
-      "initialvalue": "heaven", 
+      "initialvalue": "busking", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "4", 
-      "ulc_x": "61.8", 
-      "ulc_y": "79"
+      "ulc_x": "31.8", 
+      "ulc_y": "89"
     }
   ], 
   "ratio": "13:12", 

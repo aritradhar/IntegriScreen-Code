@@ -13,38 +13,38 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "", 
-      "editable": "true", 
+      "width": "50", 
+      "initialvalue": "hemostat", 
+      "editable": "false", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "label", 
       "id": "0", 
       "ulc_x": "51.8", 
-      "ulc_y": "29"
+      "ulc_y": "9"
     }, 
     {
       "width": "40", 
-      "initialvalue": "toughed", 
+      "initialvalue": "unpaired", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "11.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "self", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "40", 
-      "initialvalue": "chin", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
       "id": "2", 
-      "ulc_x": "61.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "cylinder", 
+      "width": "20", 
+      "initialvalue": "jail", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
@@ -53,17 +53,17 @@
       "ulc_y": "59"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "amulets", 
+      "width": "60", 
+      "initialvalue": "kilowatts", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "4", 
-      "ulc_x": "61.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "59"
     }
   ], 
-  "ratio": "12:10", 
+  "ratio": "12:12", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_9", 

@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "66", 
+  "vspace": "83", 
   "elements": [
     {
       "width": "50", 
@@ -14,76 +14,76 @@
     }, 
     {
       "width": "20", 
-      "initialvalue": "rate", 
+      "initialvalue": "stat", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "19"
     }, 
     {
-      "width": "80", 
-      "initialvalue": "", 
-      "editable": "true", 
+      "width": "70", 
+      "initialvalue": "caveman", 
+      "editable": "false", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "button", 
       "id": "1", 
-      "ulc_x": "21.8", 
-      "ulc_y": "19"
+      "ulc_x": "11.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "nobbled", 
+      "width": "20", 
+      "initialvalue": "gawk", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "flea", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "3", 
       "ulc_x": "81.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "dace", 
+      "width": "30", 
+      "initialvalue": "sighting", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "vaqueros", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "4", 
-      "ulc_x": "11.8", 
-      "ulc_y": "69"
+      "ulc_x": "51.8", 
+      "ulc_y": "79"
     }, 
     {
-      "width": "70", 
-      "initialvalue": "blastoff", 
+      "width": "60", 
+      "initialvalue": "scarcer", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "5", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
+      "ulc_x": "11.8", 
+      "ulc_y": "89"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "heath", 
+      "width": "20", 
+      "initialvalue": "rcpt", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "6", 
-      "ulc_x": "61.8", 
-      "ulc_y": "79"
+      "ulc_x": "81.8", 
+      "ulc_y": "89"
     }
   ], 
-  "ratio": "14:10", 
+  "ratio": "12:10", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_22", 

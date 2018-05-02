@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "83", 
+  "vspace": "87", 
   "elements": [
     {
       "width": "50", 
@@ -13,67 +13,67 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "50", 
-      "initialvalue": "hunkiest", 
+      "width": "90", 
+      "initialvalue": "centralizing", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "0", 
+      "ulc_x": "11.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "80", 
+      "initialvalue": "darkener", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "1.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "glee", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "2", 
       "ulc_x": "21.8", 
       "ulc_y": "39"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "also", 
+      "width": "70", 
+      "initialvalue": "titillates", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "31.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "ulna", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "1", 
-      "ulc_x": "11.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "10", 
-      "initialvalue": "tilt", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "2", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "50", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "3", 
-      "ulc_x": "51.8", 
+      "id": "4", 
+      "ulc_x": "81.8", 
       "ulc_y": "59"
     }, 
     {
       "width": "30", 
-      "initialvalue": "musses", 
-      "editable": "false", 
+      "initialvalue": "doorknob", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "4", 
-      "ulc_x": "1.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "80", 
-      "initialvalue": "shahs", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
       "id": "5", 
-      "ulc_x": "21.8", 
+      "ulc_x": "71.8", 
       "ulc_y": "89"
     }
   ], 
-  "ratio": "13:9", 
+  "ratio": "12:12", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_17", 

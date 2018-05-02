@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "68", 
+  "vspace": "85", 
   "elements": [
     {
       "width": "50", 
@@ -13,53 +13,53 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "0", 
-      "ulc_x": "21.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "80", 
-      "initialvalue": "backcloth", 
+      "width": "20", 
+      "initialvalue": "choc", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
-      "id": "1", 
+      "type": "label", 
+      "id": "0", 
       "ulc_x": "21.8", 
-      "ulc_y": "59"
+      "ulc_y": "29"
     }, 
     {
       "width": "60", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "2", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "eddy", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "3", 
-      "ulc_x": "21.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "clvi", 
+      "initialvalue": "sludgiest", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "4", 
+      "id": "1", 
       "ulc_x": "41.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "pursed", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "natl", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "81.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "80", 
+      "initialvalue": "wisecrack", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "11.8", 
       "ulc_y": "79"
     }
   ], 

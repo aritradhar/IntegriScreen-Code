@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "88", 
+  "vspace": "79", 
   "elements": [
     {
       "width": "50", 
@@ -13,57 +13,57 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "", 
+      "width": "20", 
+      "initialvalue": "dram", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "0", 
+      "ulc_x": "51.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "typhoid", 
       "editable": "true", 
       "height": "9", 
-      "type": "checkbox", 
-      "id": "0", 
+      "type": "textfield", 
+      "id": "1", 
       "ulc_x": "71.8", 
       "ulc_y": "39"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "1", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "cabs", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "60", 
-      "initialvalue": "periphery", 
+      "width": "10", 
+      "initialvalue": "gyve", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "3", 
-      "ulc_x": "21.8", 
+      "id": "2", 
+      "ulc_x": "71.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "hawkish", 
+      "width": "20", 
+      "initialvalue": "same", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "81.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "70", 
+      "initialvalue": "refuted", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
       "id": "4", 
-      "ulc_x": "71.8", 
-      "ulc_y": "79"
+      "ulc_x": "31.8", 
+      "ulc_y": "59"
     }
   ], 
-  "ratio": "13:8", 
+  "ratio": "14:8", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_3", 

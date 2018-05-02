@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "76", 
+  "vspace": "71", 
   "elements": [
     {
       "width": "50", 
@@ -13,107 +13,107 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "wove", 
+      "width": "30", 
+      "initialvalue": "motor", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "61.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "alleged", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "71.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "2", 
-      "ulc_x": "21.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "3", 
-      "ulc_x": "81.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "29"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "scalars", 
+      "width": "30", 
+      "initialvalue": "abusers", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "1", 
+      "ulc_x": "71.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "salt", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "51.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "ties", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "iris", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "4", 
+      "ulc_x": "81.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "heaven", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
-      "id": "4", 
+      "type": "textarea", 
+      "id": "5", 
       "ulc_x": "31.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "hornier", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "5", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "glop", 
+      "width": "40", 
+      "initialvalue": "flouted", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "6", 
-      "ulc_x": "81.8", 
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "60", 
+      "initialvalue": "admin", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "7", 
+      "ulc_x": "11.8", 
       "ulc_y": "69"
     }, 
     {
       "width": "30", 
-      "initialvalue": "hatter", 
-      "editable": "false", 
+      "initialvalue": "thresh", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "7", 
-      "ulc_x": "21.8", 
-      "ulc_y": "79"
+      "type": "textfield", 
+      "id": "8", 
+      "ulc_x": "71.8", 
+      "ulc_y": "69"
     }, 
     {
       "width": "20", 
-      "initialvalue": "serf", 
-      "editable": "false", 
+      "initialvalue": "prof", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "8", 
-      "ulc_x": "51.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "tugged", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
       "id": "9", 
-      "ulc_x": "71.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ], 
-  "ratio": "14:11", 
+  "ratio": "14:8", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_53", 

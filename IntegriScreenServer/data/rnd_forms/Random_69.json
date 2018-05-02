@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "72", 
+  "vspace": "85", 
   "elements": [
     {
       "width": "50", 
@@ -13,117 +13,117 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "30", 
-      "initialvalue": "foreseen", 
+      "width": "20", 
+      "initialvalue": "tags", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "0", 
-      "ulc_x": "11.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "40", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "29"
+      "ulc_x": "81.8", 
+      "ulc_y": "9"
     }, 
     {
       "width": "20", 
-      "initialvalue": "kegs", 
-      "editable": "false", 
+      "initialvalue": "acts", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "81.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "squawked", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
       "id": "2", 
       "ulc_x": "11.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "priers", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "3", 
+      "ulc_x": "1.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "hauling", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "31.8", 
       "ulc_y": "39"
     }, 
     {
       "width": "30", 
-      "initialvalue": "duvet", 
+      "initialvalue": "storms", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "3", 
-      "ulc_x": "41.8", 
+      "id": "5", 
+      "ulc_x": "71.8", 
       "ulc_y": "39"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "rung", 
+      "width": "60", 
+      "initialvalue": "insolvents", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "6", 
+      "ulc_x": "11.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "weir", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "7", 
+      "ulc_x": "1.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "80", 
+      "initialvalue": "steamroller", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "4", 
-      "ulc_x": "31.8", 
+      "id": "8", 
+      "ulc_x": "21.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "feature", 
-      "editable": "true", 
+      "width": "20", 
+      "initialvalue": "view", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
-      "id": "5", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "mistrust", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "6", 
+      "type": "label", 
+      "id": "9", 
       "ulc_x": "1.8", 
       "ulc_y": "69"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "7", 
-      "ulc_x": "31.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "puckish", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "8", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "disburse", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "9", 
-      "ulc_x": "71.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "40", 
-      "initialvalue": "soon", 
+      "width": "80", 
+      "initialvalue": "duelists", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "10", 
-      "ulc_x": "31.8", 
-      "ulc_y": "89"
+      "ulc_x": "1.8", 
+      "ulc_y": "79"
     }
   ], 
-  "ratio": "13:13", 
+  "ratio": "13:14", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_69", 

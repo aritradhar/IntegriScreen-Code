@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "78", 
+  "vspace": "79", 
   "elements": [
     {
       "width": "50", 
@@ -13,67 +13,67 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "70", 
-      "initialvalue": "", 
+      "width": "40", 
+      "initialvalue": "settle", 
       "editable": "true", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "31.8", 
-      "ulc_y": "9"
+      "ulc_x": "61.8", 
+      "ulc_y": "39"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "grudged", 
-      "editable": "false", 
+      "width": "90", 
+      "initialvalue": "enfold", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
       "id": "1", 
       "ulc_x": "11.8", 
-      "ulc_y": "19"
+      "ulc_y": "49"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "herd", 
+      "width": "70", 
+      "initialvalue": "concernedly", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "2", 
-      "ulc_x": "61.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "3", 
-      "ulc_x": "71.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "mach", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "4", 
-      "ulc_x": "1.8", 
+      "ulc_x": "21.8", 
       "ulc_y": "69"
     }, 
     {
       "width": "20", 
-      "initialvalue": "ware", 
+      "initialvalue": "ants", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
+      "id": "3", 
+      "ulc_x": "41.8", 
+      "ulc_y": "79"
+    }, 
+    {
+      "width": "40", 
+      "initialvalue": "unsnap", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "4", 
+      "ulc_x": "61.8", 
+      "ulc_y": "79"
+    }, 
+    {
+      "width": "20", 
+      "initialvalue": "plan", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
       "id": "5", 
       "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ], 
-  "ratio": "14:14", 
+  "ratio": "13:9", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_14", 

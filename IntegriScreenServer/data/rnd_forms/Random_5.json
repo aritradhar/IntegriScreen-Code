@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "76", 
+  "vspace": "69", 
   "elements": [
     {
       "width": "50", 
@@ -13,57 +13,57 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "forging", 
-      "editable": "false", 
+      "width": "80", 
+      "initialvalue": "lapse", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "61.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "fogs", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "1", 
-      "ulc_x": "21.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "19"
     }, 
     {
+      "width": "40", 
+      "initialvalue": "butter", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "1", 
+      "ulc_x": "31.8", 
+      "ulc_y": "29"
+    }, 
+    {
       "width": "20", 
-      "initialvalue": "rigs", 
+      "initialvalue": "glob", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "2", 
-      "ulc_x": "61.8", 
-      "ulc_y": "59"
+      "ulc_x": "81.8", 
+      "ulc_y": "29"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "dewy", 
+      "width": "40", 
+      "initialvalue": "edgings", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "lynx", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "3", 
-      "ulc_x": "81.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "mage", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
       "id": "4", 
-      "ulc_x": "81.8", 
-      "ulc_y": "79"
+      "ulc_x": "51.8", 
+      "ulc_y": "49"
     }
   ], 
-  "ratio": "13:10", 
+  "ratio": "12:14", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_5", 

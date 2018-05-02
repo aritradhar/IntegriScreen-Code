@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "76", 
+  "vspace": "79", 
   "elements": [
     {
       "width": "50", 
@@ -13,57 +13,57 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "checkbox", 
-      "id": "0", 
-      "ulc_x": "1.8", 
-      "ulc_y": "9"
-    }, 
-    {
       "width": "30", 
-      "initialvalue": "sporrans", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "21.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "10", 
-      "initialvalue": "mask", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "60", 
-      "initialvalue": "humus", 
+      "initialvalue": "pancakes", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
-      "id": "3", 
+      "id": "0", 
+      "ulc_x": "71.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "10", 
+      "initialvalue": "suns", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "1", 
       "ulc_x": "11.8", 
-      "ulc_y": "79"
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "80", 
+      "initialvalue": "stilted", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "2", 
+      "ulc_x": "21.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "ripping", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "21.8", 
+      "ulc_y": "39"
     }, 
     {
       "width": "20", 
-      "initialvalue": "", 
-      "editable": "true", 
+      "initialvalue": "give", 
+      "editable": "false", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "label", 
       "id": "4", 
       "ulc_x": "81.8", 
-      "ulc_y": "89"
+      "ulc_y": "39"
     }
   ], 
-  "ratio": "13:9", 
+  "ratio": "12:11", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_4", 

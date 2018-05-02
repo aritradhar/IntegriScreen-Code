@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "80", 
+  "vspace": "74", 
   "elements": [
     {
       "width": "50", 
@@ -13,117 +13,117 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "been", 
+      "width": "30", 
+      "initialvalue": "reached", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "0", 
+      "ulc_x": "71.8", 
+      "ulc_y": "9"
+    }, 
+    {
+      "width": "50", 
+      "initialvalue": "airshows", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
-      "id": "0", 
-      "ulc_x": "31.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "30", 
-      "initialvalue": "nylon", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
       "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "9"
+      "ulc_x": "31.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "40", 
-      "initialvalue": "", 
+      "width": "60", 
+      "initialvalue": "embargoing", 
       "editable": "true", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "textarea", 
       "id": "2", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
+      "ulc_x": "1.8", 
+      "ulc_y": "29"
     }, 
     {
       "width": "20", 
-      "initialvalue": "mode", 
-      "editable": "false", 
+      "initialvalue": "gaff", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
       "id": "3", 
-      "ulc_x": "81.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "39"
     }, 
     {
       "width": "40", 
-      "initialvalue": "euros", 
-      "editable": "false", 
+      "initialvalue": "phis", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textarea", 
       "id": "4", 
       "ulc_x": "61.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "lift", 
-      "editable": "true", 
+      "width": "40", 
+      "initialvalue": "flagmen", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "5", 
       "ulc_x": "1.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "80", 
-      "initialvalue": "teamster", 
+      "width": "60", 
+      "initialvalue": "recorded", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "6", 
-      "ulc_x": "21.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "50", 
-      "initialvalue": "", 
+      "width": "20", 
+      "initialvalue": "pleb", 
       "editable": "true", 
       "height": "9", 
-      "type": "checkbox", 
+      "type": "textfield", 
       "id": "7", 
-      "ulc_x": "51.8", 
-      "ulc_y": "79"
+      "ulc_x": "1.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "fume", 
+      "width": "50", 
+      "initialvalue": "certs", 
       "editable": "false", 
       "height": "9", 
-      "type": "label", 
+      "type": "button", 
       "id": "8", 
-      "ulc_x": "1.8", 
-      "ulc_y": "89"
+      "ulc_x": "21.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "10", 
-      "initialvalue": "milf", 
+      "width": "30", 
+      "initialvalue": "mambos", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "9", 
-      "ulc_x": "11.8", 
-      "ulc_y": "89"
+      "ulc_x": "71.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "80", 
-      "initialvalue": "goalless", 
-      "editable": "false", 
+      "width": "20", 
+      "initialvalue": "hide", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textarea", 
       "id": "10", 
-      "ulc_x": "21.8", 
-      "ulc_y": "89"
+      "ulc_x": "61.8", 
+      "ulc_y": "79"
     }
   ], 
-  "ratio": "14:14", 
+  "ratio": "13:14", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "border_thickness": "1", 
   "page_id": "Random_68", 

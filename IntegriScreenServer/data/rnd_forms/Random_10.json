@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "72", 
+  "vspace": "79", 
   "elements": [
     {
       "width": "50", 
@@ -13,64 +13,64 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "docs", 
-      "editable": "false", 
+      "width": "50", 
+      "initialvalue": "bellmen", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "31.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "20", 
-      "initialvalue": "gong", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "1", 
-      "ulc_x": "81.8", 
+      "ulc_x": "51.8", 
       "ulc_y": "19"
     }, 
     {
-      "width": "20", 
-      "initialvalue": "", 
+      "width": "10", 
+      "initialvalue": "coke", 
       "editable": "true", 
       "height": "9", 
-      "type": "checkbox", 
-      "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "51.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "60", 
-      "initialvalue": "admire", 
+      "width": "10", 
+      "initialvalue": "eked", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "30", 
+      "initialvalue": "refocus", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "3", 
-      "ulc_x": "11.8", 
-      "ulc_y": "39"
+      "ulc_x": "71.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "50", 
-      "initialvalue": "trodden", 
-      "editable": "true", 
+      "width": "70", 
+      "initialvalue": "lift", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "button", 
       "id": "4", 
-      "ulc_x": "51.8", 
+      "ulc_x": "31.8", 
       "ulc_y": "59"
     }, 
     {
       "width": "50", 
-      "initialvalue": "edema", 
-      "editable": "true", 
+      "initialvalue": "potfuls", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "label", 
       "id": "5", 
-      "ulc_x": "41.8", 
-      "ulc_y": "89"
+      "ulc_x": "1.8", 
+      "ulc_y": "79"
     }
   ], 
   "ratio": "13:9", 
