@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--nelems', type=int, default=5)
     parser.add_argument('-d', '--density', type=int, default=1)
     parser.add_argument('-fs', '--fontsize', type=int, default=10)
-    parser.add_argument('-ft', '--font', type=str, default='"Arial", sans-serif')
+    parser.add_argument('-ft', '--font', type=str, default="'Arial', sans-serif")
     parser.add_argument('--randomfont', action='store_true')
 
     args = parser.parse_args()
