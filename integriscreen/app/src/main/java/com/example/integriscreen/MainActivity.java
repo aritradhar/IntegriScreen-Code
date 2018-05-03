@@ -1007,8 +1007,66 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /**
      *  This method verifies if the change from oldValue to newValue is legit
      */
-    private boolean isChangeLegit(String oldValue, String newValue, double duration) {
 
+    // NOTE: TODO: this does not assume e.g. copy paste, deleting words with ctrl+delete, or selecting a lot of text and deleting
+    private static boolean isChangeLegit(String sOld, String sNew, double duration) {
+        Log.i("changeLegit: start: |", sOld + "|" + sNew);
+
+        // We assume duration of 1000 is one second
+        double durationSeconds = duration / 1000;
+        const int maxKeypressesPerSecond = 6;
+
+        // Find the shared prefix of the two strings: this is what the user does not need to edit.
+        int sharedPrefixLength = 0;
+        for(int i = 0; i < Math.min(sOld.length(), sNew.length()); ++i)
+            if (sOld.charAt(i) == sNew.charAt(i))
+                ++sharedPrefixLength;
+            else
+                break;
+
+        // trim the shared prefix
+        sOld = sOld.substring(sharedPrefixLength);
+        sNew = sNew.substring(sharedPrefixLength);
+
+
+        // Find the shared sufix of the two strings: we can assume that the user does not need to edit this
+        int sharedSuffixLength = 0;
+        for(int i = Math.min(sOld.length(), sNew.length()) - 1; i >= 0; --i)
+            if (sOld.charAt(i) == sNew.charAt(i))
+                ++sharedSuffixLength;
+            else
+                break;
+
+        sOld = sOld.substring(0, sOld.length() - sharedSuffixLength);
+        sNew = sNew.substring(0, sNew.length() - sharedSuffixLength);
+
+        Log.i("changeLegit: diff: |", sOld + "|" + sNew);
+
+        // Since each change costs at least 1, the minimal number of changes is the larger of the two remaining strings.
+        //   If this is already larger than the maximum allowed number of keypresses in the given duration, return false
+        if (Math.max(sOld.length(), sNew.length()) >  durationSeconds * maxKeypressesPerSecond) {
+            Log.i("changeLegit: max len > ", sOld.length() + "|" + sNew.length() + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
+            return false;
+        }
+
+        int[][] dp = new int[sOld.length()+1][sNew.length()+1];
+        dp[0][0] = 0;
+        for(int i = 1; i <= sOld.length(); ++i) dp[i][0] = i;    // The cost of typing the whole sNew
+        for(int i = 1; i <= sNew.length(); ++i) dp[0][i] = i;    // The cost of deleting the whole sOld
+
+        for(int i = 1; i <= sOld.length(); ++i)
+            for(int j = 0; j <= sNew.length(); ++j) {
+                dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1); // Either delete a char to old, or add one to new
+
+                if (sOld.charAt(i-1) == sNew.charAt(j-1)) {    // In case chars are the same, you can also just use the left cursor arrow
+                    dp[i][j] = Math.min(dp[i][j], dp[i-1][j-1] + 1);
+                }
+            }
+
+        if (dp[sOld.length()][sNew.length()] >  durationSeconds * maxKeypressesPerSecond) {
+            Log.i("changeLegit: dp > ", dp[sOld.length()][sNew.length()] + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
+            return false;
+        }
 
         return true;
     }
