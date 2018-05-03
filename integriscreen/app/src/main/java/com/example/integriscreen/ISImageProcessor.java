@@ -3,6 +3,7 @@ package com.example.integriscreen;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.Log;
+import android.util.Pair;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -113,7 +114,7 @@ public class ISImageProcessor {
         return (R.tl().x < limit || R.tl().y < limit || R.br().x + limit >= width || R.br().y + limit >= height);
     }
 
-    public static List<Rect> findLargeComponents(Mat frameMatBW, Mat labels, int minArea) {
+    public static List<Pair<Rect, Integer>> findLargeComponents(Mat frameMatBW, Mat labels, int minArea) {
         // Extract components
         Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
         Mat centComponents = Mat.zeros(new Size(0, 0), 0);
@@ -125,11 +126,14 @@ public class ISImageProcessor {
 
         Rect largeRectsBoundingBox = new Rect(frameMatBW.width(), frameMatBW.height(), -frameMatBW.width(), -frameMatBW.height());
 
-        List<Rect> largeRects = new ArrayList<>();
+        String allDiffAreas = "";
+
+        List<Pair<Rect, Integer>> largeRects = new ArrayList<>();
         for(int i = 1; i < rectComponents.rows(); i++) {
             // Extract bounding box
             rectComponents.row(i).get(0, 0, rectangleInfo);
             Rect currentRectBound = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
+            allDiffAreas += " | " + String.valueOf(rectangleInfo[4]);
 
 //            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
 //            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
@@ -137,11 +141,13 @@ public class ISImageProcessor {
 
             int component_area = rectangleInfo[4];
             if (component_area > minArea && !isBorderRect(currentRectBound, frameMatBW.width(), frameMatBW.height())) {
-                largeRects.add(currentRectBound);
+                largeRects.add(new Pair<>(currentRectBound, rectangleInfo[4]));
                 largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
                 Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
             }
         }
+        Log.i("all areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
+
 
         // This is just to showcase what I am finding
         labels.convertTo(labels, CV_8UC1, 10.0);
@@ -156,12 +162,12 @@ public class ISImageProcessor {
     }
     
     // This changes the inputMat and also computes the locations of all changes
-    List<Rect> diffFramesAndGetAllChangeLocations(Mat inputMat, Mat outputMat, int morphSize, int downscaleFactor, int minArea) {
+    List<Pair<Rect, Integer>> diffFramesAndGetAllChangeLocations(Mat inputMat, Mat outputMat, int morphSize, int downscaleFactor, int minArea) {
         Mat frameDiffBW = new Mat(1, 1, 1);
         diffWithPreviousFrame(inputMat, frameDiffBW, morphSize, downscaleFactor);
 
         Mat labels = new Mat(1, 1, 1);
-        List<Rect> allRects = findLargeComponents(frameDiffBW, labels, minArea);
+        List<Pair<Rect, Integer> > allRects = findLargeComponents(frameDiffBW, labels, minArea);
 
         // Depending on what I want to show
 //        labels.copyTo(outputMat);
@@ -173,9 +179,9 @@ public class ISImageProcessor {
         return allRects;
     }
 
-    List<Rect> diffFramesAndGetAllChangeLocations(Mat inputMat, int morphSize, int downscaleFactor, int minArea) {
+    List<Pair<Rect, Integer>> diffFramesAndGetAllChangeLocations(Mat inputMat, int morphSize, int downscaleFactor, int minArea) {
         Mat outputMat = new Mat(1, 1, 1);
-        List<Rect> retList = diffFramesAndGetAllChangeLocations(inputMat, outputMat, morphSize, downscaleFactor, minArea);
+        List<Pair<Rect, Integer>> retList = diffFramesAndGetAllChangeLocations(inputMat, outputMat, morphSize, downscaleFactor, minArea);
         outputMat.copyTo(inputMat);
         outputMat.release();
         return retList;

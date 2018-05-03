@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.View;
@@ -66,23 +67,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN};
     private OutputSelection currentOutputSelection;
     private SeekBar huePicker;
-    private TextView colorLabel;
-    private TextView textOutput;
-    private SeekBar detectPicker;
-    private CheckBox realignCheckbox;
-    private CheckBox limitAreaCheckbox;
-    private CheckBox liveCheckbox;
+    private static TextView colorLabel;
+    private static TextView textOutput;
+    private static SeekBar detectPicker;
+    private static CheckBox realignCheckbox;
+    private static CheckBox limitAreaCheckbox;
+    private static CheckBox liveCheckbox;
 
     private Mat previousFrameMat;
 
-    private Mat matPic;
-
-    // this is currently for "limited OCR"
-    private int h_border_perc = 30;
-    private int v_border_perc = 47;
     private Point upper_left, lower_right;
 
-    private int skin_hue_estimate = 26;
     private int color_border_hue = 130;
 
     // the form created based on specs received from Server
@@ -294,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void outputOnToast(final String outString) {
+        Log.d("Toast Output", outString);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -304,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private void outputOnUILabel(final String textToShow) {
 //        final String textToShow = outputText;
+        Log.d("UILabel Output", textToShow);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -405,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Log.d(TAG, "onPicTaken: " + currentTimeMillis());
 
         //convert to mat
-        matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
+        Mat matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
         Log.d(TAG, "afterImdecode: " + currentTimeMillis());
 
         if (currentISState == ISState.VERIFYING_UI) {
@@ -661,9 +658,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
+        int skin_hue_estimate = 26;
         PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
-        List<Rect> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart, 2, 1, 40);
+        List<Pair<Rect, Integer>> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart, 2, 1, 40);
 
         if (changedLocations.size() > 0)
             activityDetected = true;
@@ -698,17 +696,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //             if (cnt % freq == 0) storePic(canniedUpperPart, "_canny");
 
             // TODO(ivo): I need to play with parameters for min area, etc.
-            // List<Pair< Rect, int > > changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,1, 2, 170);
-            List<Rect > changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,1, 2, 170);
+            List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,
+                    1, 2, 170);
 
             validateUIChanges(rotatedUpperPart, changedLocations);
 
-            // TODO(ivo): output the sizes of all diff components
 
-//            outputOnUILabel("DIFF components: " + changedLocations.size());
+
+            String allDiffAreas = "";
+            for(Pair<Rect, Integer> P : changedLocations)
+                allDiffAreas += " | " + P.second.toString();
+
+            outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
             if (changedLocations.size() > 0 && !activityDetected) {
-                outputOnUILabel("Warning: UI changes, but no hand movement!");
                 Log.d("attack", "Warning: UI changes, but no hand movement!");
             }
 
@@ -891,6 +892,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             cameraFrameRealigner.realignImage(currentFrameMat, currentFrameMat);
         }
 
+        int h_border_perc = 30;
+        int v_border_perc = 47;
         if (currentOutputSelection == OutputSelection.RAW) {
             currentFrameMat.copyTo(previousFrameMat);
             if (limitAreaCheckbox.isChecked()) {
@@ -947,14 +950,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * of screen changes
      */
     long previousFrameTimestamp = 0;
-    private void validateUIChanges(Mat rawScreenFrame, List<Rect> changedLocations) {
+    private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
         // Todo eu: keep track of active element and update values
 
         // TODO(enis): make sure that only editable elements are allowed to change!
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
         Log.d("ElementChanges", "Total changes: " + changedLocations.size());
         for (int i = 0; i < changedLocations.size(); i++) {
-            UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i));
+            UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i).first);
+            int currElementArea = changedLocations.get(i).second;
 
             // skip if the change did not happen on an input element or the change is already processed for the same frame
             if ((currElement == null) || (processedElements.contains(currElement.id)))
