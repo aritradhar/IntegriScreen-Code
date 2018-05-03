@@ -66,6 +66,7 @@ import java.util.TimerTask;
 import static com.example.integriscreen.ISImageProcessor.applyCanny;
 import static com.example.integriscreen.ISImageProcessor.rotate270;
 import static com.example.integriscreen.ISImageProcessor.rotate90;
+import static com.example.integriscreen.ISImageProcessor.storePic;
 import static org.opencv.imgproc.Imgproc.line;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
@@ -198,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         queue = Volley.newRequestQueue(getApplicationContext());
 
         currentOutputSelection = OutputSelection.RAW;
+//        currentOutputSelection = OutputSelection.CANNY;
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -474,59 +476,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         storePic(matPic, "_mat");
     }
 
-    private void storePic(byte[] data, String extension) {
-        String fileName = genFileName(extension);
-
-        // Write the image in a file (in jpeg format)
-        try {
-            Log.d(TAG, "Saving byte[] to file: " + fileName);
-
-            FileOutputStream fos = new FileOutputStream(fileName);
-            fos.write(data);
-            fos.close();
-
-        } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
-        }
-    }
-
-    private void storePic(Mat mat, String extension) {
-        String fileName = genFileName(extension);
-
-        //convert Mat to Bitmap
-        Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
-                Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat, bmpPic);
-
-        // Write the image in a file (in jpeg format)
-        try {
-            Log.d(TAG, "Saving bitmap to file: " + fileName);
-
-            FileOutputStream fos = new FileOutputStream(fileName);
-//            fos.write(data);
-            bmpPic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-
-        } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
-        }
-    }
-
-    private String genFileName(String extension) {
-        // check if directory exists
-        File dirIS = new File(Environment.getExternalStorageDirectory(), "Integriscreen");
-        if(!dirIS.exists()) {
-            dirIS.mkdirs();
-        }
-
-        // generate filename
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
-        String fileName = dirIS.getPath() +
-                "/IS_" + sdf.format(new Date()) + extension + ".jpg";
-
-        return fileName;
-    }
 
 
     private boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
@@ -733,15 +682,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         List<Rect> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart, 2, 1, 40);
 
-        if (changedLocations.size() > 1)
+        if (changedLocations.size() > 0)
             activityDetected = true;
         else
             activityDetected = false;
+
+        if (handsPart.channels() == 1)
+            Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
 
         handsPart.copyTo(currentFrameMat.submat(handsBox));
         handsPart.release();
     }
 
+    // int cnt = 0; int freq = 50;
     void processRotatedUpperPart(Mat rotatedUpperPart)
     {
         // HANDLE THE UPPER PART!
@@ -754,17 +707,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
-            List<Rect> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(rotatedUpperPart, 2, 1, 40);
+//             if (cnt % freq == 0) storePic(rotatedUpperPart, "_upper_part");
 
-            // TODO(enis): this is where you continue
+            Mat canniedUpperPart = new Mat(1, 1, 1);
+            applyCanny(rotatedUpperPart, canniedUpperPart);
+
+//             if (cnt % freq == 0) storePic(canniedUpperPart, "_canny");
+
+            // TODO(ivo): I need to play with parameters for min area, etc.
+            // List<Pair< Rect, int > > changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,1, 2, 170);
+            List<Rect > changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,1, 2, 170);
+
             validateUIChanges(rotatedUpperPart, changedLocations);
+
+            // TODO(ivo): output the sizes of all diff components
 
             outputOnUILabel("DIFF components: " + changedLocations.size());
 
-//            Log.d("num_comp", String.valueOf(numComponents));
-            if (changedLocations.size() > 1 && !activityDetected)
+            if (changedLocations.size() > 0 && !activityDetected)
                 outputOnUILabel("Warning: UI changes, but no hand movement!");
 
+//            if (cnt % freq == 0) storePic(canniedUpperPart, "_canny_after_diff");
+
+            Imgproc.cvtColor(canniedUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+
+            canniedUpperPart.release();
+
+//            ++cnt;
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             Log.d("SubmittingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK) {
@@ -846,6 +815,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         rotate270(rotatedScreenPart, screenPart);
         rotatedScreenPart.release();
+
+        if (screenPart.channels() == 1)
+            Imgproc.cvtColor(screenPart, screenPart, Imgproc.COLOR_GRAY2RGBA);
 
         // Combine the two parts
         screenPart.copyTo(currentFrameMat.submat(screenBox));
@@ -989,8 +961,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * This method takes as input the list of changes on the screen and confirms the integrity
      * of screen changes
      */
-    private void validateUIChanges(Mat formOnScreen, List<Rect> changedLocations) {
+    private void validateUIChanges(Mat rawScreenFrame, List<Rect> changedLocations) {
         // Todo eu: keep track of active element and update values
+
+        // TODO(enis): make sure that only editable elements are allowed to change!
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
         Log.d("ElementChanges", "Total changes: " + changedLocations.size());
         for (int i = 0; i < changedLocations.size(); i++) {
@@ -1003,7 +977,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Log.d("ElementChanges", "Element being edited: " + currElement.id);
 
             // read the element value from the current frame
-            String newValue = concatTextBlocks(detect_text(formOnScreen));
+            String newValue = concatTextBlocks(detect_text(rawScreenFrame.submat(currElement.box)));
 
             // check if diff comes from an element value change
             if (!currElement.currentVal.equals(newValue)) {
@@ -1100,7 +1074,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         for (int i = 0; i < texts.size(); ++i) {
             TextBlock item = texts.valueAt(i);
             if (item != null && item.getValue() != null) {
-                textConcat += item.getValue() + " ";
+                textConcat += item.getValue();
             }
         }
         return textConcat;

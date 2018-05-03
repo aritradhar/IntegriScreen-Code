@@ -1,7 +1,10 @@
 package com.example.integriscreen;
 
+import android.graphics.Bitmap;
+import android.os.Environment;
 import android.util.Log;
 
+import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -9,7 +12,11 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.opencv.core.Core.flip;
@@ -28,20 +35,27 @@ public class ISImageProcessor {
     // based on https://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/canny_detector/canny_detector.html
     // This is using Java-based openCV
     public static void applyCanny(Mat inputMat, Mat outputMat) {
+        applyCanny(inputMat, outputMat, false);
+    }
+
+    public static void applyCanny(Mat inputMat, Mat outputMat, boolean shouldStore) {
         Mat inputMatGray = new Mat(1, 1, 1);
         Imgproc.cvtColor(inputMat, inputMatGray, Imgproc.COLOR_RGB2GRAY);
 
         double lowThreshold = 30;
-        double ratio = 2;
+        double ratio = 2.5;
         int kernel_size = 3;
 
-        Mat inputMatBlurred = new Mat(3, 3, CvType.CV_8UC4);
-
+        Mat inputMatBlurred = new Mat(1, 1, 1);
         /// Reduce noise with a kernel 3x3
+        // TODO: play with how large should the blur be!
         blur( inputMatGray, inputMatBlurred, new Size(3,3) );
+        if (shouldStore) storePic(inputMatBlurred, "_blurred");
 
         /// Canny detector
-        Imgproc.Canny( inputMatBlurred, outputMat, lowThreshold, lowThreshold*ratio, kernel_size, true );
+        Imgproc.Canny( inputMatBlurred, inputMatBlurred, lowThreshold, lowThreshold*ratio, kernel_size, true );
+
+        inputMatBlurred.copyTo(outputMat);
 
         // This copies using the "detected_edges" as a mask
         // src_gray.copyTo( dst, detected_edges);
@@ -63,8 +77,6 @@ public class ISImageProcessor {
     }
 
     public void diffWithPreviousFrame(Mat inputMat, Mat outputMat, int morphSize, int downscaleFactor) {
-        // TODO(ivo): I need to play with parameters for min area, etc.
-
         // Convert to black and white if needed
         Mat frameMatBW = new Mat(inputMat.size(), CV_8UC1);
         if (inputMat.channels() > 1) {
@@ -96,6 +108,11 @@ public class ISImageProcessor {
         frameMatBW.release();
     }
 
+    private static boolean isBorderRect(Rect R, int width, int height) {
+        int limit = 10;
+        return (R.tl().x < limit || R.tl().y < limit || R.br().x + limit >= width || R.br().y + limit >= height);
+    }
+
     public static List<Rect> findLargeComponents(Mat frameMatBW, Mat labels, int minArea) {
         // Extract components
         Mat rectComponents = Mat.zeros(new Size(0, 0), 0);
@@ -108,52 +125,49 @@ public class ISImageProcessor {
 
         Rect largeRectsBoundingBox = new Rect(frameMatBW.width(), frameMatBW.height(), -frameMatBW.width(), -frameMatBW.height());
 
-        List<Rect> allRects = new ArrayList<>();
+        List<Rect> largeRects = new ArrayList<>();
         for(int i = 1; i < rectComponents.rows(); i++) {
             // Extract bounding box
             rectComponents.row(i).get(0, 0, rectangleInfo);
             Rect currentRectBound = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
 
-            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
-            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
+//            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
+//            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
 
 
             int component_area = rectangleInfo[4];
-            if (component_area > minArea) {
-                allRects.add(currentRectBound);
+            if (component_area > minArea && !isBorderRect(currentRectBound, frameMatBW.width(), frameMatBW.height())) {
+                largeRects.add(currentRectBound);
                 largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
+                Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
             }
         }
 
         // This is just to showcase what I am finding
-        labels.convertTo(labels, CV_8UC1, 50.0);
+        labels.convertTo(labels, CV_8UC1, 10.0);
 
-        if (allRects.size() > 0)
-            Imgproc.rectangle(labels, largeRectsBoundingBox.tl(), largeRectsBoundingBox.br(), new Scalar(255, 0, 0), 2);
-
-
-        // Convert back to RGBA to be shown on the screen
-        Imgproc.cvtColor(labels, labels, Imgproc.COLOR_GRAY2RGBA);
+        if (largeRects.size() > 0)
+            Imgproc.rectangle(frameMatBW, largeRectsBoundingBox.tl(), largeRectsBoundingBox.br(), new Scalar(255, 0, 0), 4);
 
         rectComponents.release();
         centComponents.release();
 
-        return allRects;
+        return largeRects;
     }
     
     // This changes the inputMat and also computes the locations of all changes
     List<Rect> diffFramesAndGetAllChangeLocations(Mat inputMat, Mat outputMat, int morphSize, int downscaleFactor, int minArea) {
-        Mat frameMatBW = new Mat(1, 1, 1);
-        diffWithPreviousFrame(inputMat, frameMatBW, morphSize, downscaleFactor);
+        Mat frameDiffBW = new Mat(1, 1, 1);
+        diffWithPreviousFrame(inputMat, frameDiffBW, morphSize, downscaleFactor);
 
         Mat labels = new Mat(1, 1, 1);
-        List<Rect> allRects = findLargeComponents(frameMatBW, labels, minArea);
+        List<Rect> allRects = findLargeComponents(frameDiffBW, labels, minArea);
 
         // Depending on what I want to show
-        labels.copyTo(outputMat);
-//        frameMatBW.copyTo(outputMat);
+//        labels.copyTo(outputMat);
+        frameDiffBW.copyTo(outputMat);
 
-        frameMatBW.release();
+        frameDiffBW.release();
         labels.release();
 
         return allRects;
@@ -182,6 +196,66 @@ public class ISImageProcessor {
     public static void apply_diff(Mat matFirst, Mat matSecond, Mat matDiff, long morphSize, long downscaleFactor) {
         apply_diff(matFirst.getNativeObjAddr(), matSecond.getNativeObjAddr(), matDiff.getNativeObjAddr(), morphSize, downscaleFactor);
     }
+
+
+
+    public static void storePic(byte[] data, String extension) {
+        String fileName = genFileName(extension);
+
+        // Write the image in a file (in jpeg format)
+        try {
+            Log.d("Saving data[] ", "Saving byte[] to file: " + fileName);
+
+            FileOutputStream fos = new FileOutputStream(fileName);
+            fos.write(data);
+            fos.close();
+
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+    }
+
+    public static void storePic(Mat mat, String extension) {
+        String fileName = genFileName(extension);
+
+        //convert Mat to Bitmap
+        Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
+                Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmpPic);
+
+        // Write the image in a file (in jpeg format)
+        try {
+            Log.d("Saving Mat:", "Saving bitmap to file: " + fileName);
+
+            FileOutputStream fos = new FileOutputStream(fileName);
+//            fos.write(data);
+            bmpPic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+    }
+
+    private static String genFileName(String extension) {
+        // check if directory exists
+        File dirIS = new File(Environment.getExternalStorageDirectory(), "Integriscreen");
+        if(!dirIS.exists()) {
+            dirIS.mkdirs();
+        }
+
+        // generate filename
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
+        String fileName = dirIS.getPath() +
+                "/IS_" + sdf.format(new Date()) + extension + ".jpg";
+
+        return fileName;
+    }
+
+
+
+
 
     public static native void apply_diff(long matFirst, long matSecond, long matDiff, long morphSize, long downscaleFactor);
 }
