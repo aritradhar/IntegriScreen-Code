@@ -136,6 +136,16 @@
         android:text="TakePic" />
 
     <Button
+        android:id="@+id/startEval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOutput"
+        android:layout_toEndOf="@+id/takePictureButton"
+        android:onClick="onClickStartEval"
+        android:text="Eval" />
+
+
+    <Button
         android:id="@+id/ISStart"
         android:layout_marginStart="200dp"
         android:layout_width="wrap_content"

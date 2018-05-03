@@ -342,13 +342,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             outputOnToast("The form is not loaded yet!");
     }
 
+    public void onClickStartEval(View view) {
+        myEvaluationController.startEvaluation();
+    }
     public void onClickShowDiff(View view) {
-//        if (limitAreaCheckbox.isChecked()) {
-//            limitAreaCheckbox.setChecked(false);
-            myEvaluationController.startEvaluation();
-//        }
-//        else
-//            currentOutputSelection = OutputSelection.DIFF;
+        currentOutputSelection = OutputSelection.DIFF;
     }
     public void onClickShowColor(View view) {
         currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
