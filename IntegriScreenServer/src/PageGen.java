@@ -64,9 +64,10 @@ public class PageGen {
 		int vspaceInt = Integer.parseInt(vspace);
 
 		//container div
-		elementHtmlString.append("<div style=\"height:" + vspace + "vh; width:" + String.valueOf(Math.round((double)vspaceInt * heightInt / widthInt)) + "vh; margin: 0 auto; position:relative;\" id=\"frameBox\">\n");
+		
+		elementHtmlString.append(String.format("<div style='height:%s vh; width:%d vh; margin: 0 auto; position:relative;' id='frameBox'>\n", vspace, Math.round((double)vspaceInt * heightInt / widthInt)));
 		// green border overlay
-		elementHtmlString.append("<div style=\"border:" + border_thickness + "vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute;box-sizing:border-box;\" id=\"greenBox\"></div>\n");
+		elementHtmlString.append(String.format("<div style='border:%s vh solid #00ff00; height:100%%; width:100%%; margin: 0 auto; position:absolute; box-sizing:border-box;' id='greenBox'></div>\n", border_thickness));
 
 		int titleCounter = 0;
 
@@ -101,44 +102,43 @@ public class PageGen {
 					System.exit(1);
 				}
 
-				elementHtmlString.append("<h2 style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x +"%;top:" + ulc_y +"%; position:absolute\">" + initialValue + "</h2>\n");
+				elementHtmlString.append(String.format("<h2 style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute'>%s</h2>\n", width, height, ulc_x, ulc_y, initialValue));
 				page_title_h2 = initialValue;
 
 				//form action
-				elementHtmlString.append("<form action=\""+ form_action + "\" method=\"post\"  enctype=\"multipart/form-data\">");
+				elementHtmlString.append(String.format("<form action='%s' method='post'  enctype='multipart/form-data'>", form_action));
 				//hidden data
-				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_type" + "\" value=\""+ "input_form" + "\"/>");
-				elementHtmlString.append("<input type=\"hidden\" name=\"" + "page_id" + "\" value=\""+ pageName + "\"/>");
+				elementHtmlString.append("<input type='hidden' name='page_type' value='input_form' />");
+				elementHtmlString.append(String.format("<input type='hidden' name='page_id' value='%s' />", pageName));
 				titleCounter++;
 			}
 
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append("<textarea name="+ id + " style=\"left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;height:" + height + "%;width:" + width + "%;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</textarea>\n");
+				elementHtmlString.append(String.format("<textarea name='%s' style='left:%s%%; top:%s%%; position:absolute; height:%s%%; width:%s%%; font-family:%s%%; letter-spacing:%s;'>%s</textarea>\n", id, ulc_x, ulc_y, height, width, elemFont, letterSpacing, initialValue));
 
 			}
 
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append("<input type='text' name ='" + id + "' value=\"" + initialValue
-						+ "\" maxlength=\"" + maxInputChars + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">\n");
+				elementHtmlString.append(String.format("<input type='text' name ='%s' value='%s' maxlength='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; letter-spacing:%s;'>\n", id, initialValue, maxInputChars, height, ulc_x, ulc_y, elemFont, letterSpacing));
 			}
 
 			else if(type.equalsIgnoreCase("button"))
 			{
-				elementHtmlString.append("<input type=\"submit\" value=\"" + initialValue + "\" style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+				elementHtmlString.append(String.format("<input type='submit' value='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute;'>", initialValue, width, height, ulc_x, ulc_y));
 			}
 
 			else if(type.equalsIgnoreCase("checkbox"))
 			{
-				elementHtmlString.append("<input type=\"hidden\" id =\"" + id + "_hidden\" name =\"" + id + "\" value=\"False\" >");
-				elementHtmlString.append("<input type=\"checkbox\" id =\"" + id + "\" name =\"" + id + "\" value=\"True\" style=\"height:" + height + "%;width:" + width + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;\">");
+				elementHtmlString.append(String.format("<input type='hidden' id='%s_hidden' name='%s' value='False' >", id, id));
+				elementHtmlString.append(String.format("<input type='checkbox' id='%s' name='%s' value='True' style='height:%s%%; width:%s%%; left:%s%%; top:%s%%; position:absolute;'>", id, id, height, width, ulc_x, ulc_y));
 			}
 
 			else if(type.equalsIgnoreCase("label"))
 			{
-				elementHtmlString.append("<label style=\"width:" + width + "%;height:" + height + "%;left:" + ulc_x + "%;top:" + ulc_y + "%;position:absolute;font-family:" + elemFont + ";letter-spacing:"+ letterSpacing +";\">" + initialValue + "</label>\n");
+				elementHtmlString.append(String.format("<label style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; letter-spacing:%s;'>%s</label>\n", width, height, ulc_x, ulc_y, elemFont, letterSpacing, initialValue));
 			}
 
 			divCounter++;
@@ -169,7 +169,7 @@ public class PageGen {
 		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 
 
-		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Uniocorn => " + urlName + pageFileName + "_unicorn.html" +
+		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Unicorn => " + urlName + pageFileName + "_unicorn.html" +
 		//		"\nJSON file => " + urlDataName + pageFileName + ".json";
 
 		return new String[] {pageFileName, page_title_h2, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};

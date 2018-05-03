@@ -5,10 +5,10 @@ import numpy as np
 
 WORDS = np.loadtxt('dictionary', dtype=str)
 FONT_POOL = [
-    "'Arial', sans-serif",
-    "'Helvetica', sans-serif",
-    "'Verdana', sans-serif",
-    "'Times', serif"
+    '"Arial", sans-serif',
+    '"Helvetica", sans-serif',
+    '"Verdana", sans-serif',
+    '"Times", serif'
 ]
 ELEMENT_POOL = [
     "textarea",
@@ -32,7 +32,7 @@ def find_max_end(x, _i, next_element):
                next_element)
 
 
-def generate_form(title, num_elements=5, font_size="12pt", font="'Arial', sans-serif", randomfont=False):
+def generate_form(title, num_elements=5, font_size="12pt", font='"Arial", sans-serif', randomfont=False):
 
     min_width, max_width = 12, 15
     ratio = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--nelems', type=int, default=5)
     parser.add_argument('-d', '--density', type=int, default=1)
     parser.add_argument('-fs', '--fontsize', type=int, default=10)
-    parser.add_argument('-ft', '--font', type=str, default="'Arial', sans-serif")
+    parser.add_argument('-ft', '--font', type=str, default='"Arial", sans-serif')
     parser.add_argument('--randomfont', action='store_true')
 
     args = parser.parse_args()
