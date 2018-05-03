@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "67", 
+  "vspace": "69", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "14:13", 
-  "fontsize": 12, 
+  "ratio": "14:14", 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_61", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,18 +19,18 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "acid", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "smooches", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "0", 
-      "ulc_x": "1.8", 
-      "ulc_y": "19"
+      "ulc_x": "61.8", 
+      "ulc_y": "9"
     }, 
     {
       "width": "17", 
-      "initialvalue": "tuft", 
+      "initialvalue": "luff", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
@@ -39,94 +39,94 @@
       "ulc_y": "19"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "ignition", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "stride", 
+      "width": "17", 
+      "initialvalue": "loud", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "3", 
+      "id": "2", 
       "ulc_x": "61.8", 
       "ulc_y": "29"
     }, 
     {
       "width": "17", 
-      "initialvalue": "foil", 
+      "initialvalue": "tbsp", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "81.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "27", 
+      "initialvalue": "mashed", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
       "id": "4", 
+      "ulc_x": "21.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "rearing", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "5", 
       "ulc_x": "1.8", 
       "ulc_y": "49"
     }, 
     {
       "width": "17", 
-      "initialvalue": "beak", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "5", 
-      "ulc_x": "41.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "dags", 
+      "initialvalue": "heal", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "6", 
+      "ulc_x": "41.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "barred", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "7", 
       "ulc_x": "61.8", 
       "ulc_y": "49"
     }, 
     {
       "width": "17", 
-      "initialvalue": "yeti", 
-      "editable": "false", 
+      "initialvalue": "fled", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "7", 
-      "ulc_x": "81.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "pans", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "8", 
-      "ulc_x": "1.8", 
-      "ulc_y": "59"
+      "ulc_x": "81.8", 
+      "ulc_y": "69"
     }, 
     {
       "width": "37", 
-      "initialvalue": "mothball", 
+      "initialvalue": "grin", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "9", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
+      "ulc_x": "21.8", 
+      "ulc_y": "79"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "murk", 
+      "width": "37", 
+      "initialvalue": "variants", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "10", 
-      "ulc_x": "81.8", 
-      "ulc_y": "89"
+      "ulc_x": "61.8", 
+      "ulc_y": "79"
     }
   ]
 }

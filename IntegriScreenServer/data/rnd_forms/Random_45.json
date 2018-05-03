@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "78", 
+  "vspace": "76", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:12", 
-  "fontsize": 12, 
+  "ratio": "14:12", 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_45", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,93 +19,93 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "assignor", 
+      "width": "37", 
+      "initialvalue": "cheeped", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "21.8", 
       "ulc_y": "9"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "greedy", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "gaunter", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "19"
+      "ulc_x": "61.8", 
+      "ulc_y": "9"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "strategies", 
+      "width": "37", 
+      "initialvalue": "assays", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "39"
+      "ulc_x": "21.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "dist", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "3", 
-      "ulc_x": "61.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "dude", 
+      "width": "37", 
+      "initialvalue": "inboard", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "4", 
-      "ulc_x": "81.8", 
-      "ulc_y": "49"
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "gyps", 
+      "width": "37", 
+      "initialvalue": "wrist", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "4", 
+      "ulc_x": "1.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "scarceness", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "5", 
       "ulc_x": "41.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "covered", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "6", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "27", 
-      "initialvalue": "maestros", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "7", 
-      "ulc_x": "61.8", 
-      "ulc_y": "69"
+      "ulc_y": "29"
     }, 
     {
       "width": "17", 
-      "initialvalue": "vend", 
+      "initialvalue": "rate", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "8", 
+      "id": "6", 
+      "ulc_x": "81.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "27", 
+      "initialvalue": "shiitake", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "7", 
       "ulc_x": "41.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "lend", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "8", 
+      "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ]

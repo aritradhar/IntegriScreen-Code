@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "71", 
+  "vspace": "67", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:13", 
-  "fontsize": 12, 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_1", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,38 +19,38 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "equally", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "0", 
-      "ulc_x": "41.8", 
-      "ulc_y": "9"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "shallot", 
+      "width": "17", 
+      "initialvalue": "quot", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "49"
+      "id": "0", 
+      "ulc_x": "81.8", 
+      "ulc_y": "9"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "cleanlier", 
+      "width": "27", 
+      "initialvalue": "authored", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "2", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
+      "id": "1", 
+      "ulc_x": "61.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "storm", 
+      "width": "37", 
+      "initialvalue": "draggy", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "1.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "wale", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
@@ -59,14 +59,14 @@
       "ulc_y": "69"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "shifting", 
-      "editable": "false", 
+      "width": "17", 
+      "initialvalue": "wise", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "4", 
-      "ulc_x": "21.8", 
-      "ulc_y": "79"
+      "ulc_x": "41.8", 
+      "ulc_y": "69"
     }
   ]
 }

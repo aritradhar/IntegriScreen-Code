@@ -65,9 +65,9 @@ public class PageGen {
 
 		//container div
 		
-		elementHtmlString.append(String.format("<div style='height:%s vh; width:%d vh; margin: 0 auto; position:relative;' id='frameBox'>\n", vspace, Math.round((double)vspaceInt * heightInt / widthInt)));
+		elementHtmlString.append(String.format("<div style='height:%svh; width:%dvh; margin: 0 auto; position:relative;' id='frameBox'>\n", vspace, Math.round((double)vspaceInt * heightInt / widthInt)));
 		// green border overlay
-		elementHtmlString.append(String.format("<div style='border:%s vh solid #00ff00; height:100%%; width:100%%; margin: 0 auto; position:absolute; box-sizing:border-box;' id='greenBox'></div>\n", border_thickness));
+		elementHtmlString.append(String.format("<div style='border:%svh solid #00ff00; height:100%%; width:100%%; margin: 0 auto; position:absolute; box-sizing:border-box;' id='greenBox'></div>\n", border_thickness));
 
 		int titleCounter = 0;
 
@@ -115,7 +115,7 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append(String.format("<textarea name='%s' style='left:%s%%; top:%s%%; position:absolute; height:%s%%; width:%s%%; font-family:%s%%; letter-spacing:%s;'>%s</textarea>\n", id, ulc_x, ulc_y, height, width, elemFont, letterSpacing, initialValue));
+				elementHtmlString.append(String.format("<textarea name='%s' style='left:%s%%; top:%s%%; position:absolute; height:%s%%; width:%s%%; font-family:%s; letter-spacing:%s;'>%s</textarea>\n", id, ulc_x, ulc_y, height, width, elemFont, letterSpacing, initialValue));
 
 			}
 

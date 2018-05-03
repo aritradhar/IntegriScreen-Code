@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "78", 
+  "vspace": "74", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:14", 
-  "fontsize": 12, 
+  "ratio": "12:13", 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_5", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,51 +19,51 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "sharping", 
+      "width": "47", 
+      "initialvalue": "chop", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "41.8", 
+      "ulc_y": "9"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "jittery", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "41.8", 
       "ulc_y": "19"
     }, 
     {
       "width": "27", 
-      "initialvalue": "wooed", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "1", 
-      "ulc_x": "21.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "27", 
-      "initialvalue": "kenneled", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "2", 
-      "ulc_x": "21.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "buybacks", 
+      "initialvalue": "coleys", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
+      "id": "2", 
+      "ulc_x": "1.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "mufflers", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
       "id": "3", 
       "ulc_x": "61.8", 
       "ulc_y": "49"
     }, 
     {
       "width": "37", 
-      "initialvalue": "moot", 
+      "initialvalue": "plumed", 
       "editable": "false", 
       "height": "9", 
-      "type": "label", 
+      "type": "button", 
       "id": "4", 
       "ulc_x": "61.8", 
       "ulc_y": "79"

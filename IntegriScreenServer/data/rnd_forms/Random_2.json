@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "68", 
+  "vspace": "71", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "12:14", 
-  "fontsize": 12, 
+  "ratio": "13:13", 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_2", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -20,52 +20,52 @@
     }, 
     {
       "width": "17", 
-      "initialvalue": "conj", 
-      "editable": "true", 
+      "initialvalue": "biog", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "9"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "seen", 
+      "width": "17", 
+      "initialvalue": "mows", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "1", 
       "ulc_x": "21.8", 
-      "ulc_y": "9"
+      "ulc_y": "19"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "lonelier", 
+      "width": "17", 
+      "initialvalue": "anus", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "2", 
       "ulc_x": "1.8", 
-      "ulc_y": "39"
+      "ulc_y": "29"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "sheila", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "3", 
-      "ulc_x": "61.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "pars", 
+      "width": "57", 
+      "initialvalue": "stranglers", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
+      "id": "3", 
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "47", 
+      "initialvalue": "overbear", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
       "id": "4", 
-      "ulc_x": "81.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "49"
     }
   ]

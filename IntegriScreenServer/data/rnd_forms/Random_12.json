@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "66", 
+  "vspace": "65", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "13:14", 
-  "fontsize": 12, 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_12", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,63 +19,63 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "dozy", 
+      "width": "57", 
+      "initialvalue": "yogis", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "81.8", 
-      "ulc_y": "19"
+      "ulc_x": "41.8", 
+      "ulc_y": "9"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "dine", 
+      "width": "37", 
+      "initialvalue": "victim", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "1", 
-      "ulc_x": "81.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "29"
     }, 
     {
       "width": "37", 
-      "initialvalue": "spiky", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "2", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "glory", 
+      "initialvalue": "grate", 
       "editable": "false", 
       "height": "9", 
-      "type": "label", 
-      "id": "3", 
-      "ulc_x": "41.8", 
+      "type": "button", 
+      "id": "2", 
+      "ulc_x": "21.8", 
       "ulc_y": "49"
     }, 
     {
       "width": "37", 
-      "initialvalue": "burnout", 
-      "editable": "false", 
+      "initialvalue": "mallow", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "4", 
+      "type": "textfield", 
+      "id": "3", 
       "ulc_x": "41.8", 
       "ulc_y": "69"
     }, 
     {
       "width": "17", 
-      "initialvalue": "navy", 
-      "editable": "false", 
+      "initialvalue": "herd", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
-      "id": "5", 
+      "type": "textarea", 
+      "id": "4", 
       "ulc_x": "81.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "flesh", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "5", 
+      "ulc_x": "21.8", 
       "ulc_y": "79"
     }
   ]

@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "74", 
+  "vspace": "68", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:12", 
-  "fontsize": 12, 
+  "ratio": "14:13", 
+  "fontsize": "12pt", 
   "border_thickness": "1", 
   "page_id": "Random_67", 
-  "font_family": "\"Arial, sans-serif", 
+  "font_family": "\"Arial\", sans-serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,58 +19,58 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "sillies", 
-      "editable": "true", 
+      "width": "17", 
+      "initialvalue": "silt", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "61.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "9"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "vent", 
-      "editable": "false", 
+      "width": "17", 
+      "initialvalue": "slur", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
       "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
+      "ulc_x": "21.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "hark", 
+      "width": "57", 
+      "initialvalue": "troubadour", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
+      "ulc_x": "41.8", 
+      "ulc_y": "29"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "ftps", 
+      "width": "37", 
+      "initialvalue": "boycott", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "77", 
-      "initialvalue": "inanely", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "4", 
       "ulc_x": "21.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "scrota", 
+      "width": "17", 
+      "initialvalue": "zing", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "4", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "77", 
+      "initialvalue": "elephants", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
@@ -79,53 +79,53 @@
       "ulc_y": "59"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "mire", 
+      "width": "37", 
+      "initialvalue": "affluent", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "6", 
-      "ulc_x": "81.8", 
-      "ulc_y": "59"
+      "ulc_x": "21.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "throats", 
+      "width": "17", 
+      "initialvalue": "acid", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "7", 
-      "ulc_x": "61.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "69"
     }, 
     {
       "width": "37", 
-      "initialvalue": "damasked", 
-      "editable": "false", 
+      "initialvalue": "nostrum", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "8", 
-      "ulc_x": "21.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "79"
     }, 
     {
       "width": "37", 
-      "initialvalue": "holidays", 
+      "initialvalue": "orgasm", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "9", 
-      "ulc_x": "61.8", 
-      "ulc_y": "79"
+      "ulc_x": "1.8", 
+      "ulc_y": "89"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "guard", 
+      "width": "17", 
+      "initialvalue": "flux", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "10", 
-      "ulc_x": "61.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "89"
     }
   ]
