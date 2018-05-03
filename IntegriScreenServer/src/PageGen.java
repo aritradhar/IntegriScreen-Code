@@ -122,7 +122,7 @@ public class PageGen {
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append(String.format("<input type='text' name ='%s' value='%s' maxlength='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; letter-spacing:%s;'>\n", id, initialValue, maxInputChars, height, ulc_x, ulc_y, elemFont, letterSpacing));
+				elementHtmlString.append(String.format("<input type='text' name ='%s' value='%s' maxlength='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; letter-spacing:%s;'>\n", id, initialValue, maxInputChars, width, height, ulc_x, ulc_y, elemFont, letterSpacing));
 			}
 
 			else if(type.equalsIgnoreCase("button"))
