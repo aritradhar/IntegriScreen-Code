@@ -5,15 +5,15 @@ import numpy as np
 
 WORDS = np.loadtxt('dictionary', dtype=str)
 FONT_POOL = [
-    '"Arial", sans-serif',
-    '"Helvetica", sans-serif',
-    '"Verdana", sans-serif',
-    '"Times", serif'
+    "'Arial', sans-serif",
+    "'Helvetica', sans-serif",
+    "'Verdana', sans-serif",
+    "'Times', serif"
 ]
 ELEMENT_POOL = [
     "textarea",
     "textfield",
-#    "checkbox",
+    # "checkbox",
     "label"
 ]
 
@@ -25,16 +25,17 @@ def random_word(x_space):
         word = np.random.choice(WORDS)
     return word
 
+
 def find_max_end(x, _i, next_element):
     return min(x + np.random.randint(2, 10),
                10 * (x / 10 + 1),
                next_element)
 
 
-def generate_form(title, num_elements=5, fontsize=12, font='"Arial, sans-serif', randomfont=False):
+def generate_form(title, num_elements=5, font_size="12pt", font="'Arial', sans-serif", randomfont=False):
 
-    minWidth = 12; maxWidth = 15
-    ratio = [np.random.randint(minWidth, maxWidth), np.random.randint(12, 15)]
+    min_width, max_width = 12, 15
+    ratio = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
     height = np.random.randint(65, 80)
 
     form = {
@@ -44,7 +45,7 @@ def generate_form(title, num_elements=5, fontsize=12, font='"Arial, sans-serif',
         "border_thickness": "1",
         "font_family": font,
         "letter_spacing": "normal",
-        "fontsize": str(fontsize),
+        "fontsize": str(font_size),
         "form_action": "/IntegriScreenServer/MainServer",
         "elements": [
             {
@@ -60,13 +61,12 @@ def generate_form(title, num_elements=5, fontsize=12, font='"Arial, sans-serif',
         ]
     }
 
-    allbut9 = list(set(range(0, 90, 2)))
-    randomPick = np.random.choice(allbut9, num_elements, replace=False)
-    elements_start_pos = sorted(randomPick)
+    admissible_start_positions = list(set(range(0, 90, 2)))
+    random_pick = np.random.choice(admissible_start_positions, num_elements, replace=False)
+    elements_start_pos = sorted(random_pick)
 
     # Who takes the role of the button?
     button_elem = np.random.choice(range(num_elements))
-
 
     elements_coords = [(x, find_max_end(x, _i, elements_start_pos[_i+1] if _i+1 < len(elements_start_pos) else 90)) for _i, x in enumerate(elements_start_pos)]
 
