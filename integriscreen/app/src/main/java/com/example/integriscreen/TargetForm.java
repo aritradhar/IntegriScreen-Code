@@ -291,7 +291,7 @@ public class TargetForm {
         });
 
         // Adding request to request queue
-        MainActivity.queue.add(jsonObjReq);
+        MainActivity.addToCommunicationQueue(jsonObjReq);
     }
 
     /**
@@ -338,6 +338,6 @@ public class TargetForm {
         };
 
         // Adding request to request queue
-        MainActivity.queue.add(jsonObjReq);
+        MainActivity.addToCommunicationQueue(jsonObjReq);
     }
 }

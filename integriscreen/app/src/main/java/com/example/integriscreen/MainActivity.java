@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,14 +20,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -51,15 +43,10 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -67,6 +54,9 @@ import static com.example.integriscreen.ISImageProcessor.applyCanny;
 import static com.example.integriscreen.ISImageProcessor.rotate270;
 import static com.example.integriscreen.ISImageProcessor.rotate90;
 import static com.example.integriscreen.ISImageProcessor.storePic;
+import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
+import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
+import static java.lang.System.currentTimeMillis;
 import static org.opencv.imgproc.Imgproc.line;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
@@ -95,9 +85,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int skin_hue_estimate = 26;
     private int color_border_hue = 130;
 
-    // Store the RequestQueue.
-    public static RequestQueue queue;
-
     // the form created based on specs received from Server
     private TargetForm targetForm;
     private ArrayList<ActiveElementLogs> activeElementLogs;
@@ -106,14 +93,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
 
-    private HashMap<String, String> knownForms;
-
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
 
     // TextRecognizer is the native vision API for text extraction
     private TextRecognizer textRecognizer;
 
+    private ISServerCommunicationManager formsListManager;
 
     private enum ISState {  DETECTING_FRAME,       // Start detecting the green frame
                             DETECTING_TITLE,       // Start OCR-ing to find the title
@@ -195,8 +181,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-        // initialize the RequestQueue of volley
-        queue = Volley.newRequestQueue(getApplicationContext());
+        formsListManager = new ISServerCommunicationManager(serverURL, getApplicationContext());
 
         currentOutputSelection = OutputSelection.RAW;
 //        currentOutputSelection = OutputSelection.CANNY;
@@ -227,9 +212,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
         limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
         liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
-
-        knownForms = new HashMap<String, String>();
-        getListOfForms(serverURL);
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
@@ -347,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickStartEval(View view) {
         myEvaluationController.startEvaluation();
     }
+
     public void onClickShowDiff(View view) {
         currentOutputSelection = OutputSelection.DIFF;
     }
@@ -419,11 +402,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // Callback when picture is taken
     public void onPicTaken(byte[] data) {
-        Log.d(TAG, "onPicTaken: " + System.currentTimeMillis());
+        Log.d(TAG, "onPicTaken: " + currentTimeMillis());
 
         //convert to mat
         matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
-        Log.d(TAG, "afterImdecode: " + System.currentTimeMillis());
+        Log.d(TAG, "afterImdecode: " + currentTimeMillis());
 
         if (currentISState == ISState.VERIFYING_UI) {
             Mat rotatedFullRes = new Mat(1, 1, 1);
@@ -458,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
          storePic(data, "_byte");
 
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
-        Log.d(TAG, "afterCvtColor: " + System.currentTimeMillis());
+        Log.d(TAG, "afterCvtColor: " + currentTimeMillis());
 
         //        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
 
@@ -552,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private void takePicHighRes() {
         _cameraBridgeViewBase.setPictureSize(0);    // the best quality is set by default for pictures
 
-        Log.d(TAG, "before the takePicture: " + System.currentTimeMillis());
+        Log.d(TAG, "before the takePicture: " + currentTimeMillis());
         _cameraBridgeViewBase.takePicture(this);
     }
     
@@ -585,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         formToLoad = formToLoad.replaceAll("\\s+","");
 
-        String urlToLoad = knownForms.get(formToLoad);
+        String urlToLoad = formsListManager.getFormURLFromName(formToLoad);
         if (urlToLoad != null) {
             Log.d("box: curr: ", rotatedUpperFrameMat.size().toString());
             targetForm = new TargetForm(getApplicationContext(), urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
@@ -722,10 +705,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // TODO(ivo): output the sizes of all diff components
 
-            outputOnUILabel("DIFF components: " + changedLocations.size());
+//            outputOnUILabel("DIFF components: " + changedLocations.size());
 
-            if (changedLocations.size() > 0 && !activityDetected)
+            if (changedLocations.size() > 0 && !activityDetected) {
                 outputOnUILabel("Warning: UI changes, but no hand movement!");
+                Log.d("attack", "Warning: UI changes, but no hand movement!");
+            }
 
 //            if (cnt % freq == 0) storePic(canniedUpperPart, "_canny_after_diff");
 
@@ -804,7 +789,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             ISUpperFrameContinuousRealigner.realignImage(rotatedScreenPart);
         }
 
-        if (currentISState == ISState.DETECTING_FRAME && !knownForms.isEmpty()) {   // make sure that forms are already downloaded
+        if (currentISState == ISState.DETECTING_FRAME && formsListManager.isReady()) {   // make sure that forms are already downloaded
             if (loadFormBasedOnName(rotatedScreenPart, currentFrameMat.width())) { // It is important that this function only returns true if such a form exists!
                 transitionISSTo(ISState.LOADING_FORM);
             }
@@ -961,6 +946,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * This method takes as input the list of changes on the screen and confirms the integrity
      * of screen changes
      */
+    long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat rawScreenFrame, List<Rect> changedLocations) {
         // Todo eu: keep track of active element and update values
 
@@ -979,8 +965,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // read the element value from the current frame
             String newValue = concatTextBlocks(detect_text(rawScreenFrame.submat(currElement.box)));
 
+            long currentTimestamp = currentTimeMillis();
+            double diffTimestamp = currentTimestamp - previousFrameTimestamp;
+
             // check if diff comes from an element value change
             if (!currElement.currentVal.equals(newValue)) {
+                if (!isChangeLegit(currElement.currentVal, newValue, diffTimestamp)) {
+                    String message = "Change from |" + currElement.currentVal + "| to |" + newValue + "| is not OK in " + diffTimestamp + "ms";
+  //                  outputOnToast(message);
+                    outputOnUILabel(message);
+                    Log.w("non legit change: ", message);
+                }
+
                 targetForm.updateElementWithValue(currElement.id, newValue);    // value updated Todo eu: what if the frame is unclear and the change is unreal
 
                 if (targetForm.activEl.equals(currElement.id)) {    // this element is already the active one
@@ -1002,74 +998,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             processedElements.add(currElement.id);  // add the current elemnt in the processed list
 //            auditActiveElementsLogs();
         }
+        previousFrameTimestamp = currentTimeMillis();
     }
 
-    /**
-     *  This method verifies if the change from oldValue to newValue is legit
-     */
 
-    // NOTE: TODO: this does not assume e.g. copy paste, deleting words with ctrl+delete, or selecting a lot of text and deleting
-    private static boolean isChangeLegit(String sOld, String sNew, double duration) {
-        Log.i("changeLegit: start: |", sOld + "|" + sNew);
-
-        // We assume duration of 1000 is one second
-        double durationSeconds = duration / 1000;
-        const int maxKeypressesPerSecond = 6;
-
-        // Find the shared prefix of the two strings: this is what the user does not need to edit.
-        int sharedPrefixLength = 0;
-        for(int i = 0; i < Math.min(sOld.length(), sNew.length()); ++i)
-            if (sOld.charAt(i) == sNew.charAt(i))
-                ++sharedPrefixLength;
-            else
-                break;
-
-        // trim the shared prefix
-        sOld = sOld.substring(sharedPrefixLength);
-        sNew = sNew.substring(sharedPrefixLength);
-
-
-        // Find the shared sufix of the two strings: we can assume that the user does not need to edit this
-        int sharedSuffixLength = 0;
-        for(int i = Math.min(sOld.length(), sNew.length()) - 1; i >= 0; --i)
-            if (sOld.charAt(i) == sNew.charAt(i))
-                ++sharedSuffixLength;
-            else
-                break;
-
-        sOld = sOld.substring(0, sOld.length() - sharedSuffixLength);
-        sNew = sNew.substring(0, sNew.length() - sharedSuffixLength);
-
-        Log.i("changeLegit: diff: |", sOld + "|" + sNew);
-
-        // Since each change costs at least 1, the minimal number of changes is the larger of the two remaining strings.
-        //   If this is already larger than the maximum allowed number of keypresses in the given duration, return false
-        if (Math.max(sOld.length(), sNew.length()) >  durationSeconds * maxKeypressesPerSecond) {
-            Log.i("changeLegit: max len > ", sOld.length() + "|" + sNew.length() + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
-            return false;
-        }
-
-        int[][] dp = new int[sOld.length()+1][sNew.length()+1];
-        dp[0][0] = 0;
-        for(int i = 1; i <= sOld.length(); ++i) dp[i][0] = i;    // The cost of typing the whole sNew
-        for(int i = 1; i <= sNew.length(); ++i) dp[0][i] = i;    // The cost of deleting the whole sOld
-
-        for(int i = 1; i <= sOld.length(); ++i)
-            for(int j = 0; j <= sNew.length(); ++j) {
-                dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1); // Either delete a char to old, or add one to new
-
-                if (sOld.charAt(i-1) == sNew.charAt(j-1)) {    // In case chars are the same, you can also just use the left cursor arrow
-                    dp[i][j] = Math.min(dp[i][j], dp[i-1][j-1] + 1);
-                }
-            }
-
-        if (dp[sOld.length()][sNew.length()] >  durationSeconds * maxKeypressesPerSecond) {
-            Log.i("changeLegit: dp > ", dp[sOld.length()][sNew.length()] + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
-            return false;
-        }
-
-        return true;
-    }
 
     private void auditActiveElementsLogs(int lastEvents) {
         // consider #lastEvents in the audit
@@ -1102,7 +1034,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // check if the element is active, TODO: does time since active help?
         if (targetForm.getElement(i).id.equals(targetForm.activEl)) {
             targetForm.getElement(i).currentVal = text;
-            targetForm.getElement(i).lastUpdated = System.currentTimeMillis();
+            targetForm.getElement(i).lastUpdated = currentTimeMillis();
         }
         else {
             // raise an alarm flag
@@ -1111,6 +1043,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     + ", while active is: " + targetForm.activEl);
         }
     }
+
+    public static void addToCommunicationQueue(JsonObjectRequest jsonObjectRequest) {
+        ISServerCommunicationManager.queue.add(jsonObjectRequest);
+    }
+
 
     /**
      * This method returns a SparseArry of TextBlocs found in a frame, or a subframe if box is not null
@@ -1125,68 +1062,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         SparseArray<TextBlock> texts = textRecognizer.detect(frame);
         return texts;
-    }
-
-    private String concatTextBlocks (SparseArray<TextBlock> texts) {
-        String textConcat = "";
-        for (int i = 0; i < texts.size(); ++i) {
-            TextBlock item = texts.valueAt(i);
-            if (item != null && item.getValue() != null) {
-                textConcat += item.getValue();
-            }
-        }
-        return textConcat;
-    }
-
-    private void getListOfForms(String url) {
-        Log.d("ListOfForms", "trying to get the listOfForms from: " + url);
-
-        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
-                url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d("ListOfForms", "response: " + response.toString());
-
-                        try {
-                            // Parsing json object response
-                            JSONArray JSONElements = response.getJSONArray("response");
-                            Log.d("ListOfForms", "ArrayList: " + JSONElements.toString());
-
-                            // iterate through all elements
-                            for (int i = 0; i < JSONElements.length(); i++) {
-                                JSONObject currEl = JSONElements.getJSONObject(i);
-                                String pageTitle = currEl.getString("page_title");
-                                pageTitle = pageTitle.replaceAll("\\s+","");
-                                String formJsonURL = currEl.getString("json");
-                                Log.d(TAG, "FormID: " + pageTitle + " -> " + formJsonURL);
-                                knownForms.put(pageTitle, formJsonURL);
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Log.d("ListOfForms", e.getMessage());
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d("ListOfForms", "Error: " + error.getMessage());
-                        Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
-                    }
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Content-Type", "multipart/form-data");
-                return params;
-            }
-        };
-
-        // Adding request to request queue
-        queue.add(jsonObjReq);
     }
 
     public boolean shouldStopEvaluation() {

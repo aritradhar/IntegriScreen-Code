@@ -1,9 +1,5 @@
 package com.example.integriscreen;
 
-/**
- * Created by eulqinaku on 02/05/2018.
- */
-
 public class ActiveElementLogs {
     public String oldId;            // id of the previous active element -- maybe can be removed
     public String newId;            // id of the new active element
