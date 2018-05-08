@@ -315,6 +315,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickSubmitData(View view) {
+        if (currentISState == null)
+            return;
+
         Log.d("clickSubmit", currentISState.name());
 
         if (targetForm.isLoaded)
