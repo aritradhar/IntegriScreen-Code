@@ -1,12 +1,15 @@
 package com.example.integriscreen;
 
 import android.util.Log;
+import android.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class EvaluationController {
-    public EvaluationListener mainActivity;
+    public MainActivity mainActivity;
 
     private Timer reloadTimer;
     private TimerTask reloadTimerTask;
@@ -22,7 +25,12 @@ public class EvaluationController {
     }
 
 
-    public EvaluationController(EvaluationListener parentActivity) {
+    public void storeOCRMismatches(List<Pair<String, String>> OCRMismatches) {
+        for(Pair<String, String> mismatch : OCRMismatches)
+            Log.i("OCR mismatch: ", "|" + mismatch.first + "| vs |" + mismatch.second + "|");
+    }
+
+    public EvaluationController(MainActivity parentActivity) {
         mainActivity = parentActivity;
     }
 
@@ -35,6 +43,8 @@ public class EvaluationController {
         mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
 
+    // TODO: for each evaluation, we need a list of string mismatches: how did we misclassify what?
+
     public void startEvaluation() {
         cancelTimers();
 
@@ -43,21 +53,26 @@ public class EvaluationController {
             int cntSuccess = 0;
             int cntTotal = 0;
 
+            List<Integer> failIndices = new ArrayList<>();
+
             @Override
             public void run() {
-                if (cntTotal > 0 && mainActivity.previousFormSuccessfullyVerified())
-                    ++cntSuccess;
-
                 if (cntTotal > 0) {
+                    if (mainActivity.previousFormSuccessfullyVerified()) {
+                        ++cntSuccess;
+                    }
+                    else
+                        failIndices.add(cntTotal-1);
+
                     String message = "Success rate: " + cntSuccess + " / " + cntTotal + " = " + (double)cntSuccess / cntTotal;
                     Log.d("Evaluation in progress:", message);
                     mainActivity.outputOnToast(message);
                 }
 
                 if (cntTotal <= maxCnt && !mainActivity.shouldStopEvaluation())
-                    mainActivity.startIntegriScreen();
+                    mainActivity.startIntegriScreen(cntTotal);
                 else {
-                    finishEvaluation(cntSuccess, cntTotal - 1); // reduce the cntTotal that was increased at the beginning!
+                    finishEvaluation(cntSuccess, cntTotal + 1); // reduce the cntTotal that was increased at the beginning!
                 }
                 ++cntTotal;
             }

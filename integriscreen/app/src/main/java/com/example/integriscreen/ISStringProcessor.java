@@ -9,29 +9,31 @@ public class ISStringProcessor {
 
     static boolean[][] similar = new boolean[256][256];
     // We use this function for now to allow for some slack in how well does OCR work, since e.g. i and j are often confused with the current font.
-    public static boolean similarChar(char A, char B) {
+    public static boolean similarChar(char A, char B, boolean allowMinorMismatch) {
         if (A >= 256 || B >= 256) return (A == B);
 
         for(int i = 0; i < 256; ++i)
             for(int j = 0; j < 256; ++j)
                 similar[i][j] = (i == j);
 
-        similar['i']['j'] = similar['j']['i'] = true;
-        similar['8']['b'] = similar['b']['8'] = true;
-        similar['0']['8'] = similar['8']['0'] = true;
-        similar['0']['o'] = similar['o']['0'] = true;
+        if (allowMinorMismatch) { // this allows a bit of "slack" in comparison, by saying it's fine if e.g. i and j get replaced
+            similar['i']['j'] = similar['j']['i'] = true;
+            similar['8']['b'] = similar['b']['8'] = true;
+            similar['0']['8'] = similar['8']['0'] = true;
+            similar['0']['o'] = similar['o']['0'] = true;
+        }
 
         return similar[A][B];
     }
 
     // This method compares two strings, but loosely: ignoring whitesace and punctuation, and allowing that some characters are "similar"
-    public static boolean almostIdenticalString(String A, String B) {
+    public static boolean almostIdenticalString(String A, String B, boolean allowMinorCharMismatch) {
         A = OCRTrim(A);
         B = OCRTrim(B);
 
         if (A.length() != B.length()) return false;
         for(int i = 0; i < A.length(); ++i)
-            if (!similarChar(A.charAt(i), B.charAt(i)))
+            if (!similarChar(A.charAt(i), B.charAt(i), allowMinorCharMismatch))
                 return false;
 
         return true;
@@ -66,7 +68,7 @@ public class ISStringProcessor {
         // Find the shared prefix of the two strings: this is what the user does not need to edit.
         int sharedPrefixLength = 0;
         for(int i = 0; i < Math.min(sOld.length(), sNew.length()); ++i)
-            if (similarChar(sOld.charAt(i), sNew.charAt(i)))
+            if (similarChar(sOld.charAt(i), sNew.charAt(i), true))
                 ++sharedPrefixLength;
             else
                 break;
@@ -82,7 +84,7 @@ public class ISStringProcessor {
         // Find the shared sufix of the two strings: we can assume that the user does not need to edit this
         int sharedSuffixLength = 0;
         for(int i = 0; i < Math.min(sOld.length(), sNew.length()); ++i)
-            if (similarChar(sOld.charAt(sOld.length() - i - 1), sNew.charAt(sNew.length() - i - 1)))
+            if (similarChar(sOld.charAt(sOld.length() - i - 1), sNew.charAt(sNew.length() - i - 1), true))
                 ++sharedSuffixLength;
             else
                 break;

@@ -56,6 +56,7 @@ import static com.example.integriscreen.ISImageProcessor.applyCanny;
 import static com.example.integriscreen.ISImageProcessor.rotate270;
 import static com.example.integriscreen.ISImageProcessor.rotate90;
 import static com.example.integriscreen.ISImageProcessor.storePic;
+import static com.example.integriscreen.ISStringProcessor.almostIdenticalString;
 import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
 import static java.lang.System.currentTimeMillis;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private ISServerCommunicationManager formsListManager;
 
-    private enum ISState {  DETECTING_FRAME,       // Start detecting the green frame
+    public enum ISState {  DETECTING_FRAME,       // Start detecting the green frame
                             DETECTING_TITLE,       // Start OCR-ing to find the title
                             LOADING_FORM,          // Load the form based on title
                             REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                             EVERYTHING_OK,         // Tell the user that everything is OK
                             DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
                             ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
-    private ISState currentISState;
+    public ISState currentISState;
     private boolean activityDetected;
     private JSONObject receivedJSONObject;
     private Timer submitDataTimer;
@@ -357,15 +358,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    public void startIntegriScreen() {
+    public void startIntegriScreen(int evalIndex) {
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
+        // currentEvalIndex = evalIndex;
 
         transitionISSTo(ISState.DETECTING_FRAME);
         outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
     }
 
     public void onClickStartIS(View view) {
-        startIntegriScreen();
+        startIntegriScreen(-1);
     }
 
     // Button callback to handle taking a picture
@@ -424,10 +426,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             fullResolutionPerspective.detectFrameAndComputeTransformation(croppedRotatedFullRes, color_border_hue);
             fullResolutionPerspective.realignImage(croppedRotatedFullRes);
 
-            if (validateAndPlotForm(croppedRotatedFullRes, targetForm)) {
+            List<Pair<String, String>> OCRMismatches = plotFormAndFindOCRMismatches(croppedRotatedFullRes, targetForm);
+            if (OCRMismatches.size() == 0) {
                 transitionISSTo(ISState.SUPERVISING_USER_INPUT);
             }
             else {
+                myEvaluationController.storeOCRMismatches(OCRMismatches);
                 outputOnToast("Validation based on high-res photo failed");
                 storePic(croppedRotatedFullRes, "_validation");
             }
@@ -461,14 +465,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         storePic(matPic, "_mat");
     }
 
-
-
     private static boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
-        boolean allElementsAsExpected = true;
+        // If no mismatches found, all is OK
+        return (plotFormAndFindOCRMismatches(currentFrameMat, form).size() == 0);
+    }
 
+
+    private static List<Pair<String, String>> plotFormAndFindOCRMismatches(Mat currentFrameMat, TargetForm form) {
         double scaleX = (double)currentFrameMat.width() / form.form_w_abs;
         double scaleY = (double)currentFrameMat.height() / form.form_h_abs;
 
+        List<Pair<String, String>> OCRMismatches = new ArrayList<>();
         for(int i = 0; i < form.allElements.size(); ++i) {
             UIElement element = form.allElements.get(i);
             Rect rescaledBox = element.getRescaledBox(scaleX, scaleY);
@@ -477,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(rescaledBox));
 
             Scalar rectangle_color;
-            if (detected.equals(element.defaultVal)) {
+            if (almostIdenticalString(detected, element.defaultVal, false)) {
                 rectangle_color = new Scalar(255, 255, 0);
             } else {
                 rectangle_color = new Scalar( 255, 0, 0);
@@ -486,14 +493,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.putText(currentFrameMat, element.defaultVal, new Point(rescaledBox.x, rescaledBox.y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
 
-                allElementsAsExpected = false;
+                OCRMismatches.add(new Pair<> (element.defaultVal, detected));
             }
 
             // Plot the borders of the UI elements
             Imgproc.rectangle(currentFrameMat, rescaledBox.tl(), rescaledBox.br(), rectangle_color, 4);
         }
 
-        return allElementsAsExpected;
+        return OCRMismatches;
     }
 
 
@@ -1098,9 +1105,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         outputOnToast(message);
     }
 
-    public void startEvaluation(int startIndex, int endIndex) {
-        // TODO: not implemented yet
-    }
+//    public void startEvaluation(int startIndex, int endIndex) {
+//        // TODO: not implemented yet
+//    }
 
 }
 

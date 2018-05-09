@@ -3,9 +3,9 @@ package com.example.integriscreen;
 import org.json.JSONObject;
 
 public interface EvaluationListener {
-    public void startEvaluation(int startIndex, int endIndex);
+//     public void startEvaluation(int startIndex, int endIndex);
 
-    public void startIntegriScreen();
+    public void startIntegriScreen(int evalIndex);
     public boolean shouldStopEvaluation();
     public boolean previousFormSuccessfullyVerified();
     public void reportEvaluationResult(int success, int total);
