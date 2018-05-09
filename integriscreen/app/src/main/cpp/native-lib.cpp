@@ -29,7 +29,7 @@ void JNICALL Java_com_example_integriscreen_ISImageProcessor_apply_1diff__JJJJJ(
          jlong downscaleFactor) {
     // When is a pixel considered black, and when white?
     // TODO: 45 seemed like a good threshold for a bit more conservative diff detection
-    uchar black_white_threshold = 30;
+    uchar black_white_threshold = 40;
 
     Mat matA, matB;
     Mat &matAFull = *(Mat *) matAddrFirst;
@@ -51,12 +51,22 @@ void JNICALL Java_com_example_integriscreen_ISImageProcessor_apply_1diff__JJJJJ(
     absdiff(matA, matB, matDiff);
     threshold(matDiff, matDiff, black_white_threshold, 255, CV_THRESH_BINARY);
 
-    /// Apply the specified morphology operation
-    int morph_size = morphSize; // TODO: we might want to put this back to 2 later?
-    Mat element = getStructuringElement( 2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+    // Compute the element for morphological opening
+    int opening_morph_size = morphSize;
+    Mat openingElement = getStructuringElement( 2, Size( 2*opening_morph_size + 1, 2*opening_morph_size+1 ), Point( opening_morph_size, opening_morph_size ) );
+
 
     // Morphological opening
-    morphologyEx( matDiff, matOutput, MORPH_OPEN, element );
+        morphologyEx( matDiff, matOutput, MORPH_OPEN, openingElement );
+
+//    Mat matOpened;
+//    morphologyEx( matDiff, matOpened, MORPH_OPEN, openingElement );
+//
+//    // Morphological closing removes the small black holes, but it's very slow!
+//    int closing_morph_size = 2;
+//    Mat closingElement = getStructuringElement( 2, Size( 2*closing_morph_size + 1, 2*closing_morph_size+1 ), Point( closing_morph_size, closing_morph_size ) );
+//    morphologyEx( matOpened, matOutput, MORPH_CLOSE, closingElement );
+
 
     if (downscaleFactor > 1) {
         pyrUp(matOutput, matDiff, Size(matA.cols * downscaleFactor, matA.rows * downscaleFactor));

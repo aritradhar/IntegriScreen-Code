@@ -6,7 +6,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import org.opencv.android.Utils;
-import org.opencv.core.CvType;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -21,7 +21,9 @@ import java.util.Date;
 import java.util.List;
 
 import static org.opencv.core.Core.flip;
+import static org.opencv.core.Core.min;
 import static org.opencv.core.Core.transpose;
+import static org.opencv.core.CvType.CV_64F;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -96,8 +98,6 @@ public class ISImageProcessor {
             frameMatBW.copyTo(previousFrameMat);
         }
 
-        // TODO(ivo): allow specifying diff parameteres from here (threshold, min size, etc.)
-        // TODO(ivo): diffing should also probably be a separate class given the "previous frame"
         apply_diff(frameMatBW, previousFrameMat, frameMatBW, morphSize, downscaleFactor);
 
         // Store for the next frame
@@ -109,10 +109,6 @@ public class ISImageProcessor {
         frameMatBW.release();
     }
 
-    private static boolean isBorderRect(Rect R, int width, int height) {
-        int limit = 10;
-        return (R.tl().x < limit || R.tl().y < limit || R.br().x + limit >= width || R.br().y + limit >= height);
-    }
 
     public static List<Pair<Rect, Integer>> findLargeComponents(Mat frameMatBW, Mat labels, int minArea) {
         // Extract components
@@ -140,20 +136,32 @@ public class ISImageProcessor {
 
 
             int component_area = rectangleInfo[4];
-            if (component_area > minArea && !isBorderRect(currentRectBound, frameMatBW.width(), frameMatBW.height())) {
-                largeRects.add(new Pair<>(currentRectBound, rectangleInfo[4]));
-                largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
-                Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
-            }
-        }
-        Log.i("all areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
 
+            int noiseThreshold = minArea;
+            if (component_area < noiseThreshold) continue;
+
+            largeRects.add(new Pair<>(currentRectBound, rectangleInfo[4]));
+            largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
+            Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
+        }
+        Log.i("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
+
+        if (largeRects.size() > 50)
+            return new ArrayList<>();
 
         // This is just to showcase what I am finding
         labels.convertTo(labels, CV_8UC1, 10.0);
 
         if (largeRects.size() > 0)
             Imgproc.rectangle(frameMatBW, largeRectsBoundingBox.tl(), largeRectsBoundingBox.br(), new Scalar(255, 0, 0), 4);
+
+        boolean shouldPrintChanges = false;
+        if (shouldPrintChanges && largeRects.size() > 0) {
+            for(int i = 0; i < (int)largeRects.size(); ++i) {
+                Imgproc.putText(labels, largeRects.get(i).second.toString(), largeRects.get(i).first.tl(), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 255));
+            }
+            storePic(labels, "_labels");
+        }
 
         rectComponents.release();
         centComponents.release();
@@ -206,7 +214,7 @@ public class ISImageProcessor {
 
 
     public static void storePic(byte[] data, String extension) {
-        String fileName = genFileName(extension);
+        String fileName = generateFileName(extension);
 
         // Write the image in a file (in jpeg format)
         try {
@@ -222,7 +230,7 @@ public class ISImageProcessor {
     }
 
     public static void storePic(Mat mat, String extension) {
-        String fileName = genFileName(extension);
+        String fileName = generateFileName(extension);
 
         //convert Mat to Bitmap
         Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
@@ -244,7 +252,7 @@ public class ISImageProcessor {
         }
     }
 
-    private static String genFileName(String extension) {
+    private static String generateFileName(String extension) {
         // check if directory exists
         File dirIS = new File(Environment.getExternalStorageDirectory(), "Integriscreen");
         if(!dirIS.exists()) {

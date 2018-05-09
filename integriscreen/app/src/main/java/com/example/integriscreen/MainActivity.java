@@ -41,6 +41,7 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -58,6 +59,7 @@ import static com.example.integriscreen.ISImageProcessor.storePic;
 import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
 import static java.lang.System.currentTimeMillis;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.line;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
@@ -65,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static final String TAG = "MainActivity";
 
     private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN};
-    private OutputSelection currentOutputSelection;
-    private SeekBar huePicker;
+    private static OutputSelection currentOutputSelection;
+    private static SeekBar huePicker;
     private static TextView colorLabel;
     private static TextView textOutput;
     private static SeekBar detectPicker;
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private CustomCameraView _cameraBridgeViewBase;
 
     // TextRecognizer is the native vision API for text extraction
-    private TextRecognizer textRecognizer;
+    private static TextRecognizer textRecognizer;
 
     private ISServerCommunicationManager formsListManager;
 
@@ -461,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
 
-    private boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
+    private static boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
         boolean allElementsAsExpected = true;
 
         double scaleX = (double)currentFrameMat.width() / form.form_w_abs;
@@ -501,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // 3) draws it on the screen
     // 4) displays it on an UI label
     // 5) returns the concatenated text
-    private String extractAndDisplayTextFromFrame(Mat frameMat) {
+    private static String extractAndDisplayTextFromFrame(Mat frameMat) {
 
         SparseArray<TextBlock> texts = detect_text(frameMat);
 
@@ -523,8 +525,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // Also, output on the UI label
-        if (currentOutputSelection == OutputSelection.RAW && !liveCheckbox.isChecked())
-            outputOnUILabel(concatenatedText);
+//         if (currentOutputSelection == OutputSelection.RAW && !liveCheckbox.isChecked())
+        // outputOnUILabel(concatenatedText);
 
         return concatenatedText;
     }
@@ -664,7 +666,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         int skin_hue_estimate = 26;
         PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
-        List<Pair<Rect, Integer>> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart, 2, 1, 40);
+        List<Pair<Rect, Integer>> changedLocations = lowerFrameISImageProcessor.diffFramesAndGetAllChangeLocations(handsPart,
+                1, 1, 500);
 
         if (changedLocations.size() > 0)
             activityDetected = true;
@@ -691,16 +694,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
-//             if (cnt % freq == 0) storePic(rotatedUpperPart, "_upper_part");
+            Mat diffsUpperPart = rotatedUpperPart.clone();
+            // We don't apply canny any more since it causes a lot of flickering
+            // applyCanny(rotatedUpperPart, diffsUpperPart);
+            // rotatedUpperPart.copyTo(diffsUpperPart);
 
-            Mat canniedUpperPart = new Mat(1, 1, 1);
-            applyCanny(rotatedUpperPart, canniedUpperPart);
-
-//             if (cnt % freq == 0) storePic(canniedUpperPart, "_canny");
-
-            // TODO(ivo): I need to play with parameters for min area, etc.
-            List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(canniedUpperPart,
-                    1, 2, 170);
+            List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(diffsUpperPart,
+                    1, 1, 10);
 
             validateUIChanges(rotatedUpperPart, changedLocations);
 
@@ -716,11 +716,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Log.d("attack", "Warning: UI changes, but no hand movement!");
             }
 
-//            if (cnt % freq == 0) storePic(canniedUpperPart, "_canny_after_diff");
+//            if (cnt % freq == 0) storePic(diffsUpperPart, "_after_diff");
 
-            Imgproc.cvtColor(canniedUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+            Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
 
-            canniedUpperPart.release();
+            diffsUpperPart.release();
 
 //            ++cnt;
         } else if (currentISState == ISState.SUBMITTING_DATA) {
@@ -888,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF) { // Only continuiously realign if live is turned on?
+            if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF && currentOutputSelection != OutputSelection.CANNY) { // Only continuiously realign if live is turned on?
                 cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, color_border_hue, currentFrameMat.width(), currentFrameMat.height());
             }
 
@@ -915,6 +915,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         if (currentOutputSelection == OutputSelection.CANNY) {
             applyCanny(currentFrameMat, currentFrameMat);
+
+            // Some parameters to play with Canny
+            if (liveCheckbox.isChecked()) {
+                Imgproc.threshold(currentFrameMat, currentFrameMat, 40, 255, THRESH_BINARY);
+            }
+            if (limitAreaCheckbox.isChecked()) {
+                UnusedImageProcessing.applyTimeAverage(currentFrameMat, 3);
+            }
+
             return currentFrameMat;
         }
 
@@ -954,8 +963,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
-        // Todo eu: keep track of active element and update values
-
         // TODO(enis): make sure that only editable elements are allowed to change!
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
         Log.d("ElementChanges", "Total changes: " + changedLocations.size());
@@ -1059,7 +1066,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     /**
      * This method returns a SparseArry of TextBlocs found in a frame, or a subframe if box is not null
      */
-    private SparseArray<TextBlock> detect_text(Mat matFrame) {
+    private static SparseArray<TextBlock> detect_text(Mat matFrame) {
         //convert Mat to Bitmap
         Bitmap bmp = Bitmap.createBitmap(matFrame.cols(), matFrame.rows(),
                 Bitmap.Config.ARGB_8888);
