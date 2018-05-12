@@ -1,0 +1,101 @@
+{
+  "ratio": "1280:960",
+  "vspace": "65",
+  "page_id": "secure_email",
+  "border_thickness":"1",
+  "font_family": "'Verdana', sans-serif",
+  "letter_spacing": "normal",
+  "form_action":"/IntegriScreenServer/MainServer",
+  "elements": [
+    {
+      "id": "form_title",
+      "type": "title",
+      "initialvalue": "Compose Secure Email",
+      "editable": "false",
+      "ulc_x": "2",
+      "ulc_y": "2",
+      "width": "50",
+      "height": "6"
+    },
+
+
+
+
+    {
+      "id": "label_recipient",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Recipient",
+      "ulc_x": "10",
+      "ulc_y": "20",
+      "width": "14",
+      "height": "6"
+    },
+
+     {
+      "id": "email",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "recipient@bla.com",
+      "width": "40",
+      "ulc_x": "25",
+      "ulc_y": "20",
+      "height": "6"
+    },
+
+    {
+      "id": "subject_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Subject",
+      "ulc_x": "10",
+      "ulc_y": "28",
+      "width": "14",
+      "height": "6"
+    },
+
+    {
+      "id": "subject",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "Initial Subject",
+      "width": "40",
+      "ulc_x": "25",
+      "ulc_y": "28",
+      "height": "6"
+    },
+    {
+      "id": "body_label",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Email Body",
+      "ulc_x": "10",
+      "ulc_y": "37",
+      "width": "14",
+      "height": "6"
+    },
+
+    {
+      "id": "body",
+      "type": "textarea",
+      "editable": "true",
+      "initialvalue": "Write the text of your email here",
+      "ulc_x": "10",
+      "ulc_y": "44",
+      "width": "70",
+      "height": "30"
+    },
+
+	{
+      "id": "submit_button",
+      "type": "button",
+      "editable": "false",
+      "initialvalue": "Send",
+      "ulc_x": "10",
+      "ulc_y": "80",
+      "width": "25",
+      "height": "8"
+    }
+
+  ]
+}

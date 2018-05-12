@@ -735,7 +735,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else if (currentISState == ISState.EVERYTHING_OK) {
             //          outputOnUILabel(receivedJSONObject.toString());
         } else if (currentISState == ISState.DATA_MISMATCH) {
-            outputOnUILabel(receivedJSONObject.toString());
+            // outputOnUILabel(receivedJSONObject.toString());
 
             try {
                 JSONArray mismatchElements = receivedJSONObject.getJSONArray("diffs");
