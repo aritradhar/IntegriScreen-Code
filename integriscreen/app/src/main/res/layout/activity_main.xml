@@ -182,6 +182,13 @@
         android:text="Canny"
         />
 
+    <!-- Square view shown when touch to focus -->
+    <com.example.integriscreen.DrawingView
+        android:id="@+id/drawing_surface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.example.integriscreen.DrawingView>
+
 <!--
     <Button 
         android:id="@+id/button3"

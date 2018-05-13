@@ -8,11 +8,13 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
@@ -41,7 +43,6 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -93,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
+
+    // eu: square view to show the focus point
+    private DrawingView drawingView;
 
     // TextRecognizer is the native vision API for text extraction
     private static TextRecognizer textRecognizer;
@@ -244,6 +248,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 colorLabel.setText(Integer.toString(progress));
             }
         });
+
+        //cameraPreview.changeExposureComp(-currentAlphaAngle);
+        drawingView = (DrawingView) findViewById(R.id.drawing_surface);
+        _cameraBridgeViewBase.setDrawingView(drawingView);
     }
 
     @Override
@@ -1108,6 +1116,54 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //    public void startEvaluation(int startIndex, int endIndex) {
 //        // TODO: not implemented yet
 //    }
+
+
+    // get motion events
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            float x = event.getX();
+            float y = event.getY();
+
+            Log.d("FocusMode", "Click to: " + x + ", " + y
+                    + ", at: " + event.getEventTime());
+
+            android.graphics.Rect touchRect = new android.graphics.Rect(
+                    (int)(x - 200),
+                    (int)(y - 200),
+                    (int)(x + 200),
+                    (int)(y + 200));
+
+            final android.graphics.Rect targetFocusRect = new android.graphics.Rect(
+                    touchRect.left * 2000/_cameraBridgeViewBase.getWidth() - 1000,
+                    touchRect.top * 2000/_cameraBridgeViewBase.getHeight() - 1000,
+                    touchRect.right * 2000/_cameraBridgeViewBase.getWidth() - 1000,
+                    touchRect.bottom * 2000/_cameraBridgeViewBase.getHeight() - 1000);
+
+            Log.d("FocusMode", "Preview size: " + _cameraBridgeViewBase.getWidth()
+                    + " x " + _cameraBridgeViewBase.getHeight() + " px");
+
+            _cameraBridgeViewBase.doTouchFocus(targetFocusRect);
+
+            if (_cameraBridgeViewBase.drawingViewSet) {
+                drawingView.setHaveTouch(true, touchRect);
+                drawingView.invalidate();
+
+                // Remove the square after some time
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        drawingView.setHaveTouch(false, new android.graphics.Rect(0, 0, 0, 0));
+                        drawingView.invalidate();
+                    }
+                }, 1000);
+            }
+
+        }
+        return false;
+    }
 
 }
 

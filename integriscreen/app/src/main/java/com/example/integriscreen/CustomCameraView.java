@@ -1,10 +1,12 @@
 package com.example.integriscreen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.JavaCameraView;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
@@ -16,6 +18,10 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
 
     private static final String TAG = "OCV::CustomCameraView";
     private OnDataLoadedEventListener parentActivity;
+
+    // eu: variables related to sqare view for touch focus
+    private DrawingView drawingView;
+    public boolean drawingViewSet = false;
 
     public CustomCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,7 +64,60 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
      * TODO: check if this method is correct
      */
     public void stopRefocusing() {
-        mCamera.cancelAutoFocus();
+//        mCamera.cancelAutoFocus();
+    }
+
+    /**
+     * Called from PreviewSurfaceView to set touch focus.
+     *
+     * @param - Rect - new area for auto focus
+     */
+    public void doTouchFocus(final Rect tfocusRect) {
+        Log.d("FocusMode", "inside doTouchFocus() method");
+        try {
+            Log.d("FocusMode", "Focus rect: (" + tfocusRect.left + ", " + tfocusRect.top
+                    + ") x (" + tfocusRect.right + ", " + tfocusRect.bottom +  ")");
+
+            final List<Camera.Area> focusList = new ArrayList<Camera.Area>();
+            Camera.Area focusArea = new Camera.Area(tfocusRect, 1000);
+            focusList.add(focusArea);
+
+            Camera.Parameters para = mCamera.getParameters();
+            para.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            para.setFocusAreas(focusList);
+            para.setMeteringAreas(focusList);
+            mCamera.setParameters(para);
+
+            mCamera.autoFocus(myAutoFocusCallback);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("FocusMode", "Unable to autofocus");
+        }
+
+    }
+
+    /**
+     * AutoFocus callback
+     */
+    Camera.AutoFocusCallback myAutoFocusCallback = new Camera.AutoFocusCallback(){
+
+        @Override
+        public void onAutoFocus(boolean arg0, Camera arg1) {
+            Log.d("FocusMode", "inside onAutoFocus callback, arg0: " + arg0
+                    + ", arg1: " + arg1.toString());
+
+            if (arg0){
+                mCamera.cancelAutoFocus();
+            }
+        }
+    };
+
+    /**
+     * set DrawingView instance for touch focus indication.
+     */
+    public void setDrawingView(DrawingView dView) {
+        drawingView = dView;
+        drawingViewSet = true;
     }
 
     /**
