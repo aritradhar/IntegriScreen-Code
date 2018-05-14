@@ -10,8 +10,10 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 
 
 public class CustomCameraView extends JavaCameraView implements PictureCallback {
@@ -60,11 +62,66 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         return mCamera.getParameters().getPreviewSize();
     }
 
+
     /**
-     * TODO: check if this method is correct
+     *  Set focus at given coordinates x,y and square size size
      */
-    public void stopRefocusing() {
-//        mCamera.cancelAutoFocus();
+    public void focusAt(float x, float y, int size) {
+        Log.d("FocusMode", "Focus At: " + x + ", " + y + ", sqare size: " + size);
+
+        android.graphics.Rect screenRect = new android.graphics.Rect(
+                (int)(x - size),
+                (int)(y - size),
+                (int)(x + size),
+                (int)(y + size));
+
+        focusAtRectOnScreen(screenRect);
+    }
+
+
+    /**
+     *  Set focus at given coordinates at the green box of the form
+     */
+    public void focusAt(org.opencv.core.Rect rect) {
+        Log.d("FocusMode", "Focus at rectangle: " + rect.x + ", " + rect.y
+                + ", " + rect.width + ", " + rect.height);
+
+        // convert opencv.core.Rect to android.graphics.Rect
+        android.graphics.Rect screenRect = new android.graphics.Rect(
+                rect.x,
+                rect.y,
+                rect.x + rect.width,
+                rect.y + rect.height);
+
+        focusAtRectOnScreen(screenRect);
+    }
+
+    public void focusAtRectOnScreen(Rect screenRect) {
+
+        // convert rect to the camera specific
+        final android.graphics.Rect targetFocusRect = new android.graphics.Rect(
+                screenRect.left * 2000/this.getWidth() - 1000,
+                screenRect.top * 2000/this.getHeight() - 1000,
+                screenRect.right * 2000/this.getWidth() - 1000,
+                screenRect.bottom * 2000/this.getHeight() - 1000);
+
+        doTouchFocus(targetFocusRect);
+
+        if (drawingViewSet) {
+            drawingView.setHaveTouch(true, screenRect);
+            drawingView.invalidate();
+
+            // Remove the square after some time
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    drawingView.setHaveTouch(false, new android.graphics.Rect(0, 0, 0, 0));
+                    drawingView.invalidate();
+                }
+            }, 1000);
+        }
     }
 
     /**

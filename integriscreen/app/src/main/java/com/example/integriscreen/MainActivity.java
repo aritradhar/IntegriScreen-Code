@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -631,8 +630,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // Once it is ready, we use this to verify as well
             takePicHighRes();
 
-            // Stop refocusing!
-            _cameraBridgeViewBase.stopRefocusing();
+            // TODO eu: replace with new focusing method
+//            _cameraBridgeViewBase.stopRefocusing();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
@@ -1121,46 +1120,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // get motion events
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
             float x = event.getX();
             float y = event.getY();
 
             Log.d("FocusMode", "Click to: " + x + ", " + y
                     + ", at: " + event.getEventTime());
 
-            android.graphics.Rect touchRect = new android.graphics.Rect(
-                    (int)(x - 200),
-                    (int)(y - 200),
-                    (int)(x + 200),
-                    (int)(y + 200));
-
-            final android.graphics.Rect targetFocusRect = new android.graphics.Rect(
-                    touchRect.left * 2000/_cameraBridgeViewBase.getWidth() - 1000,
-                    touchRect.top * 2000/_cameraBridgeViewBase.getHeight() - 1000,
-                    touchRect.right * 2000/_cameraBridgeViewBase.getWidth() - 1000,
-                    touchRect.bottom * 2000/_cameraBridgeViewBase.getHeight() - 1000);
-
-            Log.d("FocusMode", "Preview size: " + _cameraBridgeViewBase.getWidth()
-                    + " x " + _cameraBridgeViewBase.getHeight() + " px");
-
-            _cameraBridgeViewBase.doTouchFocus(targetFocusRect);
-
-            if (_cameraBridgeViewBase.drawingViewSet) {
-                drawingView.setHaveTouch(true, touchRect);
-                drawingView.invalidate();
-
-                // Remove the square after some time
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        drawingView.setHaveTouch(false, new android.graphics.Rect(0, 0, 0, 0));
-                        drawingView.invalidate();
-                    }
-                }, 1000);
-            }
-
+            _cameraBridgeViewBase.focusAt(x, y, 100);
         }
         return false;
     }
