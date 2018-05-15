@@ -1,26 +1,28 @@
 $(document).ready(function() {
     
     var url = new URL(window.location.href);
-    var testing = url.searchParams.get("ocr_testing");
+    var setup = url.searchParams.get("setup");
     var time = url.searchParams.get("time");
-    var limit = url.searchParams.get("limit");
+    var start = url.searchParams.get("start");
     
-    if (testing == null) return;
-    if (time == null) time = 10000;
-    if (limit == null) limit = 110;
+    if (setup == null) return;
+    time = time == null ? time = 10000 : parseInt(time);
+    start = start == null ? start = 0 : parseInt(start);
+    
+    iframe = $('#target')
                   
-    setTimeout(function() {
-        target = parseInt(testing);
-        limit = parseInt(limit);
-        next_target = target + 1;
-        console.log(target); console.log(limit); console.log(next_target);
-        if (next_target == limit) {
-            window.location.href = window.location.href.replace(/Random_\d+\.html/, '__STOP__.html');
-            return; // makes no sense but maybe no way it makes 100% sense otherwise it goes on executing
-        }
-        next_destination = window.location.href.replace(/Random_\d+\.html/, `Random_${next_target}.html`);
-        next_destination = next_destination.replace(/ocr_testing=\d+/, `ocr_testing=${next_target}`);
-        window.location.href = next_destination;
-    }, parseInt(time));
+    $.get(setup, function(data) {
+        
+        targets = data.split('\n');
+        
+        tester = setInterval(function() {
+            if (start == targets.length) clearInterval(tester);
+            var target = start != targets.length ? targets[start] : '__STOP__.html';
+            console.log(target);
+            
+            iframe.attr('src', `http://tildem.inf.ethz.ch/generated/${target}?${url.searchParams.toString()}`);
+            start += 1;
+        }, time);
+    });
                   
 });
