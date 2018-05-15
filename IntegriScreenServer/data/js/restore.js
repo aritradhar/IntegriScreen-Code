@@ -5,17 +5,16 @@ $(document).ready(function() {
     
     if (old_vals == null) return;
                   
-    $('body').append(`<p style='text-align:center;'>${old_vals}</p>`);
+    $('body').append(`<pre style='text-align:center;'>${old_vals}</pre>`);
                  
-    old_vals = old_vals.replace(/[{ }]/g,'').split(',');
+    old_vals = JSON.parse(old_vals);
     
-    old_vals.forEach(function(elem) {
-        elem = elem.split('=');
-        target = $(`[name='${elem[0]}']`);
+    for (var key in old_vals) {
+        target = $(`[name='${key}']`);
         target.each(function() {
             var el = $(this);
-            if (el[0].type != 'checkbox' && el[0].type != 'hidden') el.val(elem[1]);
-            else if (el[0].type != 'hidden' && elem[1] == 'True') el.prop('checked', true);
+            if (el[0].type != 'checkbox' && el[0].type != 'hidden') el.val(old_vals[key]);
+            else if (el[0].type != 'hidden' && old_vals[key] == 'True') el.prop('checked', true);
         });
-    });
+    }
 });
