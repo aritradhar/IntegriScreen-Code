@@ -56,7 +56,7 @@ public class ProcessApplicationForm {
 
 		// response.getWriter().write("Response recorded: " + KVPair.toString());
 		//	response.flushBuffer();
-		String redirectURL = pageDefaultLoc + pageID + ".html?submitted=" + KVPair.toString();
+		String redirectURL = pageDefaultLoc + pageID + ".html?submitted=" + (new JSONObject(KVPair)).toString();
 		if (atkMode != null && atkType != null)
 			redirectURL = redirectURL + "&atk_mode=" + atkMode + "&atk_type=" + atkType;
 		
