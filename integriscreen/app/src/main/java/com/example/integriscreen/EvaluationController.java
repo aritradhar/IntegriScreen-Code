@@ -1,6 +1,5 @@
 package com.example.integriscreen;
 
-import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -9,6 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.example.integriscreen.LogManager.logF;
+import static com.example.integriscreen.LogManager.logR;
 
 public class EvaluationController {
     public MainActivity mainActivity;
@@ -36,12 +36,12 @@ public class EvaluationController {
         mainActivity = parentActivity;
     }
 
-    public void finishEvaluation(int cntSuccess, int cntTotal)
+    public void finishEvaluation(int cntSuccess, int cntTotal, List<String> failIndices)
     {
         cancelTimers();
 
-        logF("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
-
+        logR("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
+        logR("UI Verification failed on forms: ", failIndices.toString());
         mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
 
@@ -55,7 +55,7 @@ public class EvaluationController {
             int cntSuccess = 0;
             int cntTotal = 0;
 
-            List<Integer> failIndices = new ArrayList<>();
+            List<String> filedFormIDs = new ArrayList<>();
 
             @Override
             public void run() {
@@ -64,7 +64,7 @@ public class EvaluationController {
                         ++cntSuccess;
                     }
                     else
-                        failIndices.add(cntTotal-1);
+                        filedFormIDs.add(mainActivity.getCurrentFormName());
 
                     String message = "Success rate: " + cntSuccess + " / " + cntTotal + " = " + (double)cntSuccess / cntTotal;
                     logF("Evaluation in progress:", message);
@@ -74,7 +74,7 @@ public class EvaluationController {
                 if (cntTotal <= maxCnt && !mainActivity.shouldStopEvaluation())
                     mainActivity.startIntegriScreen(cntTotal);
                 else {
-                    finishEvaluation(cntSuccess, cntTotal + 1); // reduce the cntTotal that was increased at the beginning!
+                    finishEvaluation(cntSuccess, cntTotal + 1, filedFormIDs); // reduce the cntTotal that was increased at the beginning!
                 }
                 ++cntTotal;
             }

@@ -16,7 +16,12 @@ public class LogManager {
 
     public LogManager(Context currentContext) {
         context = currentContext;
-        pathName = ISImageProcessor.generatePathName("log", ".txt");
+        pathName = ISImageProcessor.generatePathName("_log", ".txt");
+    }
+
+    public static void logR(String tag, String message) {
+        Log.w(tag, message);
+        writeToFile("RESULT: " + tag + ":" + message + "\n\n");
     }
 
     public static void logW(String tag, String message) {

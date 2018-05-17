@@ -1120,6 +1120,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return (currentISState == ISState.SUPERVISING_USER_INPUT);
     }
 
+    public String getCurrentFormName() {
+        if (targetForm == null) return "__NULL__";
+        return targetForm.pageId;
+    }
+
     public void reportEvaluationResult(int cntSuccess, int cntTotal) {
         String message = "Success rate: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal;
         logF("Evaluation Finished:", message);
