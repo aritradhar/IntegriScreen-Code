@@ -82,7 +82,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
     /**
      *  Set focus at given coordinates at the green box of the form
      */
-    public void focusAt(org.opencv.core.Rect rect) {
+    public void focusAt(org.opencv.core.Rect rect)   {
         Log.d("FocusMode", "Focus at rectangle: " + rect.x + ", " + rect.y
                 + ", " + rect.width + ", " + rect.height);
 
@@ -163,8 +163,13 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             Log.d("FocusMode", "inside onAutoFocus callback, arg0: " + arg0
                     + ", arg1: " + arg1.toString());
 
-            if (arg0){
-                mCamera.cancelAutoFocus();
+            try {
+                if (arg0){
+                    mCamera.cancelAutoFocus();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("FocusMode", "Error on myAutoFocusCallback");
             }
         }
     };
@@ -199,23 +204,34 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
     }
 
     public void takePicture(OnDataLoadedEventListener parent) {
-        Log.i(TAG, "Taking picture");
-        parentActivity = parent;
-        // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
-        // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
-        mCamera.setPreviewCallback(null);
+        try {
+            Log.i(TAG, "Taking picture");
+            parentActivity = parent;
+            // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
+            // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
+            mCamera.setPreviewCallback(null);
 
-        // PictureCallback is implemented by the current class
-        mCamera.takePicture(null, null, this);
+            // PictureCallback is implemented by the current class
+            mCamera.takePicture(null, null, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Error on takePicture()");
+        }
     }
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        Log.i(TAG, "Saving a bitmap to file");
-        // The camera preview was automatically stopped. Start it again.
-        mCamera.startPreview();
-        mCamera.setPreviewCallback(this);
+        try {
+            Log.i(TAG, "Saving a bitmap to file");
+            // The camera preview was automatically stopped. Start it again.
+            mCamera.startPreview();
+            mCamera.setPreviewCallback(this);
 
-        parentActivity.onPicTaken(data);
+            parentActivity.onPicTaken(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Error on onPictureTaken()");
+        }
     }
+
 }

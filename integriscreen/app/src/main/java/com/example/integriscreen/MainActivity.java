@@ -627,11 +627,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             realignCheckbox.setChecked(true);
         }
         else if (newState == ISState.VERIFYING_UI) {
+            // TODO eu: Focus is set arbitrarly to the midle point of the upper-half of the screen
+            int x = (int) _cameraBridgeViewBase.getWidth() / 2;
+            int y = (int) _cameraBridgeViewBase.getHeight() / 4;
+            int squareSize = 200;
+
+            _cameraBridgeViewBase.drawingViewSet = false;
+            _cameraBridgeViewBase.focusAt(x, y, squareSize);
+            Log.d(TAG, "Focus is set automatically to the midle point of the upper-half of the screen");
+
             // Once it is ready, we use this to verify as well
             takePicHighRes();
-
-            // TODO eu: replace with new focusing method
-//            _cameraBridgeViewBase.stopRefocusing();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
