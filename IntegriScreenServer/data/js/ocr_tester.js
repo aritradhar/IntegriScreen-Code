@@ -11,7 +11,7 @@ $(document).ready(function() {
     iframe = $('#target');
     
     function next_page() { 
-        var target = start != targets.length ? targets[start] : '__STOP__.html';
+        var target = start != page_targets.length ? page_targets[start] : '__STOP__.html';
         console.log(target);
         
         iframe.attr('src', `http://tildem.inf.ethz.ch/generated/${target}?${url.searchParams.toString()}`);
@@ -21,13 +21,13 @@ $(document).ready(function() {
                   
     $.get(setup, function(data) {
         
-        targets = data.split('\n');
+        page_targets = data.split('\n');
         next_page();
         
         if (time != null) {
         
             tester = setInterval(function() {
-                if (start == targets.length) clearInterval(tester);
+                if (start == page_targets.length) clearInterval(tester);
                 next_page();
             }, parseInt(time));
         }
