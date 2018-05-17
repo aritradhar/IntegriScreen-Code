@@ -8,7 +8,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -18,6 +17,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.example.integriscreen.LogManager.logF;
 
 public class ISServerCommunicationManager {
     private static HashMap<String, String> knownForms;
@@ -43,19 +44,19 @@ public class ISServerCommunicationManager {
     }
 
     private void getListOfForms(String url) {
-        Log.d("ListOfForms", "trying to get the listOfForms from: " + url);
+        logF("ListOfForms", "trying to get the listOfForms from: " + url);
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
                 url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("ListOfForms", "response: " + response.toString());
+                        logF("ListOfForms", "response: " + response.toString());
 
                         try {
                             // Parsing json object response
                             JSONArray JSONElements = response.getJSONArray("response");
-                            Log.d("ListOfForms", "ArrayList: " + JSONElements.toString());
+                            logF("ListOfForms", "ArrayList: " + JSONElements.toString());
 
                             // iterate through all elements
                             for (int i = 0; i < JSONElements.length(); i++) {
@@ -63,21 +64,20 @@ public class ISServerCommunicationManager {
                                 String pageTitle = currEl.getString("page_title");
                                 pageTitle = pageTitle.replaceAll("\\s+","");
                                 String formJsonURL = currEl.getString("json");
-                                Log.d("Loading forms", "FormID: " + pageTitle + " -> " + formJsonURL);
+                                logF("Loading forms", "FormID: " + pageTitle + " -> " + formJsonURL);
                                 knownForms.put(pageTitle, formJsonURL);
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.d("ListOfForms", e.getMessage());
+                            logF("ListOfForms", e.getMessage());
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d("ListOfForms", "Error: " + error.getMessage());
-                        Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
+                        logF("ListOfForms", String.valueOf(error.getStackTrace()));
                     }
                 }
         ) {

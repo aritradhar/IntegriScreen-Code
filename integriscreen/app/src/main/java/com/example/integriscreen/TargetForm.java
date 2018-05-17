@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.integriscreen.LogManager.logF;
+
 
 public class TargetForm {
     private String TAG = "TargetForm";
@@ -150,7 +152,7 @@ public class TargetForm {
         for (int i = 0; i < allElements.size(); i++) {
             UIElement currEl = allElements.get(i);
             if (currEl.id.equals(elementID)) {
-                Log.d("ElementChanges", "Id: " + currEl.id + ", old: "
+                logF("ElementChanges", "Id: " + currEl.id + ", old: "
                         + currEl.currentVal + ", new: " + newValue);
                 allElements.get(i).currentVal = newValue;
                 break;
@@ -213,7 +215,7 @@ public class TargetForm {
 
             @Override
             public void onResponse(JSONObject response) {
-                Log.d(TAG, response.toString());
+                logF(TAG, response.toString());
 
                 try {
                     String ratio = response.getString("ratio");
@@ -230,14 +232,14 @@ public class TargetForm {
 
                     // Parsing json object response
                     JSONArray JSONElements = response.getJSONArray("elements");
-                    Log.d(TAG, JSONElements.toString());
+                    logF(TAG, JSONElements.toString());
 
                     allElements = new ArrayList<UIElement>();
 
                     // iterate through all elements, compute their absolute coordinates
                     for (int i = 0; i < JSONElements.length(); i++) {
                         JSONObject currEl = JSONElements.getJSONObject(i);
-//                        Log.d(TAG, "Parsing JSONObject: " + currEl.toString());
+//                        logF(TAG, "Parsing JSONObject: " + currEl.toString());
                         String id = currEl.getString("id");
                         Boolean editable = currEl.getBoolean("editable");
                         String type = currEl.getString("type");
@@ -263,7 +265,7 @@ public class TargetForm {
 
 
                         UIElement tmpElement = new UIElement(id, editable, type, new Rect(new Point(a_x1, a_y1), new Point(a_x2, a_y2)), defaultVal);
-                        Log.d(TAG+" parsed element: ", tmpElement.toString());
+                        logF(TAG+" parsed element: ", tmpElement.toString());
 
                         // add the element in the arraylist of all UI elements
                         allElements.add(tmpElement);
@@ -276,7 +278,7 @@ public class TargetForm {
 
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Log.d(TAG, e.getMessage());
+                    logF(TAG, e.getMessage());
                     Toast.makeText(applicationContext, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
@@ -284,7 +286,7 @@ public class TargetForm {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                logF(TAG, "Error: " + error.getMessage());
                 Toast.makeText(applicationContext,
                         error.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -298,7 +300,7 @@ public class TargetForm {
      * This method sends a POST request to the server with a json including form data
      */
     public void submitFormData(String url) {
-        Log.d("submitform", "Submit form with id: " + pageId);
+        logF("submitform", "Submit form with id: " + pageId);
         Map<String, String> postParam = new HashMap<String, String>();
         postParam.put("page_id", pageId);
 
@@ -308,7 +310,7 @@ public class TargetForm {
                 continue;
 
             postParam.put(currentElement.id, currentElement.currentVal);
-            Log.d("submitform", "key: " + currentElement.id + " -> " + currentElement.currentVal);
+            logF("submitform", "key: " + currentElement.id + " -> " + currentElement.currentVal);
         }
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
@@ -316,7 +318,7 @@ public class TargetForm {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG + "submitform", "Reply of form submit" + response.toString());
+                        logF(TAG + "submitform", "Reply of form submit" + response.toString());
                         parentActivity.onResponseReceived(response);
                     }
                 },
@@ -324,8 +326,8 @@ public class TargetForm {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d(TAG+ "submitform", "Error: " + error.getMessage());
-                        Log.d("ListOfForms", String.valueOf(error.getStackTrace()));
+                        logF(TAG+ "submitform", "Error: " + error.getMessage());
+                        logF("ListOfForms", String.valueOf(error.getStackTrace()));
                     }
                 }
         ) {

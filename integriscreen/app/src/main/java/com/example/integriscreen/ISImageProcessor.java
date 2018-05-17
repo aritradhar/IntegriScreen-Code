@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.example.integriscreen.LogManager.logF;
 import static org.opencv.core.Core.flip;
 import static org.opencv.core.Core.min;
 import static org.opencv.core.Core.transpose;
-import static org.opencv.core.CvType.CV_64F;
 import static org.opencv.core.CvType.CV_8UC1;
 import static org.opencv.imgproc.Imgproc.blur;
 
@@ -131,8 +131,8 @@ public class ISImageProcessor {
             Rect currentRectBound = new Rect(rectangleInfo[0], rectangleInfo[1], rectangleInfo[2], rectangleInfo[3]);
             allDiffAreas += " | " + String.valueOf(rectangleInfo[4]);
 
-//            Log.d("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
-//            Log.d("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
+//            logF("comps rect", rectangleInfo[0] + " | " +rectangleInfo[1] + " | " +rectangleInfo[2] + " | " +rectangleInfo[3] + " | " +rectangleInfo[4]);
+//            logF("comps cent", centroidInfo[0] + " | " + centroidInfo[1]);
 
 
             int component_area = rectangleInfo[4];
@@ -144,7 +144,7 @@ public class ISImageProcessor {
             largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
             Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
         }
-        Log.i("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
+        logF("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
 
         if (largeRects.size() > 50)
             return new ArrayList<>();
@@ -214,23 +214,23 @@ public class ISImageProcessor {
 
 
     public static void storePic(byte[] data, String extension) {
-        String fileName = generateFileName(extension);
+        String fileName = generatePathName(extension);
 
         // Write the image in a file (in jpeg format)
         try {
-            Log.d("Saving data[] ", "Saving byte[] to file: " + fileName);
+            logF("Saving data[] ", "Saving byte[] to file: " + fileName);
 
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(data);
             fos.close();
 
         } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
+            logF("PictureDemo", "Exception in photoCallback" + e.toString());
         }
     }
 
     public static void storePic(Mat mat, String extension) {
-        String fileName = generateFileName(extension);
+        String fileName = generatePathName(extension);
 
         //convert Mat to Bitmap
         Bitmap bmpPic = Bitmap.createBitmap(mat.cols(), mat.rows(),
@@ -239,7 +239,7 @@ public class ISImageProcessor {
 
         // Write the image in a file (in jpeg format)
         try {
-            Log.d("Saving Mat:", "Saving bitmap to file: " + fileName);
+            logF("Saving Mat:", "Saving bitmap to file: " + fileName);
 
             FileOutputStream fos = new FileOutputStream(fileName);
 //            fos.write(data);
@@ -248,11 +248,15 @@ public class ISImageProcessor {
             fos.close();
 
         } catch (java.io.IOException e) {
-            Log.e("PictureDemo", "Exception in photoCallback", e);
+            logF("PictureDemo", "Exception in photoCallback" + e.toString());
         }
     }
 
-    private static String generateFileName(String extension) {
+    public static String generatePathName(String suffix) {
+        return generatePathName(suffix, ".jpg");
+    }
+
+    public  static String generatePathName(String suffix, String extension) {
         // check if directory exists
         File dirIS = new File(Environment.getExternalStorageDirectory(), "Integriscreen");
         if(!dirIS.exists()) {
@@ -262,7 +266,7 @@ public class ISImageProcessor {
         // generate filename
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd_HH-mm-ss");
         String fileName = dirIS.getPath() +
-                "/IS_" + sdf.format(new Date()) + extension + ".jpg";
+                "/IS_" + sdf.format(new Date()) + suffix + extension;
 
         return fileName;
     }

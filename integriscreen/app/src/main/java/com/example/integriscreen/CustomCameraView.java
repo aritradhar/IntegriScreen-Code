@@ -15,6 +15,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import static com.example.integriscreen.LogManager.logF;
+
 
 public class CustomCameraView extends JavaCameraView implements PictureCallback {
 
@@ -67,7 +69,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
      *  Set focus at given coordinates x,y and square size size
      */
     public void focusAt(float x, float y, int size) {
-        Log.d("FocusMode", "Focus At: " + x + ", " + y + ", sqare size: " + size);
+        logF("FocusMode", "Focus At: " + x + ", " + y + ", sqare size: " + size);
 
         android.graphics.Rect screenRect = new android.graphics.Rect(
                 (int)(x - size),
@@ -83,7 +85,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
      *  Set focus at given coordinates at the green box of the form
      */
     public void focusAt(org.opencv.core.Rect rect)   {
-        Log.d("FocusMode", "Focus at rectangle: " + rect.x + ", " + rect.y
+        logF("FocusMode", "Focus at rectangle: " + rect.x + ", " + rect.y
                 + ", " + rect.width + ", " + rect.height);
 
         // convert opencv.core.Rect to android.graphics.Rect
@@ -130,9 +132,9 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
      * @param - Rect - new area for auto focus
      */
     public void doTouchFocus(final Rect tfocusRect) {
-        Log.d("FocusMode", "inside doTouchFocus() method");
+        logF("FocusMode", "inside doTouchFocus() method");
         try {
-            Log.d("FocusMode", "Focus rect: (" + tfocusRect.left + ", " + tfocusRect.top
+            logF("FocusMode", "Focus rect: (" + tfocusRect.left + ", " + tfocusRect.top
                     + ") x (" + tfocusRect.right + ", " + tfocusRect.bottom +  ")");
 
             final List<Camera.Area> focusList = new ArrayList<Camera.Area>();
@@ -148,7 +150,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             mCamera.autoFocus(myAutoFocusCallback);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.i("FocusMode", "Unable to autofocus");
+            logF("FocusMode", "Unable to autofocus");
         }
 
     }
@@ -160,7 +162,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
 
         @Override
         public void onAutoFocus(boolean arg0, Camera arg1) {
-            Log.d("FocusMode", "inside onAutoFocus callback, arg0: " + arg0
+            logF("FocusMode", "inside onAutoFocus callback, arg0: " + arg0
                     + ", arg1: " + arg1.toString());
 
             try {
@@ -169,7 +171,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("FocusMode", "Error on myAutoFocusCallback");
+                logF("FocusMode", "Error on myAutoFocusCallback");
             }
         }
     };
@@ -191,21 +193,21 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
         List<Size> sizes = params.getSupportedPictureSizes();
 
         for (int i = 0; i < sizes.size(); i++)
-            Log.d(TAG, "Supported PicSize - Height: " + sizes.get(i).height + ", Width: " + sizes.get(i).width);
+            logF(TAG, "Supported PicSize - Height: " + sizes.get(i).height + ", Width: " + sizes.get(i).width);
 
         mCamera.stopPreview(); // Preview should be stopped in order to update camera parameters
 
         params.setPictureSize(sizes.get(quality).width, sizes.get(quality).height);
         mCamera.setParameters(params);
 
-        Log.d(TAG, "Picture Size (Width x Height px): " + mCamera.getParameters().getPictureSize().width
+        logF(TAG, "Picture Size (Width x Height px): " + mCamera.getParameters().getPictureSize().width
                 + " x " + mCamera.getParameters().getPictureSize().height);
         mCamera.startPreview();
     }
 
     public void takePicture(OnDataLoadedEventListener parent) {
         try {
-            Log.i(TAG, "Taking picture");
+            logF(TAG, "Taking picture");
             parentActivity = parent;
             // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
             // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
@@ -215,14 +217,14 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             mCamera.takePicture(null, null, this);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "Error on takePicture()");
+            logF(TAG, "Error on takePicture()");
         }
     }
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         try {
-            Log.i(TAG, "Saving a bitmap to file");
+            logF(TAG, "Saving a bitmap to file");
             // The camera preview was automatically stopped. Start it again.
             mCamera.startPreview();
             mCamera.setPreviewCallback(this);
@@ -230,7 +232,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             parentActivity.onPicTaken(data);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "Error on onPictureTaken()");
+            logF(TAG, "Error on onPictureTaken()");
         }
     }
 

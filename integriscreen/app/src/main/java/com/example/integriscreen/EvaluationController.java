@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.integriscreen.LogManager.logF;
+
 public class EvaluationController {
     public MainActivity mainActivity;
 
@@ -27,7 +29,7 @@ public class EvaluationController {
 
     public void storeOCRMismatches(List<Pair<String, String>> OCRMismatches) {
         for(Pair<String, String> mismatch : OCRMismatches)
-            Log.i("OCR mismatch: ", "|" + mismatch.first + "| vs |" + mismatch.second + "|");
+            logF("OCR mismatch: ", "|" + mismatch.first + "| vs |" + mismatch.second + "|");
     }
 
     public EvaluationController(MainActivity parentActivity) {
@@ -38,7 +40,7 @@ public class EvaluationController {
     {
         cancelTimers();
 
-        Log.d("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
+        logF("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
 
         mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
@@ -65,7 +67,7 @@ public class EvaluationController {
                         failIndices.add(cntTotal-1);
 
                     String message = "Success rate: " + cntSuccess + " / " + cntTotal + " = " + (double)cntSuccess / cntTotal;
-                    Log.d("Evaluation in progress:", message);
+                    logF("Evaluation in progress:", message);
                     mainActivity.outputOnToast(message);
                 }
 

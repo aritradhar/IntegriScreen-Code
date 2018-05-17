@@ -5,6 +5,8 @@ import android.util.SparseArray;
 
 import com.google.android.gms.vision.text.TextBlock;
 
+import static com.example.integriscreen.LogManager.logF;
+
 public class ISStringProcessor {
 
     static boolean[][] similar = new boolean[256][256];
@@ -53,15 +55,15 @@ public class ISStringProcessor {
     public static boolean isChangeLegit(String sOld, String sNew, double duration) {
         int maxKeypressesPerSecond = 40;   // Based on Ivo's test of bashing on the keyboard for 10 seconds
 
-        Log.i("changeLegit: old:", "|" + sOld + "|");
-        Log.i("changeLegit: new:", "|" + sNew + "|");
+        logF("changeLegit: old:", "|" + sOld + "|");
+        logF("changeLegit: new:", "|" + sNew + "|");
 
         // First we remove the whitespace characters and punctuation before comparison!
         sOld = OCRTrim(sOld);
         sNew = OCRTrim(sNew);
 
-        Log.i("changeLegit: trim old:", "|" + sOld + "|");
-        Log.i("changeLegit: trim new:", "|" + sNew + "|");
+        logF("changeLegit: trim old:", "|" + sOld + "|");
+        logF("changeLegit: trim new:", "|" + sNew + "|");
         // We assume duration of 1000 is one second
         double durationSeconds = duration / 1000;
 
@@ -77,8 +79,8 @@ public class ISStringProcessor {
         sOld = sOld.substring(sharedPrefixLength);
         sNew = sNew.substring(sharedPrefixLength);
 
-        Log.i("changeLegit:", "after prefix trim: |" + sOld + "|");
-        Log.i("changeLegit:", "after prefix trim: |" + sNew + "|");
+        logF("changeLegit:", "after prefix trim: |" + sOld + "|");
+        logF("changeLegit:", "after prefix trim: |" + sNew + "|");
 
 
         // Find the shared sufix of the two strings: we can assume that the user does not need to edit this
@@ -92,13 +94,13 @@ public class ISStringProcessor {
         sOld = sOld.substring(0, sOld.length() - sharedSuffixLength);
         sNew = sNew.substring(0, sNew.length() - sharedSuffixLength);
 
-        Log.i("changeLegit:", "after suffix trim: |" + sOld + "|");
-        Log.i("changeLegit:", "after suffix trim: |" + sNew + "|");
+        logF("changeLegit:", "after suffix trim: |" + sOld + "|");
+        logF("changeLegit:", "after suffix trim: |" + sNew + "|");
 
         // Since each change costs at least 1, the minimal number of changes is the larger of the two remaining strings.
         //   If this is already larger than the maximum allowed number of keypresses in the given duration, return false
         if (Math.max(sOld.length(), sNew.length()) >  durationSeconds * maxKeypressesPerSecond) {
-            Log.i("changeLegit: max len > ", sOld.length() + "|" + sNew.length() + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
+            logF("changeLegit: max len > ", sOld.length() + "|" + sNew.length() + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
             return false;
         }
 
@@ -117,7 +119,7 @@ public class ISStringProcessor {
             }
 
         if (dp[sOld.length()][sNew.length()] >  durationSeconds * maxKeypressesPerSecond) {
-            Log.i("changeLegit: dp > ", dp[sOld.length()][sNew.length()] + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
+            logF("changeLegit: dp > ", dp[sOld.length()][sNew.length()] + "|" + durationSeconds + "|" + maxKeypressesPerSecond);
             return false;
         }
 

@@ -59,6 +59,9 @@ import static com.example.integriscreen.ISImageProcessor.storePic;
 import static com.example.integriscreen.ISStringProcessor.almostIdenticalString;
 import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
+import static com.example.integriscreen.LogManager.logF;
+import static com.example.integriscreen.LogManager.logW;
+import static com.example.integriscreen.LogManager.writeToFile;
 import static java.lang.System.currentTimeMillis;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.line;
@@ -77,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static CheckBox limitAreaCheckbox;
     private static CheckBox liveCheckbox;
 
+    private static LogManager LM;
+
     private Mat previousFrameMat;
 
     private Point upper_left, lower_right;
@@ -85,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // the form created based on specs received from Server
     private TargetForm targetForm;
-    private ArrayList<ActiveElementLogs> activeElementLogs;
+    private ArrayList<ActiveElementLog> activeElementLogs;
 
     // static address of the server to fetch list of forms
     private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
@@ -130,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
+                    logF(TAG, "OpenCV loaded successfully");
                     // Load ndk built module, as specified in moduleName in build.gradle
                     // after opencv initialization
                     System.loadLibrary("native-lib");
@@ -169,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         //check textRecognizer is operational
         if (!textRecognizer.isOperational()) {
-            Log.w(TAG, "Detector dependencies are not yet available.");
+            logF(TAG, "Detector dependencies are not yet available.");
 
             // Check for low storage.  If there is low storage, the native library will not be
             // downloaded, so detection will not become operational.
@@ -178,9 +183,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             if (hasLowStorage) {
                 Toast.makeText(this, "Low Storage!!!", Toast.LENGTH_LONG).show();
-                Log.w(TAG, "Low Storage!!!");
+                logF(TAG, "Low Storage!!!");
             }
         }
+
+        LM = new LogManager(getApplicationContext());
 
         formsListManager = new ISServerCommunicationManager(serverURL, getApplicationContext());
 
@@ -268,10 +275,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         hideActionBar();
 
         if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            logF(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, _baseLoaderCallback);
         } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            logF(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
@@ -285,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    Log.d("TAG", "Permission granted");
+                    logF("TAG", "Permission granted");
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -299,7 +306,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void outputOnToast(final String outString) {
-        Log.d("Toast Output", outString);
+        logF("Toast Output", outString);
+        logF("toastOutput", outString);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -310,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private void outputOnUILabel(final String textToShow) {
 //        final String textToShow = outputText;
-        Log.d("UILabel Output", textToShow);
+        logF("UILabel Output", textToShow);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -328,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentISState == null)
             return;
 
-        Log.d("clickSubmit", currentISState.name());
+        logF("clickSubmit", currentISState.name());
 
         if (targetForm.isLoaded)
             transitionISSTo(ISState.SUBMITTING_DATA);
@@ -379,13 +387,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // Button callback to handle taking a picture
     public void onClickTakePic(View view) {
-        Log.d(TAG, "Take picture button clicled.");
+        logF(TAG, "Take picture button clicled.");
         takePicHighRes();
     }
 
     // Callback which is called by TargetForm class once the data is ready.
     public void onFormLoaded() {
-        Log.d(TAG, "Form loaded!" + targetForm.toString());
+        logF(TAG, "Form loaded!" + targetForm.toString());
         //Toast.makeText(getApplicationContext(), "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
     }
 
@@ -407,17 +415,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // outputOnToast(receivedJSONObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG + "error:", "responseJSON" + responseJSON.toString() + "|" + e.getMessage());
+            logF(TAG + "error:", "responseJSON" + responseJSON.toString() + "|" + e.getMessage());
         }
     }
 
     // Callback when picture is taken
     public void onPicTaken(byte[] data) {
-        Log.d(TAG, "onPicTaken: " + currentTimeMillis());
+        logF(TAG, "onPicTaken: " + currentTimeMillis());
 
         //convert to mat
         Mat matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
-        Log.d(TAG, "afterImdecode: " + currentTimeMillis());
+        logF(TAG, "afterImdecode: " + currentTimeMillis());
 
         if (currentISState == ISState.VERIFYING_UI) {
             Mat rotatedFullRes = new Mat(1, 1, 1);
@@ -454,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
          storePic(data, "_byte");
 
         Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
-        Log.d(TAG, "afterCvtColor: " + currentTimeMillis());
+        logF(TAG, "afterCvtColor: " + currentTimeMillis());
 
         //        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
 
@@ -466,7 +474,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // rotate the mat so we get the proper orientation
         rotate90(matPic, matPic);
 
-        Log.d("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
+        logF("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
 
         // store mat image in drive
         storePic(matPic, "_mat");
@@ -487,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             UIElement element = form.allElements.get(i);
             Rect rescaledBox = element.getRescaledBox(scaleX, scaleY);
 
-            Log.d("box: ", rescaledBox.toString() + "|" + currentFrameMat.size());
+            logF("box: ", rescaledBox.toString() + "|" + currentFrameMat.size());
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(rescaledBox));
 
             Scalar rectangle_color;
@@ -523,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         String concatDelim = "";
         String concatenatedText = "";
-        Log.d("TextDetected", texts.size()+" words");
+        logF("TextDetected", texts.size()+" words");
         for (int i = 0; i < texts.size(); ++i) {
             TextBlock item = texts.valueAt(i);
             android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
@@ -533,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 Imgproc.putText(frameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
                         Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0,255,0), 2);
 
-                Log.d("TextDetected", item.getValue());
+                logF("TextDetected", item.getValue());
                 concatenatedText += item.getValue() + concatDelim;
             }
         }
@@ -551,7 +559,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private void takePicHighRes() {
         _cameraBridgeViewBase.setPictureSize(0);    // the best quality is set by default for pictures
 
-        Log.d(TAG, "before the takePicture: " + currentTimeMillis());
+        logF(TAG, "before the takePicture: " + currentTimeMillis());
         _cameraBridgeViewBase.takePicture(this);
     }
     
@@ -586,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         String urlToLoad = formsListManager.getFormURLFromName(formToLoad);
         if (urlToLoad != null) {
-            Log.d("box: curr: ", rotatedUpperFrameMat.size().toString());
+            logF("box: curr: ", rotatedUpperFrameMat.size().toString());
             targetForm = new TargetForm(getApplicationContext(), urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
             // outputOnToast("Loading form: " + formToLoad);
         } else
@@ -634,7 +642,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             _cameraBridgeViewBase.drawingViewSet = false;
             _cameraBridgeViewBase.focusAt(x, y, squareSize);
-            Log.d(TAG, "Focus is set automatically to the midle point of the upper-half of the screen");
+            logF(TAG, "Focus is set automatically to the midle point of the upper-half of the screen");
 
             // Once it is ready, we use this to verify as well
             takePicHighRes();
@@ -733,7 +741,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
             if (changedLocations.size() > 0 && !activityDetected) {
-                Log.d("attack", "Warning: UI changes, but no hand movement!");
+                logF("attack", "Warning: UI changes, but no hand movement!");
             }
 
 //            if (cnt % freq == 0) storePic(diffsUpperPart, "_after_diff");
@@ -744,7 +752,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 //            ++cnt;
         } else if (currentISState == ISState.SUBMITTING_DATA) {
-            Log.d("SubmittingData", "bla");
+            logF("SubmittingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK) {
             //          outputOnUILabel(receivedJSONObject.toString());
         } else if (currentISState == ISState.DATA_MISMATCH) {
@@ -762,7 +770,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     String phoneVal = currDiff.getString("phone");
                     String browserVal = currDiff.getString("browser");
 
-                    Log.d("diffs", elementID + "|" + browserVal);
+                    logF("diffs", elementID + "|" + browserVal);
 
                     UIElement currentElement = targetForm.getElementById(elementID);
 
@@ -779,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.d("ListOfForms", e.getMessage());
+                logF("ListOfForms", e.getMessage());
             }
 
         } else {
@@ -889,7 +897,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
-//        Log.d(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
+//        logF(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.INTEGRISCREEN) {
             return executeISStateMachine(currentFrameMat);
@@ -985,7 +993,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
         // TODO(enis): make sure that only editable elements are allowed to change!
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
-        Log.d("ElementChanges", "Total changes: " + changedLocations.size());
+        logF("ElementChanges", "Total changes: " + changedLocations.size());
         for (int i = 0; i < changedLocations.size(); i++) {
             UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i).first);
             int currElementArea = changedLocations.get(i).second;
@@ -994,7 +1002,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if ((currElement == null) || (processedElements.contains(currElement.id)))
                 continue;
 
-            Log.d("ElementChanges", "Element being edited: " + currElement.id);
+            logF("ElementChanges", "Element being edited: " + currElement.id);
 
             // read the element value from the current frame
             String newValue = concatTextBlocks(detect_text(rawScreenFrame.submat(currElement.box)));
@@ -1008,7 +1016,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     String message = "Change from |" + currElement.currentVal + "| to |" + newValue + "| is not OK in " + diffTimestamp + "ms";
   //                  outputOnToast(message);
                     outputOnUILabel(message);
-                    Log.w("non legit change: ", message);
+                    logW("non legit change: ", message);
                 }
 
                 targetForm.updateElementWithValue(currElement.id, newValue);    // value updated Todo eu: what if the frame is unclear and the change is unreal
@@ -1024,7 +1032,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     targetForm.activEl = currElement.id;
 
                     // store the change in the logs
-                    ActiveElementLogs tmp = new ActiveElementLogs(oldElement, currElement.id, tsOfNow);
+                    ActiveElementLog tmp = new ActiveElementLog(oldElement, currElement.id, tsOfNow);
                     activeElementLogs.add(tmp);
                 }
             }
@@ -1072,7 +1080,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         else {
             // raise an alarm flag
-            Log.d(TAG, "***Attack*** Take things seriously :-) " +
+            logF(TAG, "***Attack*** Take things seriously :-) " +
                     "Trying to modify element with ID: " + targetForm.getElement(i).id
                     + ", while active is: " + targetForm.activEl);
         }
@@ -1114,7 +1122,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void reportEvaluationResult(int cntSuccess, int cntTotal) {
         String message = "Success rate: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal;
-        Log.d("Evaluation Finished:", message);
+        logF("Evaluation Finished:", message);
         outputOnToast(message);
     }
 
@@ -1130,7 +1138,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             float x = event.getX();
             float y = event.getY();
 
-            Log.d("FocusMode", "Click to: " + x + ", " + y
+            logF("FocusMode", "Click to: " + x + ", " + y
                     + ", at: " + event.getEventTime());
 
             _cameraBridgeViewBase.focusAt(x, y, 100);
