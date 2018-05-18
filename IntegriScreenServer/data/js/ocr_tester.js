@@ -27,7 +27,7 @@ $(document).ready(function() {
         if (time != null) {
 
             tester = setInterval(function() {
-                if (start == page_targets.length) clearInterval(tester);
+                if (start == page_targets.length-1) clearInterval(tester);
                 next_page();
             }, parseInt(time));
         }
