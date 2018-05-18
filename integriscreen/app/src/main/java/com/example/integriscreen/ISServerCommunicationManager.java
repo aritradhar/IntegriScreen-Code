@@ -51,12 +51,12 @@ public class ISServerCommunicationManager {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        logF("ListOfForms", "response: " + response.toString());
+                        // logF("ListOfForms", "response: " + response.toString());
 
                         try {
                             // Parsing json object response
                             JSONArray JSONElements = response.getJSONArray("response");
-                            logF("ListOfForms", "ArrayList: " + JSONElements.toString());
+                            // logF("ListOfForms", "ArrayList: " + JSONElements.toString());
 
                             // iterate through all elements
                             for (int i = 0; i < JSONElements.length(); i++) {
@@ -64,13 +64,13 @@ public class ISServerCommunicationManager {
                                 String pageTitle = currEl.getString("page_title");
                                 pageTitle = pageTitle.replaceAll("\\s+","");
                                 String formJsonURL = currEl.getString("json");
-                                logF("Loading forms", "FormID: " + pageTitle + " -> " + formJsonURL);
+                                // logF("Loading forms", "FormID: " + pageTitle + " -> " + formJsonURL);
                                 knownForms.put(pageTitle, formJsonURL);
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            logF("ListOfForms", e.getMessage());
+                            logF("Error Loading ListOfForms", e.getMessage());
                         }
                     }
                 },

@@ -19,16 +19,19 @@ public class LogManager {
         pathName = ISImageProcessor.generatePathName("_log", ".txt");
     }
 
+    // Logging for final results
     public static void logR(String tag, String message) {
         Log.w(tag, message);
         writeToFile("RESULT: " + tag + ":" + message + "\n\n");
     }
 
+    // Logging decorator for warnings
     public static void logW(String tag, String message) {
         Log.w(tag, message);
         writeToFile("WARNING:" + tag + ":" + message + "\n\n");
     }
 
+    // Standard Logging decorator
     public static void logF(String tag, String message) {
         Log.i(tag, message);
         writeToFile(tag + ":" + message + "\n\n");
