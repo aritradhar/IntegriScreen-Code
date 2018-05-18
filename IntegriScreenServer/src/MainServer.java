@@ -1,17 +1,15 @@
 
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -60,7 +58,7 @@ public class MainServer extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-			
+
 		//no get method supported due to the multipart configuration nature of this Servlet
 	}
 
@@ -72,9 +70,9 @@ public class MainServer extends HttpServlet {
 
 		//input form
 		String page_type = request.getParameter("page_type");
-		
+
 		//System.out.println(page_type);
-		
+
 		//page response from the browser
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
@@ -162,7 +160,7 @@ public class MainServer extends HttpServlet {
 				{
 					String[] out = PageGen.pageGen(pageFileName);
 					System.out.println("Generated : " + pageFileName);
-					
+
 					JSONObject inJson = new JSONObject();
 					inJson.put("page_id", out[0]);
 					inJson.put("page_title", out[1]);
@@ -170,6 +168,30 @@ public class MainServer extends HttpServlet {
 					inJson.put("html", out[3]);
 					inJson.put("unicorn", out[4]);
 					jarray.put(counter++, inJson);
+				}
+				//get permission
+				try
+				{
+					String s = null;
+					//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
+					Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/generated");        
+					BufferedReader br = new BufferedReader(
+							new InputStreamReader(p.getInputStream()));
+					while ((s = br.readLine()) != null)
+						System.out.println("line: " + s);
+					
+					 br = new BufferedReader(
+								new InputStreamReader(p.getErrorStream()));
+						while ((s = br.readLine()) != null)
+							System.out.println("line: " + s);
+						
+					p.waitFor();
+					System.out.println ("exit: " + p.exitValue());
+					p.destroy();
+				}
+				catch(Exception ex)
+				{
+					System.err.println("Things fucked up");
 				}
 				outJson.put("response", jarray);
 
