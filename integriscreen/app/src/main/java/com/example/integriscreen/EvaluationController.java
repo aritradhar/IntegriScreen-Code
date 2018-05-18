@@ -41,7 +41,13 @@ public class EvaluationController {
         cancelTimers();
 
         logR("Evaluation Finished:", "Success: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal);
+        String failIndicesFormatted = "";
+        for(String fail : failIndices)
+            failIndicesFormatted += fail + ".html\n";
+
         logR("UI Verification failed on forms: ", failIndices.toString());
+        logR("UI Verification failed forms formated\n", failIndicesFormatted);
+
         mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
 
