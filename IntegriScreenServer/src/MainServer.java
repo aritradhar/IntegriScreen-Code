@@ -193,6 +193,30 @@ public class MainServer extends HttpServlet {
 				{
 					System.err.println("Things fucked up");
 				}
+				
+				try
+				{
+					String s = null;
+					//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
+					Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/data");        
+					BufferedReader br = new BufferedReader(
+							new InputStreamReader(p.getInputStream()));
+					while ((s = br.readLine()) != null)
+						System.out.println("line: " + s);
+					
+					 br = new BufferedReader(
+								new InputStreamReader(p.getErrorStream()));
+						while ((s = br.readLine()) != null)
+							System.out.println("line: " + s);
+						
+					p.waitFor();
+					System.out.println ("exit: " + p.exitValue());
+					p.destroy();
+				}
+				catch(Exception ex)
+				{
+					System.err.println("Things fucked up");
+				}
 				outJson.put("response", jarray);
 
 				response.getWriter().append(outJson.toString(1));
