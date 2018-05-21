@@ -992,8 +992,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
         // TODO(enis): make sure that only editable elements are allowed to change!
+        // TODO eu: active element is updated when value changes (not focus in browser)
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
         logF("ElementChanges", "Total changes: " + changedLocations.size());
+
         for (int i = 0; i < changedLocations.size(); i++) {
             UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i).first);
             int currElementArea = changedLocations.get(i).second;
@@ -1008,7 +1010,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             String newValue = concatTextBlocks(detect_text(rawScreenFrame.submat(currElement.box)));
 
             long currentTimestamp = currentTimeMillis();
-            double diffTimestamp = currentTimestamp - previousFrameTimestamp;
+            long diffTimestamp = currentTimestamp - previousFrameTimestamp;
 
             // check if diff comes from an element value change
             if (!currElement.currentVal.equals(newValue)) {
@@ -1017,28 +1019,39 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
   //                  outputOnToast(message);
                     outputOnUILabel(message);
                     logW("non legit change: ", message);
+                    // Todo : implement a method to fire an alert
                 }
-
-                targetForm.updateElementWithValue(currElement.id, newValue);    // value updated Todo eu: what if the frame is unclear and the change is unreal
 
                 if (targetForm.activEl.equals(currElement.id)) {    // this element is already the active one
-                    targetForm.activeElementLastEdit = System.currentTimeMillis();  //Todo eu: frame timestamp would be more accurate!
-                }
-                else {
-                    String oldElement = targetForm.activEl;
-                    double tsOfNow = System.currentTimeMillis();
-                    targetForm.activeSince = tsOfNow;
-                    targetForm.activeElementLastEdit = tsOfNow;
-                    targetForm.activEl = currElement.id;
+                    //Todo eu: frame timestamp would be more accurate!
+                    targetForm.activeElementLastEdit = currentTimestamp;
 
-                    // store the change in the logs
-                    ActiveElementLog tmp = new ActiveElementLog(oldElement, currElement.id, tsOfNow);
-                    activeElementLogs.add(tmp);
+                    // value updated Todo eu: what if the frame is unclear and the change is unreal
+                    String oldValue = currElement.currentVal;
+                    targetForm.updateElementWithValue(currElement.id, newValue);
+
+                    //store in the logs
+                    ActiveElementLog tmpLog = new ActiveElementLog(currElement.id, currElement.id,
+                            oldValue, newValue, currentTimestamp, diffTimestamp);
+                    activeElementLogs.add(tmpLog);
+                }
+                else {                                          // new active element
+                    String oldElementID = targetForm.activEl;
+
+                    String oldValue = currElement.currentVal;
+                    targetForm.activEl = currElement.id;
+                    targetForm.activeSince = currentTimestamp;
+                    targetForm.activeElementLastEdit = currentTimestamp;
+                    targetForm.updateElementWithValue(currElement.id, newValue);
+
+                    //store in the logs
+                    ActiveElementLog tmpLog = new ActiveElementLog(oldElementID, currElement.id,
+                            oldValue, newValue, currentTimestamp, diffTimestamp);
+                    activeElementLogs.add(tmpLog);
                 }
             }
-
-            processedElements.add(currElement.id);  // add the current elemnt in the processed list
-//            auditActiveElementsLogs();
+            // add the current elemnt in the processed list
+            processedElements.add(currElement.id);
         }
         previousFrameTimestamp = currentTimeMillis();
     }
@@ -1046,8 +1059,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
     private void auditActiveElementsLogs(int lastEvents) {
-        // consider #lastEvents in the audit
+        // tresholds
+        long minTimeActive = 500;   // minimum duration that one element should be active
 
+        // stores the duration an active element has been edited
+        long sequentialEdits = 0;
+        for (int i = 0; i < activeElementLogs.size(); i++) {
+            ActiveElementLog cLog = activeElementLogs.get(i);
+
+            if (!isChangeLegit(cLog.oldValue, cLog.newValue, cLog.duration)) {
+                Log.d(TAG, "------ Alert!!!!!");
+            }
+            
+            if (cLog.oldId == null) {                       // first time an elements becomes active
+                sequentialEdits = cLog.duration;
+            }
+            else if (cLog.newId.equals(cLog.oldId)) {       // same element being edited
+                sequentialEdits += cLog.duration;
+            }
+            else {
+                if (sequentialEdits < minTimeActive) {      // if one element has been updated very fast
+                    Log.d(TAG, "------ Alert!!!!!");
+                }
+                sequentialEdits = cLog.duration;            // reset sequentialEdits
+            }
+        }
     }
 
     /**
