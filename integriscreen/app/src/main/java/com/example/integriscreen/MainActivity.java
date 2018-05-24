@@ -346,6 +346,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (currentISState == null)
             return;
 
+        // audit logs before submitting data
+        auditActiveElementsLogs(0);
         logF("clickSubmit", currentISState.name());
 
         if (targetForm.isLoaded)
@@ -1112,14 +1114,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
 
-
+    /**
+     *  This method audits the logs of changes on the user's computer as received on the phone.
+     *  @lastEvents is the number of events to consider in the audit, 0 means all events
+     */
     private void auditActiveElementsLogs(int lastEvents) {
         // tresholds
         long minTimeActive = 500;   // minimum duration that one element should be active
+        int logsSize = activeElementLogs.size();
+        int start = 0;
+        if (lastEvents > 0)
+            start = logsSize-lastEvents;
 
         // stores the duration an active element has been edited
         long sequentialEdits = 0;
-        for (int i = 0; i < activeElementLogs.size(); i++) {
+        for (int i = start; i < logsSize; i++) {
             ActiveElementLog cLog = activeElementLogs.get(i);
 
             if (!isChangeLegit(cLog.oldValue, cLog.newValue, cLog.duration)) {
