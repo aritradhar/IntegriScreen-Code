@@ -17,6 +17,10 @@ label {
   white-space: nowrap;
 }
 
+:focus {
+    outline: 1vh solid rgba(10, 10, 240, 1);
+}
+
 textarea {
   resize: none;
   overflow:hidden;
@@ -28,17 +32,26 @@ h1, h2, h3, h4, h5, h6 {
     box-sizing: border-box;
 }
 
-input[type='text'] {
-    border-left-style: solid;
-    border-left-width: 1px;
+::selection {
+    background: transparent;
+}
+
+::moz-selection {
+    background: transparent;
 }
 
 label, textarea, input, button {
     padding: 1% 1%;
     box-sizing: border-box;
-    -moz-user-select: none;
+
+    -webkit-user-select: none; /* Webkit */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE 10  */
+    /* Currently not supported in Opera but will be soon */
+    -o-user-select: none;
     user-select: none;
-    caret-color: transparent;
+
+  <!--  caret-color: transparent; -->
 }
 
 html, body, input, select, textarea, button{font-family: !!font!!; letter-spacing: !!letter_spacing!!;}
