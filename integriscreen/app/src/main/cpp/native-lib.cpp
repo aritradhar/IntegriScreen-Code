@@ -91,32 +91,33 @@ void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_color_1detector
     colorMask.copyTo(outputMat);
 }
 
-void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_compute_1transformation(
+void JNICALL Java_com_example_integriscreen_PerspectiveRealigner_find_1rectangle_1corners(
         JNIEnv *env, jobject instance,
         jlong colorMaskAddr,
-        jlong width,
-        jlong height,
-        jlong lambdaAddr) {
+        jlong cornersAddr) {
 
     Mat &colorMask = *(Mat *)colorMaskAddr;
-    Mat &lambdaExternal = *(Mat *)lambdaAddr;
+    Mat &cornersMat = *(Mat *)cornersAddr;
 
     // Output Quadilateral or World plane coordinates - they are usually constant
     // The 4 points where the mapping is to be done , from top-left in clockwise order
     vector<Point2f> outputQuadNew(4);
     // This stretches the across the whole frame
     outputQuadNew[0] = Point2f(0, 0);
-    outputQuadNew[1] = Point2f(width - 1, 0);
-    outputQuadNew[2] = Point2f(width - 1, height - 1);
-    outputQuadNew[3] = Point2f(0, height - 1);
+    outputQuadNew[1] = Point2f(colorMask.cols, 0);
+    outputQuadNew[2] = Point2f(colorMask.cols, colorMask.rows);
+    outputQuadNew[3] = Point2f(0, colorMask.rows);
 
     vector<Point2f> potentialCorners;
     potentialCorners = detect_rectangle_corners(colorMask, colorMask, outputQuadNew);
     reorder_points(potentialCorners, outputQuadNew);
 
-
-    getPerspectiveTransform(potentialCorners, outputQuadNew).copyTo(lambdaExternal);
+    for(int i = 0; i < potentialCorners.size(); ++i) {
+        cornersMat.at<int>(i,0) = (int)potentialCorners[i].x;
+        cornersMat.at<int>(i,1) = (int)potentialCorners[i].y;
+    }
 }
+
 
 
 } /// end of "extern C"
@@ -129,6 +130,12 @@ void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
     int hueCenterOpenCV = hueCenter / 2;
     int lower_hue = ( (int)hueCenterOpenCV - 10 + 180 ) % 180;
     int upper_hue = ( (int)hueCenterOpenCV + 10 ) % 180;
+
+    // If we decide to also blur the image:
+//    Mat tmpMat(1, 1, CV_8UC3);
+//    GaussianBlur( inputMat, tmpMat, Size(5, 5), 3, 3 );
+//    blur( inputMat, tmpMat, Size(11, 11));
+//    cvtColor(tmpMat, hsvMat, COLOR_RGB2HSV);
 
     cvtColor(inputMat, hsvMat, COLOR_RGB2HSV);
 

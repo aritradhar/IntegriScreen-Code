@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import static com.example.integriscreen.ISImageProcessor.applyCanny;
 import static com.example.integriscreen.ISImageProcessor.rotate270;
@@ -61,7 +62,6 @@ import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
 import static com.example.integriscreen.LogManager.logF;
 import static com.example.integriscreen.LogManager.logW;
-import static com.example.integriscreen.LogManager.writeToFile;
 import static java.lang.System.currentTimeMillis;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.line;
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // detect the green framebox
         PerspectiveRealigner myPerspective = new PerspectiveRealigner();
-        myPerspective.detectFrameAndComputeTransformation(matPic, color_border_hue, matPic.width(), matPic.height());
+        myPerspective.detectFrameAndComputeTransformation(matPic, color_border_hue);
         myPerspective.realignImage(matPic);
 
         // rotate the mat so we get the proper orientation
@@ -734,9 +734,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
 
+
             String allDiffAreas = "";
-            for(Pair<Rect, Integer> P : changedLocations)
+            for(Pair<Rect, Integer> P : changedLocations) {
                 allDiffAreas += " | " + P.second.toString();
+                Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 0), 2);
+            }
 
             outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
@@ -746,7 +749,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 //            if (cnt % freq == 0) storePic(diffsUpperPart, "_after_diff");
 
-            Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+            // This is where we decide to draw the black-and-white on the screen
+            // Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
 
             diffsUpperPart.release();
 
@@ -909,15 +913,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (detection_option == 0) // just show the color detection
                 cameraFrameRealigner.detectColor(currentFrameMat, currentFrameMat, hueCenter);
             else
-                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, hueCenter,
-                        currentFrameMat.width(), currentFrameMat.height(), true);
+                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, hueCenter, true);
 
             return currentFrameMat;
         }
 
         if (realignCheckbox.isChecked()) {
             if (liveCheckbox.isChecked() && currentOutputSelection != OutputSelection.DIFF && currentOutputSelection != OutputSelection.CANNY) { // Only continuiously realign if live is turned on?
-                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, color_border_hue, currentFrameMat.width(), currentFrameMat.height());
+                cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, color_border_hue);
             }
 
             cameraFrameRealigner.realignImage(currentFrameMat, currentFrameMat);
@@ -994,6 +997,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // TODO(enis): make sure that only editable elements are allowed to change!
         // TODO eu: active element is updated when value changes (not focus in browser)
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
+
+        // TODO: Enis: this is where you detect the active element:
+        // --------------
+        int hueBlue = 240;
+        Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(rawScreenFrame, hueBlue);
+        // simply output them
+        for(int i = 0; i < (int)activeElementCorners.size(); ++i)
+            logF("Blue Corner " + String.valueOf(i), activeElementCorners.get(i).toString());
+
+        // TODO: activeElCorners to elementRect
+        Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
+        Imgproc.rectangle(rawScreenFrame, myRect.tl(), myRect.br(), new Scalar(255) , 8);
+
+        // TODO(ivo): detect cases when the rectangle is not found and signalize it
+        // -------------
+
+
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
         for (int i = 0; i < changedLocations.size(); i++) {
