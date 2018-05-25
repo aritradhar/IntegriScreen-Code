@@ -3,6 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
+#include <android/log.h>
 
 #define LOG_TAG "jni_debug"
 #define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
@@ -131,12 +132,7 @@ void detect_specific_color(const Mat& inputMat, Mat &outputMat, int hueCenter)
     int lower_hue = ( (int)hueCenterOpenCV - 10 + 180 ) % 180;
     int upper_hue = ( (int)hueCenterOpenCV + 10 ) % 180;
 
-    // If we decide to also blur the image:
-//    Mat tmpMat(1, 1, CV_8UC3);
-//    GaussianBlur( inputMat, tmpMat, Size(5, 5), 3, 3 );
-//    blur( inputMat, tmpMat, Size(11, 11));
-//    cvtColor(tmpMat, hsvMat, COLOR_RGB2HSV);
-
+    // Convert to HSV colorspace
     cvtColor(inputMat, hsvMat, COLOR_RGB2HSV);
 
     // Detect the specified color based on hueCenter
@@ -149,6 +145,11 @@ double my_dist(Point2f A, Point2f B) { double dx = A.x - B.x; double dy = A.y - 
 // this function will reorder the input points so that points[0] is the one closest to output[0], etc.
 void reorder_points(vector<Point2f> &points, vector<Point2f> &outputQuadsNew)
 {
+    if (points.size() != 4) {
+        ALOG("POINTS should always be of size 4!");
+        return;
+    }
+
     for(int i = 0; i < 4; ++i) {
         int closest = i;
         for(int j = i + 1; j < 4; ++j) {
@@ -182,8 +183,11 @@ vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, co
         CC_STAT_AREA The total area (in pixels) of the connected component
      */
 
+    if (numComponents == 1) { // No pixels of expected color
+        return vector<Point2f>(4, Point2f(0, 0));
+    }
+
     // find the largest component by enclosing area
-    int maxAreaIndex = 1;
     int maxEnclosingIndex = 0, maxEnclosingArea = 0;
     for (int i = 1; i < numComponents; ++i) { // crucial to start with 1 since 0 is the largest one?
         int currentArea = stats.at<int>(i, CC_STAT_WIDTH) * stats.at<int>(i, CC_STAT_HEIGHT);
@@ -222,7 +226,6 @@ vector<Point2f> detect_rectangle_corners(const Mat &inputMat, Mat &outputMat, co
         circle( outputMat, points[i], 3, Scalar(255,255,255), -1, 8, 0 );
         // Draw circle outline
         circle( outputMat, points[i], 10, Scalar(255,255,255), 3, 8, 0 );
-
     }
 
     return points;

@@ -42,6 +42,7 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -208,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Uncomment to set one of the upper bounds on the camera resolution (the other is the preview View size)
         // To hardcode the resolution, find "// calcWidth = 1920;" in CameraBridgeViewBase
         // Ivo's phone: 960x540, 1280x720 (1M), 1440x1080 (1.5M), 1920x1080 (2M)
-        // _cameraBridgeViewBase.setMaxFrameSize(1280, 720);
+        // _cameraBridgeViewBase.setMaxFrameSize(1440, 1080);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.enableFpsMeter();
@@ -691,6 +692,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
+        // TODO(ivo): why do we have a bug with hands?!f
+
         int skin_hue_estimate = 26;
         PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
@@ -894,11 +897,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return currentFrameMat;
     }
 
-
-
-
-
-
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat currentFrameMat = inputFrame.rgba();
 //        logF(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
@@ -988,6 +986,42 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return currentFrameMat;
     }
 
+    boolean similar(double a, double b) { double maxDiff = 25; return Math.abs(a - b) < maxDiff; }
+    boolean similar(Point a, Point b) { return similar(a.x, b.x) && similar(a.y, b.y); }
+
+//    boolean isRectangle(Vector<Point> corners) {
+//        return ( similar(corners.get(0).y, corners.get(1).y) && similar(corners.get(2).y, corners.get(3).y) &&
+//                similar(corners.get(0).x, corners.get(3).x) && similar(corners.get(1).x, corners.get(2).x));
+//    }
+
+    Vector<Point> rectToVector(Rect R) {
+        Vector<Point> result = new Vector<>();
+        result.add(R.tl());
+        result.add(new Point(R.br().x, R.tl().y));
+        result.add(R.br());
+        result.add(new Point(R.tl().x, R.br().y));
+        return result;
+    }
+
+    boolean similar(Vector<Point> A, Vector<Point> B) {
+        if (A.size() != B.size()) return false;
+        for(int i = 0; i < A.size(); ++i)
+            if (!similar(A.get(i), B.get(i)))
+                return false;
+        return true;
+    }
+
+    private UIElement findActiveElementFromCoorners(Vector<Point> corners) {
+        for(int i = 0; i < targetForm.allElements.size(); ++i) {
+            UIElement currentElement = targetForm.allElements.get(i);
+
+            if (similar(rectToVector(currentElement.box), corners))
+                return currentElement;
+        }
+
+        return null;
+    }
+
     /**
      * This method takes as input the list of changes on the screen and confirms the integrity
      * of screen changes
@@ -998,21 +1032,24 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // TODO eu: active element is updated when value changes (not focus in browser)
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
 
-        // TODO: Enis: this is where you detect the active element:
-        // --------------
         int hueBlue = 240;
         Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(rawScreenFrame, hueBlue);
+        UIElement activeElement = findActiveElementFromCoorners(activeElementCorners);
+
         // simply output them
         for(int i = 0; i < (int)activeElementCorners.size(); ++i)
             logF("Blue Corner " + String.valueOf(i), activeElementCorners.get(i).toString());
 
-        // TODO: activeElCorners to elementRect
-        Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
-        Imgproc.rectangle(rawScreenFrame, myRect.tl(), myRect.br(), new Scalar(255) , 8);
 
-        // TODO(ivo): detect cases when the rectangle is not found and signalize it
-        // -------------
-
+        // TODO(enis): the active element is detected here and drawn as well
+        if (activeElement != null) {
+            // If we found an active element, we draw a green rectangle
+            Imgproc.rectangle(rawScreenFrame, activeElement.box.tl(), activeElement.box.br(), new Scalar(0, 255, 0), 8);
+        } else {
+            // If we haven't been able to correlated with any UI element, we draw a red rectangle
+            Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
+            Imgproc.rectangle(rawScreenFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
+        }
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
