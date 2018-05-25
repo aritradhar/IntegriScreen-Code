@@ -8,7 +8,7 @@ import org.opencv.core.Rect;
 public class UIElement {
     public String id;
     public Boolean editable;      // 0-No, 1-Yes, 2-Enumerate
-    public String type;         // label, textbox, radio, checkbox, textarea
+    public String type;         // label, textbox, textbox, radio, checkbox, textarea   //TODO: add restrictions for sensitive elements, NUMBER_ONLY, BTC_ADDRESS_ONLY
     public Rect box;                   // location of the UI on the screen, in apsolute coordinates!
     public String defaultVal;   // default value of the UI element
     public String currentVal;   // current value of the UI element extracted through OCR
