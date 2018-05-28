@@ -2,6 +2,8 @@ package com.example.integriscreen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.opencv.android.JavaCameraView;
 
@@ -113,10 +115,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             drawingView.setHaveTouch(true, screenRect);
             drawingView.invalidate();
 
-            // Remove the square after some time
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-
+            new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     drawingView.setHaveTouch(false, new android.graphics.Rect(0, 0, 0, 0));

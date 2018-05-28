@@ -628,23 +628,29 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (submitDataTimer != null) submitDataTimer.cancel();
     }
 
+    private void focusToForm() {
+        // Careful to take screen rotation into account!
+        int x = (int) _cameraBridgeViewBase.getWidth() / 4;
+        int y = (int) _cameraBridgeViewBase.getHeight() / 2;
+        int squareSize = 200;
+
+        _cameraBridgeViewBase.focusAt(x, y, squareSize);
+        logF(TAG, "Focus is set automatically to the midle point of the upper-half of the screen");
+    }
+
     private void executeISStateEntryActions(ISState newState)
     {
         if (newState == ISState.DETECTING_FRAME) {
+            // If there were any previous timers, turn them off
             cancelTimers();
 
+            // Ensure that focus is properly set
+            focusToForm();
+
+            // Start realigning
             realignCheckbox.setChecked(true);
         }
         else if (newState == ISState.VERIFYING_UI) {
-            // TODO eu: Focus is set arbitrarly to the midle point of the upper-half of the screen
-            int x = (int) _cameraBridgeViewBase.getWidth() / 2;
-            int y = (int) _cameraBridgeViewBase.getHeight() / 4;
-            int squareSize = 200;
-
-            _cameraBridgeViewBase.drawingViewSet = false;
-            _cameraBridgeViewBase.focusAt(x, y, squareSize);
-            logF(TAG, "Focus is set automatically to the midle point of the upper-half of the screen");
-
             // Once it is ready, we use this to verify as well
             takePicHighRes();
         }
