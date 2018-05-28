@@ -2,8 +2,8 @@
   "letter_spacing": "normal", 
   "vspace": "73", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:12", 
-  "fontsize": "12pt", 
+  "ratio": "14:14", 
+  "fontsize": "14pt", 
   "border_thickness": "1", 
   "page_id": "Random_40", 
   "font_family": "\"Arial\", sans-serif", 
@@ -12,101 +12,121 @@
       "width": "50", 
       "initialvalue": "Random 40", 
       "editable": "false", 
-      "height": "9", 
+      "height": "15", 
       "type": "title", 
       "id": "form_title", 
       "ulc_x": "5", 
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "spud", 
+      "width": "37", 
+      "initialvalue": "fuehrer", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
       "id": "0", 
-      "ulc_x": "81.8", 
-      "ulc_y": "9"
+      "ulc_x": "1.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "claw", 
+      "width": "57", 
+      "initialvalue": "disbelief", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "1", 
-      "ulc_x": "21.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "lispers", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "2", 
       "ulc_x": "41.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "beseems", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "jowlier", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "4", 
-      "ulc_x": "61.8", 
       "ulc_y": "29"
     }, 
     {
       "width": "17", 
-      "initialvalue": "felt", 
+      "initialvalue": "fern", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "5", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
+      "id": "2", 
+      "ulc_x": "1.8", 
+      "ulc_y": "39"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "dooms", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "6", 
-      "ulc_x": "61.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "punished", 
+      "width": "17", 
+      "initialvalue": "quip", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "7", 
-      "ulc_x": "61.8", 
-      "ulc_y": "69"
+      "id": "3", 
+      "ulc_x": "21.8", 
+      "ulc_y": "39"
     }, 
     {
       "width": "27", 
-      "initialvalue": "defeat", 
+      "initialvalue": "crudity", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "4", 
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "cock", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "5", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "feds", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "6", 
+      "ulc_x": "81.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "47", 
+      "initialvalue": "spite", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "7", 
+      "ulc_x": "21.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "slay", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "8", 
-      "ulc_x": "21.8", 
-      "ulc_y": "89"
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "hasp", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "9", 
+      "ulc_x": "81.8", 
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "67", 
+      "initialvalue": "waters", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "10", 
+      "ulc_x": "1.8", 
+      "ulc_y": "79"
     }
   ]
 }
