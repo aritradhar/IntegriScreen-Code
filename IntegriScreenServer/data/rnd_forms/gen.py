@@ -32,15 +32,17 @@ def find_max_end(x, _i, next_element):
                next_element)
 
 
-def generate_form(title, num_elements=5, font_size="12pt", font='"Arial", sans-serif', randomfont=False):
+def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-serif', randomfont=False):
 
+    # Form will have a ratio between 15:12 and 12:15
     min_width, max_width = 12, 15
-    ratio = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
-    height = np.random.randint(65, 80)
+    ratio_wh = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
+
+    height_perc = np.random.randint(65, 80) # Percentage of the total browser height
 
     form = {
-        "ratio": "{}:{}".format(*ratio),
-        "vspace": "{}".format(height),
+        "ratio": "{}:{}".format(*ratio_wh),
+        "vspace": "{}".format(height_perc),
         "page_id": title,
         "border_thickness": "1",
         "font_family": font,
@@ -56,12 +58,12 @@ def generate_form(title, num_elements=5, font_size="12pt", font='"Arial", sans-s
                 "ulc_x": "5",
                 "ulc_y": "2",
                 "width": "50",
-                "height": "9"
+                "height": "15"
             },
         ]
     }
 
-    admissible_start_positions = list(set(range(0, 90, 2)))
+    admissible_start_positions = list(set(range(10, 90, 2)))
     random_pick = np.random.choice(admissible_start_positions, num_elements, replace=False)
     elements_start_pos = sorted(random_pick)
 
@@ -70,6 +72,9 @@ def generate_form(title, num_elements=5, font_size="12pt", font='"Arial", sans-s
 
     elements_coords = [(x, find_max_end(x, _i, elements_start_pos[_i+1] if _i+1 < len(elements_start_pos) else 90)) for _i, x in enumerate(elements_start_pos)]
 
+    print elements_coords
+
+    # Add other elements except the title
     for _i, (start, end) in zip(range(num_elements), elements_coords):
         elem_type = np.random.choice(ELEMENT_POOL) if _i != button_elem else "button"
 

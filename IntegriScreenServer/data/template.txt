@@ -7,7 +7,6 @@ html, body{
     height: 100%;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: !!fontsize!! !important;
 }
 
 label {
@@ -44,6 +43,8 @@ label, textarea, input, button {
     padding: 1% 1%;
     box-sizing: border-box;
 
+    font-size: !!fontsize!! !important;
+
     -webkit-user-select: none; /* Webkit */
     -moz-user-select: none;    /* Firefox */
     -ms-user-select: none;     /* IE 10  */
@@ -54,7 +55,10 @@ label, textarea, input, button {
   <!--  caret-color: transparent; -->
 }
 
-html, body, input, select, textarea, button{font-family: !!font!!; letter-spacing: !!letter_spacing!!;}
+html, body, input, select, textarea, button{
+    font-family: !!font!!;
+    letter-spacing: !!letter_spacing!!;
+}
 
 <!--place-for-unicorn-styling-->
 
