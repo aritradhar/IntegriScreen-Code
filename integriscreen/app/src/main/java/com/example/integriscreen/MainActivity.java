@@ -48,6 +48,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -72,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private enum OutputSelection {RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN}
 
-    ;
     private static OutputSelection currentOutputSelection;
     private static SeekBar huePicker;
     private static TextView colorLabel;
@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public boolean evaluationStarting;
 
     // the form created based on specs received from Server
+    private HashMap<String, TargetForm> allLoadedForms;
     private TargetForm targetForm;
     private ArrayList<ActiveElementLog> activeElementLogs;
 
@@ -133,9 +134,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private PerspectiveRealigner cameraFrameRealigner;
     private PerspectiveRealigner ISUpperFrameContinuousRealigner;
+
     private ISImageProcessor upperFrameISImageProcessor;
     private ISImageProcessor lowerFrameISImageProcessor;
     private ISImageProcessor wholeFrameISImageProcessor;
+
     private EvaluationController myEvaluationController;
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -196,6 +199,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         LM = new LogManager(getApplicationContext());
+
+        allLoadedForms = new HashMap<>();
 
         formsListManager = new ISServerCommunicationManager(serverURL, getApplicationContext());
 
@@ -599,25 +604,32 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     // this one will probably be of size 1080 / 960 -> since the form needs to know how much height it is allowed to take
-    public boolean loadFormBasedOnName(Mat rotatedUpperFrameMat, int maxScreenHeight) {
+    private String detectFormNameAndGetUrl(Mat rotatedUpperFrameMat) {
         Rect formTitleBox = new Rect(0, 0, rotatedUpperFrameMat.width() / 2, rotatedUpperFrameMat.height() / 8); // about 15%
 
         Imgproc.rectangle(rotatedUpperFrameMat, formTitleBox.tl(), formTitleBox.br(), new Scalar(255, 0, 0), 4);
 
-        // At the moment we are strongly and implicitly!!! hardcoding the values "string -> URL"
-        String formToLoad = concatTextBlocks(detect_text(rotatedUpperFrameMat.submat(formTitleBox)));
+        String formNameToLoad = concatTextBlocks(detect_text(rotatedUpperFrameMat.submat(formTitleBox)));
+        formNameToLoad = formNameToLoad.replaceAll("\\s+","");
 
-        formToLoad = formToLoad.replaceAll("\\s+","");
+        return formsListManager.getFormURLFromName(formNameToLoad);
+    }
 
-        String urlToLoad = formsListManager.getFormURLFromName(formToLoad);
-        if (urlToLoad != null) {
-            logF("box: curr: ", rotatedUpperFrameMat.size().toString());
-            targetForm = new TargetForm(getApplicationContext(), urlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
-            // outputOnToast("Loading form: " + formToLoad);
-        } else
-            return false;
+    public TargetForm loadFormBasedOnUrl(String formUrlToLoad, Mat rotatedUpperFrameMat, int maxScreenHeight) {
+        if (formUrlToLoad == null) return null;
 
-        return true;
+        if (allLoadedForms.get(formUrlToLoad) == null) {
+            TargetForm newForm = new TargetForm(getApplicationContext(), formUrlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
+            allLoadedForms.put(formUrlToLoad, newForm);
+
+            logF("Creating new form", formUrlToLoad);
+            return newForm;
+        }
+        else {
+            TargetForm existingForm = allLoadedForms.get(formUrlToLoad);
+            logF("Re-loading existing form", formUrlToLoad);
+            return existingForm;
+        }
     }
 
     boolean shouldDetectTransformation(ISState currentISState) {
@@ -854,7 +866,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentISState == ISState.DETECTING_FRAME && formsListManager.isReady()) {   // make sure that forms are already downloaded
-            if (loadFormBasedOnName(rotatedScreenPart, currentFrameMat.width())) { // It is important that this function only returns true if such a form exists!
+            String potentialFormUrl = detectFormNameAndGetUrl(rotatedScreenPart);
+            TargetForm newForm = loadFormBasedOnUrl(potentialFormUrl, rotatedScreenPart, currentFrameMat.width());
+            if (newForm != null) {
+                targetForm = newForm;
                 transitionISSTo(ISState.LOADING_FORM);
             }
         }

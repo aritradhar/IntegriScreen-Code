@@ -2,14 +2,12 @@ package com.example.integriscreen;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
@@ -59,7 +57,6 @@ public class TargetForm {
     public TargetForm(Context context, String targetUrl, int screenWidth, int maxScreenHeight, OnDataLoadedEventListener parent) {
         parentActivity = parent;
         pageId = "";
-        formUrl = targetUrl;
         isLoaded = false;
         activEl = "";
         activeSince = 0;
@@ -69,8 +66,9 @@ public class TargetForm {
         maxScreenH = maxScreenHeight;
         allElements = null;
         applicationContext = context;
-//        submitURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer?page_type=mobile_form";
-        makeJsonObjectRequest(targetUrl);
+
+        formUrl = targetUrl;
+        fetchAndParseFormData(targetUrl);
     }
 
     /**
@@ -186,12 +184,6 @@ public class TargetForm {
 
         return outputString;
     }
-    /**
-     * get number of UI Elements in the form
-     */
-    public int getUIElNumber() {
-        return allElements.size();
-    }
 
     public Rect getFrameSize(int maxScreenW, int maxScreenH) {
         int frame_w = maxScreenW;
@@ -209,7 +201,7 @@ public class TargetForm {
     /**
      * Method to make json object request where json response starts wtih {
      * */
-    private void makeJsonObjectRequest(String url) {
+    private void fetchAndParseFormData(String url) {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
                 url, null, new Response.Listener<JSONObject>() {
 

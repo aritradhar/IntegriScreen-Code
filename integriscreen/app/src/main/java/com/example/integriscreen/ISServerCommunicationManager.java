@@ -1,7 +1,6 @@
 package com.example.integriscreen;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -21,26 +20,26 @@ import java.util.Map;
 import static com.example.integriscreen.LogManager.logF;
 
 public class ISServerCommunicationManager {
-    private static HashMap<String, String> knownForms;
+    private static HashMap<String, String> allExistingForms;
     // Store the RequestQueue.
     public static RequestQueue queue;
 
     public ISServerCommunicationManager(String serverURL, Context applicationContext) {
-        knownForms = new HashMap<>();
+        allExistingForms = new HashMap<>();
         // initialize the RequestQueue of volley
         queue = Volley.newRequestQueue(applicationContext);
         getListOfForms(serverURL);
     }
 
     public String getFormURLFromName(String formName) {
-        if (knownForms != null)
-            return knownForms.get(formName);
+        if (allExistingForms != null)
+            return allExistingForms.get(formName);
         else
             return null;
     }
 
     public boolean isReady() {
-        return !knownForms.isEmpty();
+        return !allExistingForms.isEmpty();
     }
 
     private void getListOfForms(String url) {
@@ -65,7 +64,7 @@ public class ISServerCommunicationManager {
                                 pageTitle = pageTitle.replaceAll("\\s+","");
                                 String formJsonURL = currEl.getString("json");
                                 // logF("Loading forms", "FormID: " + pageTitle + " -> " + formJsonURL);
-                                knownForms.put(pageTitle, formJsonURL);
+                                allExistingForms.put(pageTitle, formJsonURL);
                             }
 
                         } catch (JSONException e) {
