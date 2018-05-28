@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.example.integriscreen.LogManager.logF;
+import static com.example.integriscreen.LogManager.logW;
 import static org.opencv.core.Core.flip;
 import static org.opencv.core.Core.min;
 import static org.opencv.core.Core.transpose;
@@ -30,7 +31,7 @@ import static org.opencv.imgproc.Imgproc.blur;
 
 public class ISImageProcessor {
 
-    Mat previousFrameMat;
+    private Mat previousFrameMat;
 
     public ISImageProcessor() {
     }
@@ -195,16 +196,30 @@ public class ISImageProcessor {
         return retList;
     }
 
-    static void rotate90(Mat inputMat, Mat outputMat) {
+    static void rotateMatX(Mat inputMat, Mat outputMat, int flipCode) {
+        if (inputMat == outputMat) {
+            // I don't know what's the reason, but this seems to be the case!!!
+            logW("Error", "Rotation with the same file will cause memory leaks!");
+            assert inputMat != outputMat;
+        }
+        // flipCode = 1 for 90 deg
+        // flipCode = 0 for 270 deg
+
         Mat transposedMat = new Mat(1, 1, 1);
+
         transpose(inputMat, transposedMat);
-        flip(transposedMat, outputMat, +1);
+        flip(transposedMat, outputMat, flipCode);
+
+        transposedMat.release();
+    }
+
+
+    static void rotate90(Mat inputMat, Mat outputMat) {
+        rotateMatX(inputMat, outputMat, 1);
     }
 
     static void rotate270(Mat inputMat, Mat outputMat) {
-        Mat transposedMat = new Mat(1, 1, 1);
-        transpose(inputMat, transposedMat);
-        flip(transposedMat, outputMat, 0);
+        rotateMatX(inputMat, outputMat, 0);
     }
 
     public static void apply_diff(Mat matFirst, Mat matSecond, Mat matDiff, long morphSize, long downscaleFactor) {

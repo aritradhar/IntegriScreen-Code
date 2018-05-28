@@ -311,7 +311,7 @@ public class TargetForm {
                     @Override
                     public void onResponse(JSONObject response) {
                         logF(TAG + "submitform", "Reply of form submit" + response.toString());
-                        parentActivity.onResponseReceived(response);
+                        parentActivity.onReceivedSubmitDataResponse(response);
                     }
                 },
 

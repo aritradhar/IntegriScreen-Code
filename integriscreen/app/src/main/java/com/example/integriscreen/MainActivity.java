@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         auditActiveElementsLogs(0);
         logF("clickSubmit", currentISState.name());
 
-        if (targetForm.isLoaded)
+        if (targetForm != null && targetForm.isLoaded)
             transitionISSTo(ISState.SUBMITTING_DATA);
         else
             outputOnToast("The form is not loaded yet!");
@@ -419,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         //Toast.makeText(getApplicationContext(), "Loaded form: " + targetForm.formUrl, Toast.LENGTH_SHORT).show();
     }
 
-    public void onResponseReceived(JSONObject responseJSON) {
+    public void onReceivedSubmitDataResponse(JSONObject responseJSON) {
         if (currentOutputSelection != OutputSelection.INTEGRISCREEN)
             cancelTimers();
 
@@ -494,12 +494,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         myPerspective.realignImage(matPic);
 
         // rotate the mat so we get the proper orientation
-        rotate90(matPic, matPic);
+        Mat rotatedPic = new Mat(1, 1, 1);
+        rotate90(matPic, rotatedPic);
+        rotatedPic.copyTo(matPic);
 
         logF("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
 
         // store mat image in drive
         storePic(matPic, "_mat");
+        matPic.release();
     }
 
     private static boolean validateAndPlotForm(Mat currentFrameMat, TargetForm form) {
@@ -632,16 +635,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
+    static List<ISState> dontDetectTransformation = Arrays.asList(
+            ISState.VERIFYING_UI,
+            ISState.SUPERVISING_USER_INPUT,
+            ISState.SUBMITTING_DATA,
+            ISState.EVERYTHING_OK,
+            ISState.DATA_MISMATCH);
+
     boolean shouldDetectTransformation(ISState currentISState) {
         if (liveCheckbox.isChecked())
             return true;
-
-        List<ISState> dontDetectTransformation = Arrays.asList(
-                ISState.VERIFYING_UI,
-                ISState.SUPERVISING_USER_INPUT,
-                ISState.SUBMITTING_DATA,
-                ISState.EVERYTHING_OK,
-                ISState.DATA_MISMATCH);
 
         if (dontDetectTransformation.contains(currentISState))
             return false;
@@ -908,31 +911,35 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         detectHandsAndUpdateActivity(currentFrameMat, mid_delim);
         // =============================================
 
+        // NOTE!!!! Before I started using a helper rotatedScreenMat, this caused memory leaks!
+        Mat rotatedScreenMat = new Mat(1, 1, 1);
         if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
-            rotate90(currentFrameMat, currentFrameMat);
+            rotate90(currentFrameMat, rotatedScreenMat);
 
         int textX = 300;
         int textY = 1100;
         if (currentISState == ISState.EVERYTHING_OK) {
-            Imgproc.putText(currentFrameMat, "EVERYTHING OK!", new Point(textX, textY),
-                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
+            Imgproc.putText(rotatedScreenMat, "EVERYTHING OK!", new Point(textX, textY),
+                   Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
         } else if (currentISState == ISState.DATA_MISMATCH) {
-            Imgproc.putText(currentFrameMat, "MISMATCH!", new Point(textX, textY),
+            Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
                     Core.FONT_HERSHEY_SIMPLEX, 4, new Scalar(255, 0, 0), 5);
 
-            Imgproc.putText(currentFrameMat, "BROWSER", new Point(textX, textY + 200),
+            Imgproc.putText(rotatedScreenMat, "BROWSER", new Point(textX, textY + 200),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 255), 5);
 
-            Imgproc.putText(currentFrameMat, "PHONE", new Point(textX, textY + 300),
+            Imgproc.putText(rotatedScreenMat, "PHONE", new Point(textX, textY + 300),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0), 5);
         } else {
             // Draw the separating line, choose color depending on activity
             Scalar lineColor = (activityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
-            line(currentFrameMat, new Point(mid_delim, currentFrameMat.height()), new Point(mid_delim, 0), lineColor, 3);
+            line(rotatedScreenMat, new Point(mid_delim, rotatedScreenMat.height()), new Point(mid_delim, 0), lineColor, 3);
         }
 
         if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
-            rotate270(currentFrameMat, currentFrameMat);
+            rotate270(rotatedScreenMat, currentFrameMat);
+
+        rotatedScreenMat.release();
 
         return currentFrameMat;
     }
@@ -949,7 +956,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             int hueCenter = huePicker.getProgress(); // get progress value from the progress bar, divide by 2 since this is what OpenCV expects
             int detection_option = detectPicker.getProgress();
             if (detection_option == 0) // just show the color detection
-                cameraFrameRealigner.detectColor(currentFrameMat, currentFrameMat, hueCenter);
+                PerspectiveRealigner.detectColor(currentFrameMat, currentFrameMat, hueCenter);
             else
                 cameraFrameRealigner.detectFrameAndComputeTransformation(currentFrameMat, hueCenter, true);
 
@@ -997,7 +1004,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (currentOutputSelection == OutputSelection.DIFF) {
-            wholeFrameISImageProcessor.diffWithPreviousFrame(currentFrameMat, currentFrameMat, 1, 1);
+             wholeFrameISImageProcessor.diffWithPreviousFrame(currentFrameMat, currentFrameMat, 1, 1);
             return currentFrameMat;
         }
 

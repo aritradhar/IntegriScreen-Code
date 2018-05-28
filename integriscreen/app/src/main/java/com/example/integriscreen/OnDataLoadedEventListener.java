@@ -10,5 +10,5 @@ public interface OnDataLoadedEventListener{
     // callback when picture is taken
     public void onPicTaken(byte[] data);
 
-    public void onResponseReceived(JSONObject responseJSON);
+    public void onReceivedSubmitDataResponse(JSONObject responseJSON);
 }
