@@ -1,5 +1,6 @@
 package com.example.integriscreen;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -9,12 +10,9 @@ import org.opencv.utils.Converters;
 
 import java.util.Vector;
 
-import static com.example.integriscreen.LogManager.logF;
-
 public class PerspectiveRealigner {
     private Mat lambda;
     private int hueCenter;
-    private long outWidth, outHeight;
     private int defaultHueCenter = 120;
 
 
@@ -49,6 +47,29 @@ public class PerspectiveRealigner {
         return outputCorners;
     }
 
+    private boolean allZero(Vector<Point> detectedCorners) {
+        for(Point P: detectedCorners)
+            if (P.x != 0 || P.y != 0)
+                return false;
+        return true;
+    }
+
+    private boolean couldBeRectangle(Vector<Point> detectedCorners) {
+        if (detectedCorners.size() != 4 || allZero(detectedCorners)) return false;
+
+        // Check if any two corners are closer than minDist appart
+        int minDist = 200;
+        for(int i = 0; i < 4; ++i)
+            for(int j = i + 1; j < 4; ++j) {
+                Point P1 = detectedCorners.get(i);
+                Point P2 = detectedCorners.get(j);
+                if (Math.pow(P1.x - P2.x, 2) + Math.pow(P1.y - P2.y, 2) < Math.pow(minDist, 2))
+                    return false;
+            }
+        return true;
+    }
+
+
     void detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, boolean shouldReturnColorMask) {
         Vector<Point> detectedCorners = detectRectangleCorners(currentFrameMat, _hueCenter, shouldReturnColorMask);
 
@@ -56,6 +77,12 @@ public class PerspectiveRealigner {
             lambda = new Mat(1, 1, CvType.CV_8UC1);
 
         Vector<Point> outputCorners = getOutputCorners(currentFrameMat.size());
+
+        if (!couldBeRectangle(detectedCorners)) {
+            // If nothing was found, ensure that transformation leaves the frame unchanged
+            detectedCorners = outputCorners;
+        }
+
         update_transformation_lambda(detectedCorners, outputCorners);
     }
 

@@ -46,12 +46,16 @@ public class EvaluationController {
             failIndicesFormatted += fail + ".html\n";
 
         logR("UI Verification failed on forms: ", failIndices.toString());
-        logR("UI Verification failed forms formated\n", failIndicesFormatted);
+        logR("UI Verification failed on forms (formatted):\n", failIndicesFormatted);
 
         mainActivity.reportEvaluationResult(cntSuccess, cntTotal);
     }
 
-    // TODO: for each evaluation, we need a list of string mismatches: how did we misclassify what?
+    public void abortAll() {
+        cancelTimers();
+    }
+
+    // TODO: for each evaluation, we need a list of string mismatches: why did we misclassify what?
 
     public void startEvaluation() {
         cancelTimers();

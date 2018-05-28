@@ -71,7 +71,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = "MainActivity";
 
-    private enum OutputSelection { RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN};
+    private enum OutputSelection {RAW, CANNY, DIFF, DETECT_TRANSFORMATION, DETECT_TEXT, INTEGRISCREEN}
+
+    ;
     private static OutputSelection currentOutputSelection;
     private static SeekBar huePicker;
     private static TextView colorLabel;
@@ -108,16 +110,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private ISServerCommunicationManager formsListManager;
 
-    public enum ISState {  DETECTING_FRAME,       // Start detecting the green frame
-                            DETECTING_TITLE,       // Start OCR-ing to find the title
-                            LOADING_FORM,          // Load the form based on title
-                            REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
-                            VERIFYING_UI,          // Start verifying that the UI is as expected
-                            SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
-                            SUBMITTING_DATA,       // Keep sending user data until server responds
-                            EVERYTHING_OK,         // Tell the user that everything is OK
-                            DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
-                            ERROR_DURING_INPUT };  // We might end up here in case we detect something strange during user input
+    public enum ISState {
+        DETECTING_FRAME,       // Start detecting the green frame
+        DETECTING_TITLE,       // Start OCR-ing to find the title
+        LOADING_FORM,          // Load the form based on title
+        REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
+        VERIFYING_UI,          // Start verifying that the UI is as expected
+        SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
+        SUBMITTING_DATA,       // Keep sending user data until server responds
+        EVERYTHING_OK,         // Tell the user that everything is OK
+        DATA_MISMATCH,        // There was a mismatch on the server. Show the diff to the user.
+        ERROR_DURING_INPUT
+    }
+
+    ;  // We might end up here in case we detect something strange during user input
     public ISState currentISState;
     private boolean activityDetected;
     private JSONObject receivedJSONObject;
@@ -215,12 +221,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         _cameraBridgeViewBase.enableFpsMeter();
 
         // Deal with the UI element bindings
-        colorLabel = (TextView)findViewById(R.id.colorLabel);
-        textOutput = (TextView)findViewById(R.id.textOutput);
-        detectPicker = (SeekBar)findViewById(R.id.detect_method);
-        realignCheckbox = (CheckBox)findViewById(R.id.realignCheckBox);
-        limitAreaCheckbox = (CheckBox)findViewById(R.id.limitAreaCheckBox);
-        liveCheckbox = (CheckBox)findViewById(R.id.liveCheckbox);
+        colorLabel = (TextView) findViewById(R.id.colorLabel);
+        textOutput = (TextView) findViewById(R.id.textOutput);
+        detectPicker = (SeekBar) findViewById(R.id.detect_method);
+        realignCheckbox = (CheckBox) findViewById(R.id.realignCheckBox);
+        limitAreaCheckbox = (CheckBox) findViewById(R.id.limitAreaCheckBox);
+        liveCheckbox = (CheckBox) findViewById(R.id.liveCheckbox);
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
@@ -233,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         myEvaluationController = new EvaluationController(this);
 
-        huePicker = (SeekBar)findViewById(R.id.colorSeekBar);
+        huePicker = (SeekBar) findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -247,8 +253,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float []hsv = new float[3];
-                hsv[0] = (float)progress;
+                float[] hsv = new float[3];
+                hsv[0] = (float) progress;
                 hsv[1] = hsv[2] = 100f;
 
                 colorLabel.setBackgroundColor(Color.HSVToColor(hsv));
@@ -352,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void onClickShowDiff(View view) {
         currentOutputSelection = OutputSelection.DIFF;
     }
+
     public void onClickShowColor(View view) {
         currentOutputSelection = OutputSelection.DETECT_TRANSFORMATION;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -383,6 +390,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickStartIS(View view) {
+        // Make sure we stop any potentially existing evaluations
+        if (myEvaluationController != null) myEvaluationController.abortAll();
+
         startIntegriScreen(-1);
     }
 
@@ -408,8 +418,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             String responseVal = receivedJSONObject.getString("response");
             if (responseVal.equals("match")) {
                 transitionISSTo(ISState.EVERYTHING_OK);
-            }
-            else if (responseVal.equals("nomatch")) {
+            } else if (responseVal.equals("nomatch")) {
                 transitionISSTo(ISState.DATA_MISMATCH);
             }
 
@@ -419,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             logF(TAG + "error:", "responseJSON" + responseJSON.toString() + "|" + e.getMessage());
         }
     }
+
 
     // Callback when picture is taken
     public void onPicTaken(byte[] data) {
@@ -1210,6 +1220,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return false;
 
         if (targetForm.pageId.equals("__STOP__"))
+            return true;
+
+        // This is a slightly hacky way to stop whenever the user has chosen some other output
+        if (currentOutputSelection != OutputSelection.INTEGRISCREEN)
             return true;
 
         return false;
