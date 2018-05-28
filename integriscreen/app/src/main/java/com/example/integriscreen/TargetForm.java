@@ -28,6 +28,8 @@ public class TargetForm {
     private Context applicationContext;
     public String formUrl;
 
+    public UIElement titleElement;
+
     // store UI elements
     public ArrayList<UIElement> allElements;
 
@@ -52,9 +54,9 @@ public class TargetForm {
 
     private OnDataLoadedEventListener parentActivity;
     public int form_w_abs, form_h_abs;  // the total amount of space available to draw the form
-    public int maxScreenH;
+    public int maxScreenH = 1920; // This is hardcoded!
 
-    public TargetForm(Context context, String targetUrl, int screenWidth, int maxScreenHeight, OnDataLoadedEventListener parent) {
+    public TargetForm(Context context, String targetUrl, int screenWidth, OnDataLoadedEventListener parent) {
         parentActivity = parent;
         pageId = "";
         isLoaded = false;
@@ -63,7 +65,6 @@ public class TargetForm {
         activeElementLastEdit = 0;
         form_w_abs = screenWidth;
         // form_h_abs can not yet be computed -> we need to find out the form ratio first.
-        maxScreenH = maxScreenHeight;
         allElements = null;
         applicationContext = context;
 
@@ -151,8 +152,8 @@ public class TargetForm {
             UIElement currEl = allElements.get(i);
             if (currEl.id.equals(elementID)) {
                 logF("ElementChanges", "Id: " + currEl.id + ", old: "
-                        + currEl.currentVal + ", new: " + newValue);
-                allElements.get(i).currentVal = newValue;
+                        + currEl.currentValue + ", new: " + newValue);
+                allElements.get(i).currentValue = newValue;
                 break;
             }
         }
@@ -256,11 +257,14 @@ public class TargetForm {
 
 
 
-                        UIElement tmpElement = new UIElement(id, editable, type, new Rect(new Point(a_x1, a_y1), new Point(a_x2, a_y2)), defaultVal);
-                        logF(TAG+" parsed element: ", tmpElement.toString());
+                        UIElement newElement = new UIElement(id, editable, type, new Rect(new Point(a_x1, a_y1), new Point(a_x2, a_y2)), defaultVal);
+                        logF(TAG+" parsed element: ", newElement.toString());
 
-                        // add the element in the arraylist of all UI elements
-                        allElements.add(tmpElement);
+                        if (type.equals("title"))
+                            titleElement = newElement;
+
+                                    // add the element in the arraylist of all UI elements
+                        allElements.add(newElement);
                     }
 
                     // Set the form as isLoaded.
@@ -301,8 +305,8 @@ public class TargetForm {
             if (!currentElement.editable) // skip elements that take no input
                 continue;
 
-            postParam.put(currentElement.id, currentElement.currentVal);
-            logF("submitform", "key: " + currentElement.id + " -> " + currentElement.currentVal);
+            postParam.put(currentElement.id, currentElement.currentValue);
+            logF("submitform", "key: " + currentElement.id + " -> " + currentElement.currentValue);
         }
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,

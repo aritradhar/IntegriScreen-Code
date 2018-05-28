@@ -524,16 +524,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             String detected = extractAndDisplayTextFromFrame(currentFrameMat.submat(rescaledBox));
 
             Scalar rectangle_color;
-            if (almostIdenticalString(detected, element.defaultVal, false)) {
+            if (almostIdenticalString(detected, element.currentValue, false)) {
                 rectangle_color = new Scalar(255, 255, 0);
             } else {
                 rectangle_color = new Scalar( 255, 0, 0);
                 // Output the text on the UI elements
-                int textHeight = (int) Imgproc.getTextSize(element.defaultVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
-                Imgproc.putText(currentFrameMat, element.defaultVal, new Point(rescaledBox.x, rescaledBox.y + textHeight + 20),
+                int textHeight = (int) Imgproc.getTextSize(element.currentValue, Core.FONT_HERSHEY_SIMPLEX, 1.3, 1, new int[1]).height;
+                Imgproc.putText(currentFrameMat, element.currentValue, new Point(rescaledBox.x, rescaledBox.y + textHeight + 20),
                         Core.FONT_HERSHEY_SIMPLEX, 1.3, new Scalar(255, 0, 0));
 
-                OCRMismatches.add(new Pair<> (element.defaultVal, detected));
+                OCRMismatches.add(new Pair<> (element.currentValue, detected));
             }
 
             // Plot the borders of the UI elements
@@ -618,11 +618,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return formsListManager.getFormURLFromName(formNameToLoad);
     }
 
-    public TargetForm loadFormBasedOnUrl(String formUrlToLoad, Mat rotatedUpperFrameMat, int maxScreenHeight) {
+    public TargetForm loadFormBasedOnUrl(String formUrlToLoad, Mat rotatedUpperFrameMat) {
         if (formUrlToLoad == null) return null;
 
         if (allLoadedForms.get(formUrlToLoad) == null) {
-            TargetForm newForm = new TargetForm(getApplicationContext(), formUrlToLoad, rotatedUpperFrameMat.width(), maxScreenHeight, this);
+            TargetForm newForm = new TargetForm(getApplicationContext(), formUrlToLoad, rotatedUpperFrameMat.width(), this);
             allLoadedForms.put(formUrlToLoad, newForm);
 
             logF("Creating new form", formUrlToLoad);
@@ -752,8 +752,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         handsPart.release();
     }
 
+    static boolean impactedByChanges(Rect R, List<Pair<Rect, Integer>> changeLocations) {
+        for(Pair<Rect, Integer> change : changeLocations) {
+            android.graphics.Rect ch = new android.graphics.Rect(change.first.x,
+                                                                 change.first.y,
+                                                           change.first.x + change.first.width,
+                                                         change.first.y + change.first.height);
+            if (ch.intersects(R.x, R.y, R.x + R.width, R.y + R.height))
+                return true;
+        }
+        return false;
+    }
+
     // int cnt = 0; int freq = 50;
-    void processRotatedUpperPart(Mat rotatedUpperPart)
+    void processRotatedUpperPart(Mat rotatedUpperPart, Mat currentFrameMat)
     {
         // HANDLE THE UPPER PART!
         // ---------------- Based on the state that we are in, handle the upper part ------
@@ -773,9 +785,32 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(diffsUpperPart,
                     1, 1, 10);
 
-            validateUIChanges(rotatedUpperPart, changedLocations);
+            if (changedLocations.size() > 0 && !activityDetected) {
+                logW("Possible attack", "Warning: UI changes, but no hand movement!");
+            }
 
+            // Check if title was impacted. If it was, update the form.
+            if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
+                // In this case, we need to recreate the "non-realigned" image to make sure we are extracting the form
+                Rect screenBox = new Rect(new Point(0, 0), new Point(currentFrameMat.width() / 2, currentFrameMat.height()));
+                Mat screenPart = currentFrameMat.submat(screenBox);
+                Mat rotatedPotentialFormMat = new Mat(1, 1, CvType.CV_8UC1);
+                rotate90(screenPart, rotatedPotentialFormMat);
 
+                PerspectiveRealigner titleDetector = new PerspectiveRealigner();
+                titleDetector.realignImage(rotatedPotentialFormMat);
+
+                String potentialFormUrl = detectFormNameAndGetUrl(rotatedPotentialFormMat);
+                TargetForm newForm = loadFormBasedOnUrl(potentialFormUrl, rotatedPotentialFormMat);
+                if (newForm != null && !newForm.formUrl.equals(targetForm.formUrl)) {
+                    targetForm = newForm;
+                    startIntegriScreen(-1);
+                }
+                rotatedPotentialFormMat.release();
+
+            } else {
+                validateUIChanges(rotatedUpperPart, changedLocations);
+            }
 
 
             String allDiffAreas = "";
@@ -786,18 +821,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
-            if (changedLocations.size() > 0 && !activityDetected) {
-                logF("attack", "Warning: UI changes, but no hand movement!");
-            }
-
-//            if (cnt % freq == 0) storePic(diffsUpperPart, "_after_diff");
-
             // This is where we decide to draw the black-and-white on the screen
             // Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
 
             diffsUpperPart.release();
+            return;
 
-//            ++cnt;
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             logF("SubmittingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK) {
@@ -870,7 +899,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         if (currentISState == ISState.DETECTING_FRAME && formsListManager.isReady()) {   // make sure that forms are already downloaded
             String potentialFormUrl = detectFormNameAndGetUrl(rotatedScreenPart);
-            TargetForm newForm = loadFormBasedOnUrl(potentialFormUrl, rotatedScreenPart, currentFrameMat.width());
+            TargetForm newForm = loadFormBasedOnUrl(potentialFormUrl, rotatedScreenPart);
             if (newForm != null) {
                 targetForm = newForm;
                 transitionISSTo(ISState.LOADING_FORM);
@@ -878,7 +907,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // Depending on the app state, run detection of text, find changes, etc.
-        processRotatedUpperPart(rotatedScreenPart);
+        processRotatedUpperPart(rotatedScreenPart, currentFrameMat);
 
         rotate270(rotatedScreenPart, screenPart);
         rotatedScreenPart.release();
@@ -1049,13 +1078,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * of screen changes
      */
     long previousFrameTimestamp = 0;
-    private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
-        // TODO(enis): make sure that only editable elements are allowed to change!
-
-        List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
+    private void validateUIChanges(Mat realignedUpperFrame, List<Pair<Rect, Integer>> changedLocations) {
+        // TODO(ivo): make sure that only editable elements are allowed to change!
 
         int hueBlue = 240;
-        Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(rawScreenFrame, hueBlue);
+        Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueBlue);
         UIElement activeElement = findActiveElementFromCoorners(activeElementCorners);
 
         // simply output them
@@ -1063,74 +1090,81 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             logF("Blue Corner " + String.valueOf(i), activeElementCorners.get(i).toString());
 
 
-        // TODO(enis): the active element is detected here and drawn as well
         if (activeElement != null) {
             // If we found an active element, we draw a green rectangle
-            Imgproc.rectangle(rawScreenFrame, activeElement.box.tl(), activeElement.box.br(), new Scalar(0, 255, 0), 8);
+            Imgproc.rectangle(realignedUpperFrame, activeElement.box.tl(), activeElement.box.br(), new Scalar(0, 255, 0), 8);
         } else {
             // If we haven't been able to correlated with any UI element, we draw a red rectangle
             Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
-            Imgproc.rectangle(rawScreenFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
+            Imgproc.rectangle(realignedUpperFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
         }
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
-        for (int i = 0; i < changedLocations.size(); i++) {
-            UIElement currElement = targetForm.matchElFromDiff(changedLocations.get(i).first);
-            int currElementArea = changedLocations.get(i).second;
-
-            // skip if the change did not happen on an input element or the change is already processed for the same frame
-            if ((currElement == null) || (processedElements.contains(currElement.id)))
+        for(UIElement currentElement : targetForm.allElements) {
+            if (!impactedByChanges(currentElement.box, changedLocations))
                 continue;
 
-            logF("ElementChanges", "Element being edited: " + currElement.id);
+            logF("ElementChanges", "Element being edited: " + currentElement.id);
 
             // read the element value from the current frame
-            String newValue = concatTextBlocks(detect_text(rawScreenFrame.submat(currElement.box)));
+            String newValue = concatTextBlocks(detect_text(realignedUpperFrame.submat(currentElement.box)));
+
+            // TODO(ivo): newValue will be empty whenever it is e.g. covered by some other window. Should we detect and handle this?
 
             long currentTimestamp = currentTimeMillis();
             long diffTimestamp = currentTimestamp - previousFrameTimestamp;
 
             // check if diff comes from an element value change
-            if (!currElement.currentVal.equals(newValue)) {
-                if (!isChangeLegit(currElement.currentVal, newValue, diffTimestamp)) {
-                    String message = "Change from |" + currElement.currentVal + "| to |" + newValue + "| is not OK in " + diffTimestamp + "ms";
-  //                  outputOnToast(message);
-                    outputOnUILabel(message);
-                    logW("non legit change: ", message);
+            if (!currentElement.currentValue.equals(newValue)) {
+
+                if (!isChangeLegit(currentElement.currentValue, newValue, diffTimestamp)) {
+                    String message = "Change from |" + currentElement.currentValue + "| to |" + newValue + "| is not OK in " + diffTimestamp + "ms";
+                    // outputOnToast(message);
+//                    outputOnUILabel(message);
+                    logW("non legit text change!", message);
+
                     // Todo : implement a method to fire an alert
                 }
 
-                if (targetForm.activEl.equals(currElement.id)) {    // this element is already the active one
+                if (currentElement != activeElement) {
+                    logW("Potential Attack", "Non-active element changing!");
+                    outputOnToast("Potential attack: non-active el. changing");
+                    // TODO: add more info here
+                }
+
+                if (currentElement == activeElement) {    // this element is already the active one
                     //Todo eu: frame timestamp would be more accurate!
                     targetForm.activeElementLastEdit = currentTimestamp;
 
-                    // value updated Todo eu: what if the frame is unclear and the change is unreal
-                    String oldValue = currElement.currentVal;
-                    targetForm.updateElementWithValue(currElement.id, newValue);
+                    // value updated
+                    // Todo eu: what if the frame is unclear and the change is unreal
+                    String oldValue = currentElement.currentValue;
+                    targetForm.updateElementWithValue(currentElement.id, newValue);
 
                     //store in the logs
-                    ActiveElementLog tmpLog = new ActiveElementLog(currElement.id, currElement.id,
+                    ActiveElementLog tmpLog = new ActiveElementLog(currentElement.id, currentElement.id,
                             oldValue, newValue, currentTimestamp, diffTimestamp);
                     activeElementLogs.add(tmpLog);
                 }
-                else {                                          // new active element
-                    String oldElementID = targetForm.activEl;
 
-                    String oldValue = currElement.currentVal;
-                    targetForm.activEl = currElement.id;
-                    targetForm.activeSince = currentTimestamp;
-                    targetForm.activeElementLastEdit = currentTimestamp;
-                    targetForm.updateElementWithValue(currElement.id, newValue);
+                // else {
+                // new active element
 
-                    //store in the logs
-                    ActiveElementLog tmpLog = new ActiveElementLog(oldElementID, currElement.id,
-                            oldValue, newValue, currentTimestamp, diffTimestamp);
-                    activeElementLogs.add(tmpLog);
-                }
+//                    String oldElementID = targetForm.activEl;
+//
+//                    String oldValue = currentElement.currentValue;
+//                    targetForm.activEl = currentElement.id;
+//                    targetForm.activeSince = currentTimestamp;
+//                    targetForm.activeElementLastEdit = currentTimestamp;
+//                    targetForm.updateElementWithValue(currentElement.id, newValue);
+//
+//                    //store in the logs
+//                    ActiveElementLog tmpLog = new ActiveElementLog(oldElementID, currentElement.id,
+//                            oldValue, newValue, currentTimestamp, diffTimestamp);
+//                    activeElementLogs.add(tmpLog);
+                // }
             }
-            // add the current elemnt in the processed list
-            processedElements.add(currElement.id);
         }
         previousFrameTimestamp = currentTimeMillis();
     }
@@ -1197,7 +1231,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public void updateUIElement(int i, String text) {
         // check if the element is active, TODO: does time since active help?
         if (targetForm.getElement(i).id.equals(targetForm.activEl)) {
-            targetForm.getElement(i).currentVal = text;
+            targetForm.getElement(i).currentValue = text;
             targetForm.getElement(i).lastUpdated = currentTimeMillis();
         }
         else {

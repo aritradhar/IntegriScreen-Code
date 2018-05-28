@@ -11,7 +11,7 @@ public class UIElement {
     public String type;         // label, textbox, textbox, radio, checkbox, textarea   //TODO: add restrictions for sensitive elements, NUMBER_ONLY, BTC_ADDRESS_ONLY
     public Rect box;                   // location of the UI on the screen, in apsolute coordinates!
     public String defaultVal;   // default value of the UI element
-    public String currentVal;   // current value of the UI element extracted through OCR
+    public String currentValue;   // current value of the UI element extracted through OCR
     public boolean found;       // true if the UI element is found on the screen through OCR
     public long lastUpdated;  // track the time of last update
     public Boolean dirty;       // true if the element is changed simultanuesly with another one
@@ -26,7 +26,7 @@ public class UIElement {
         type = tp;
         box = bounding_box;
         defaultVal = dV;
-        currentVal = defaultVal;
+        currentValue = defaultVal;
         found = false;
         lastUpdated = System.currentTimeMillis();
         dirty = false;
@@ -43,7 +43,7 @@ public class UIElement {
         return "UI element[id: " + id + ", editable: " + editable + ", type: " + type
                 + ", position: (" + box.x + ", " + box.y + ", "
                 + box.width + ", " + box.height + "), default: " + defaultVal
-                + ", currentVal: " + currentVal + ", located: " + found + ", dirty: " + dirty + "]";
+                + ", currentValue: " + currentValue + ", located: " + found + ", dirty: " + dirty + "]";
 
     }
 
