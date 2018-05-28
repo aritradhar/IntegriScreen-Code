@@ -89,14 +89,14 @@ def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-s
             "height": 9
         })
 
-    # save stuff to disk
+    # Convert all numbers to strings as well
     for elem in form['elements']:
-        # Thank you Java
         elem['ulc_x'] = str(elem['ulc_x'])
         elem['ulc_y'] = str(elem['ulc_y'])
         elem['width'] = str(elem['width'])
         elem['height'] = str(elem['height'])
 
+    # Save the form to disk
     with open(title + '.json', 'w') as f:
         json.dump(form, f, indent=2)
 

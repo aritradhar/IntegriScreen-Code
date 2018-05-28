@@ -42,7 +42,6 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -90,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Point upper_left, lower_right;
 
     private int color_border_hue = 130;
+
+    public boolean evaluationStarting;
 
     // the form created based on specs received from Server
     private TargetForm targetForm;
@@ -203,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
+
+        evaluationStarting = false;
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
@@ -352,6 +355,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickStartEval(View view) {
+        evaluationStarting = true;
         myEvaluationController.startEvaluation();
     }
 
@@ -662,7 +666,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         else if (newState == ISState.VERIFYING_UI) {
             // Once it is ready, we use this to verify as well
-            takePicHighRes();
+
+            // At the moment, we stopped taking a high-res picture because it takes time, but did not seem to help much.
+            // We might add this back in the future
+            // takePicHighRes();
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
@@ -1002,36 +1009,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return currentFrameMat;
     }
 
-    boolean similar(double a, double b) { double maxDiff = 25; return Math.abs(a - b) < maxDiff; }
-    boolean similar(Point a, Point b) { return similar(a.x, b.x) && similar(a.y, b.y); }
-
-//    boolean isRectangle(Vector<Point> corners) {
-//        return ( similar(corners.get(0).y, corners.get(1).y) && similar(corners.get(2).y, corners.get(3).y) &&
-//                similar(corners.get(0).x, corners.get(3).x) && similar(corners.get(1).x, corners.get(2).x));
-//    }
-
-    Vector<Point> rectToVector(Rect R) {
-        Vector<Point> result = new Vector<>();
-        result.add(R.tl());
-        result.add(new Point(R.br().x, R.tl().y));
-        result.add(R.br());
-        result.add(new Point(R.tl().x, R.br().y));
-        return result;
-    }
-
-    boolean similar(Vector<Point> A, Vector<Point> B) {
-        if (A.size() != B.size()) return false;
-        for(int i = 0; i < A.size(); ++i)
-            if (!similar(A.get(i), B.get(i)))
-                return false;
-        return true;
-    }
-
     private UIElement findActiveElementFromCoorners(Vector<Point> corners) {
         for(int i = 0; i < targetForm.allElements.size(); ++i) {
             UIElement currentElement = targetForm.allElements.get(i);
 
-            if (similar(rectToVector(currentElement.box), corners))
+            if (PerspectiveRealigner.similar(PerspectiveRealigner.rectToPointVector(currentElement.box), corners))
                 return currentElement;
         }
 
@@ -1045,7 +1027,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat rawScreenFrame, List<Pair<Rect, Integer>> changedLocations) {
         // TODO(enis): make sure that only editable elements are allowed to change!
-        // TODO eu: active element is updated when value changes (not focus in browser)
+
         List<String> processedElements = new ArrayList<String>();   // skip future changes on the same element
 
         int hueBlue = 240;
@@ -1223,7 +1205,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             return true;
 
         // This is a slightly hacky way to stop whenever the user has chosen some other output
-        if (currentOutputSelection != OutputSelection.INTEGRISCREEN)
+        if (!evaluationStarting && currentOutputSelection != OutputSelection.INTEGRISCREEN)
             return true;
 
         return false;

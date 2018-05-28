@@ -1,9 +1,9 @@
 package com.example.integriscreen;
 
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
@@ -35,16 +35,34 @@ public class PerspectiveRealigner {
         outMat.release();
     }
 
+    static boolean similar(double a, double b) { double maxDiff = 25; return Math.abs(a - b) < maxDiff; }
+    static boolean similar(Point a, Point b) { return similar(a.x, b.x) && similar(a.y, b.y); }
+
+//    boolean isRectangle(Vector<Point> corners) {
+//        return ( similar(corners.get(0).y, corners.get(1).y) && similar(corners.get(2).y, corners.get(3).y) &&
+//                similar(corners.get(0).x, corners.get(3).x) && similar(corners.get(1).x, corners.get(2).x));
+//    }
+
+
+    public static Vector<Point> rectToPointVector(Rect R) {
+        Vector<Point> result = new Vector<>();
+        result.add(R.tl());
+        result.add(new Point(R.br().x, R.tl().y));
+        result.add(R.br());
+        result.add(new Point(R.tl().x, R.br().y));
+        return result;
+    }
+
+    public static boolean similar(Vector<Point> A, Vector<Point> B) {
+        if (A.size() != B.size()) return false;
+        for(int i = 0; i < A.size(); ++i)
+            if (!similar(A.get(i), B.get(i)))
+                return false;
+        return true;
+    }
+
     Vector<Point> getOutputCorners(Size currentFrameMat) {
-        Vector<Point> outputCorners = new Vector<>();
-
-        // This stretches the across the whole frame
-        outputCorners.add(new Point(0, 0));
-        outputCorners.add(new Point(currentFrameMat.width, 0));
-        outputCorners.add(new Point(currentFrameMat.width, currentFrameMat.height));
-        outputCorners.add(new Point(0, currentFrameMat.height));
-
-        return outputCorners;
+        return rectToPointVector(new Rect(new Point(0, 0), new Point(currentFrameMat.width, currentFrameMat.height)));
     }
 
     private boolean allZero(Vector<Point> detectedCorners) {

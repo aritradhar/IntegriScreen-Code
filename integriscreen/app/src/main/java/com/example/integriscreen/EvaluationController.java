@@ -17,7 +17,7 @@ public class EvaluationController {
     private TimerTask reloadTimerTask;
 
     int maxCnt = 200;
-    int secondsToVerify = 10;
+    int secondsToVerify = 4;
 
     private void cancelTimers() {
         // if (submitDataTimer != null) outputOnToast("Cancelling the existing timer.");
@@ -81,8 +81,10 @@ public class EvaluationController {
                     mainActivity.outputOnToast(message);
                 }
 
-                if (cntTotal <= maxCnt && !mainActivity.shouldStopEvaluation())
+                if (cntTotal <= maxCnt && !mainActivity.shouldStopEvaluation()) {
+                    mainActivity.evaluationStarting = false;
                     mainActivity.startIntegriScreen(cntTotal);
+                }
                 else {
                     finishEvaluation(cntSuccess, cntTotal + 1, filedFormIDs); // reduce the cntTotal that was increased at the beginning!
                 }
