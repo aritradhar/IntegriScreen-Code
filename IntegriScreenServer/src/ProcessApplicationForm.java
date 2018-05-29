@@ -108,7 +108,7 @@ public class ProcessApplicationForm {
 
 				// At the moment, we are using approximate matching, ignoring whitespace and cases
 				// if(!phoneVal.equals(browserVal))
-				if (almostIdenticalString(phoneVal, browserVal, false))
+				if (!almostIdenticalString(phoneVal, browserVal, false))
 				{
 					JSONObject failJSON = new JSONObject();
 					failJSON.put("elementid", key);
