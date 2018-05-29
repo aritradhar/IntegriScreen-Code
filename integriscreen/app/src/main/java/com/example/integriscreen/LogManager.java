@@ -23,12 +23,12 @@ public class LogManager {
 
     // Logging for final results
     public static void logR(String tag, String message) {
-        Log.w(tag, message);
+        Log.w("RESULT: " + tag, message);
         writeToFile("RESULT: " + tag + ":" + message + "\n\n");
     }
 
     public static void logW(String tag, String message, boolean toastOuput) {
-        Log.w(tag, message);
+        Log.w("WARNING: " + tag, message);
         writeToFile("WARNING:" + tag + ":" + message + "\n\n");
         if (toastOuput)
             mainActivity.outputOnToast(tag + ":" + message);

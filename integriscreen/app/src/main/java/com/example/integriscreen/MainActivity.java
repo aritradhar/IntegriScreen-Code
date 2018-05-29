@@ -62,10 +62,12 @@ import static com.example.integriscreen.ISStringProcessor.almostIdenticalString;
 import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
 import static com.example.integriscreen.LogManager.logF;
+import static com.example.integriscreen.LogManager.logR;
 import static com.example.integriscreen.LogManager.logW;
 import static java.lang.System.currentTimeMillis;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.line;
+import static org.opencv.imgproc.Imgproc.rectangle;
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
 
@@ -724,7 +726,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
                 tryLoadingNewForm(currentFrameMat);
             } else {
-                superviseUIChanges(rotatedUpperPart, changedLocations);
+                boolean readyToInput = superviseUIChanges(rotatedUpperPart, changedLocations);
+
+                if (readyToInput && targetForm.initiallyVerified == false) {
+                    logR("Form Loaded", "Successfully Loaded form: " + targetForm.pageId);
+                    targetForm.initiallyVerified = true;
+                }
             }
 
             // This is where we could choose to draw the black-and-white on the screen
@@ -1080,7 +1087,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             } else {
                 // Use yellow rectangle
-                rectangle_color = new Scalar(255, 255, 0);
+                if (allowChanges)
+                    rectangle_color = new Scalar(0, 255, 0);
+                else
+                    rectangle_color = new Scalar(255, 255, 0);
                 rectangle_thicknes = 2;
             }
 
@@ -1096,7 +1106,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // If we found an active element, we draw a green rectangle
             Imgproc.rectangle(realignedUpperFrame, activeElement.box.tl(), activeElement.box.br(), new Scalar(0, 255, 0), 8);
         } else {
-            // If we haven't been able to correlated with any UI element, we draw a red rectangle
+            // If we haven't been able to correlat with any UI element, we draw a red rectangle
             Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
             Imgproc.rectangle(realignedUpperFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
         }

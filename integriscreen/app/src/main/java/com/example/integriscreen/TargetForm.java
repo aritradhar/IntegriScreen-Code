@@ -49,6 +49,8 @@ public class TargetForm {
 
     public boolean isLoaded;
 
+    public boolean initiallyVerified;
+
     // url to submit the form
 //    private String submitURL;
 
@@ -60,6 +62,7 @@ public class TargetForm {
         parentActivity = parent;
         pageId = "";
         isLoaded = false;
+        initiallyVerified = false;
         activEl = "";
         activeSince = 0;
         activeElementLastEdit = 0;
