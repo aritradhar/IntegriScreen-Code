@@ -72,18 +72,6 @@ public class TargetForm {
         fetchAndParseFormData(targetUrl);
     }
 
-    /**
-     * Set the active element based on the point where the diff happens
-     */
-    public void setActivElAtDiff(Point point) {
-        for (int i = 0; i < allElements.size(); i++) {
-            if (allElements.get(i).box.contains(point)) {
-                activEl = allElements.get(i).id;
-                activeSince = System.currentTimeMillis();
-                break;
-            }
-        }
-    }
 
     public UIElement getElementById(String elementId) {
         for(UIElement el : allElements) {
@@ -113,50 +101,6 @@ public class TargetForm {
         }
     }
 
-    /**
-     * This method finds the corresponding Element from a point of diff event
-     */
-    public UIElement matchElFromDiff(Point point) {
-        UIElement currElement = null; // empty string represents no element is found on the diff location
-
-        for (int i = 0; i < allElements.size(); i++) {
-            if (allElements.get(i).box.contains(point)) {
-                currElement = allElements.get(i);
-                break;
-            }
-        }
-        return currElement;
-    }
-
-    // Returns the index of an element that *fully* contains rect
-    public UIElement matchElFromDiff(Rect rect) {
-        UIElement currElement = null; // empty string represents no element is found on the diff location
-
-        Point tl = new Point(rect.x, rect.y);
-        Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
-        for (int i = 0; i < allElements.size(); i++) {
-            if (allElements.get(i).box.contains(tl) &&
-                    allElements.get(i).box.contains(rb)) {
-                currElement = allElements.get(i);
-                break;
-            }
-        }
-        return currElement;
-    }
-
-    /**
-     * Get UI Element with index i
-     */
-    public UIElement getElement(int index) {
-        return allElements.get(index);
-    }
-
-    /**
-     * Set an UI Element in a specific index
-     */
-    public void setElement(int index, UIElement element) {
-        allElements.set(index, element);
-    }
 
     // if X is < low, return low, if larger than high, return high
     private long limitLowHigh(long x, long low, long high) { return Math.min(Math.max(x, low), high); }
@@ -171,17 +115,6 @@ public class TargetForm {
         return outputString;
     }
 
-    public Rect getFrameSize(int maxScreenW, int maxScreenH) {
-        int frame_w = maxScreenW;
-        int frame_h = maxScreenH / 2;  // initially, we assume to take the half of the screen height
-
-        if (isLoaded) { // if the form is loaded, we can be more precise about how much height do we take
-            frame_h = Math.min((int) Math.round(frame_w * form_ratio_h / (double) form_ratio_w),
-                    maxScreenH);  // this one we compute based on the form ratios
-        }
-
-        return new Rect(new Point(0, 0), new Point(frame_w, frame_h));
-    }
 
 
     /**
