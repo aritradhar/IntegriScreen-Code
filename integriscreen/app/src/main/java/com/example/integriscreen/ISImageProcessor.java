@@ -145,7 +145,7 @@ public class ISImageProcessor {
             largeRectsBoundingBox = update_bounding_box(largeRectsBoundingBox, currentRectBound);
             Imgproc.rectangle(frameMatBW, currentRectBound.tl(), currentRectBound.br(), new Scalar(255, 0, 0), 2);
         }
-        logF("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
+        // logF("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
 
         // This is just to showcase what I am finding
         labels.convertTo(labels, CV_8UC1, 10.0);

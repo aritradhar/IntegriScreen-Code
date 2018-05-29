@@ -27,11 +27,17 @@ public class LogManager {
         writeToFile("RESULT: " + tag + ":" + message + "\n\n");
     }
 
+    public static void logW(String tag, String message, boolean toastOuput) {
+        Log.w(tag, message);
+        writeToFile("WARNING:" + tag + ":" + message + "\n\n");
+        if (toastOuput)
+            mainActivity.outputOnToast(tag + ":" + message);
+        else
+            mainActivity.outputOnUILabel(tag + ":" + message);
+    }
     // Logging decorator for warnings
     public static void logW(String tag, String message) {
-        Log.w(tag, message);
-        mainActivity.outputOnToast(tag + ":" + message);
-        writeToFile("WARNING:" + tag + ":" + message + "\n\n");
+        logW(tag, message, false);
     }
 
     // Standard Logging decorator
