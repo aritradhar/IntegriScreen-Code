@@ -15,6 +15,8 @@ public class PerspectiveRealigner {
     private int hueCenter;
     private int defaultHueCenter = 120;
 
+    private Vector<Point> currentCorners;
+
 
     static void detectColor(Mat currentFrameMat, Mat outputMat, int hueCenter)
     {
@@ -26,23 +28,24 @@ public class PerspectiveRealigner {
     }
 
     void update_transformation_lambda(Vector<Point> detectedCorners, Vector<Point> outputCorners) {
+        if (lambda == null) {
+            lambda = new Mat(1, 1, CvType.CV_8UC1);
+        }
+
         Mat inMat = Converters.vector_Point2f_to_Mat(detectedCorners);
         Mat outMat = Converters.vector_Point2f_to_Mat(outputCorners);
 
+        currentCorners = detectedCorners;
         Imgproc.getPerspectiveTransform(inMat, outMat).copyTo(lambda);
 
         inMat.release();
         outMat.release();
     }
 
-    static boolean similar(double a, double b) { double maxDiff = 25; return Math.abs(a - b) < maxDiff; }
+    static boolean similar(double a, double b, double threshold) { return Math.abs(a - b) < threshold; }
+    static boolean similar(double a, double b) { double threshold = 25; return similar(a, b, threshold); }
     static boolean similar(Point a, Point b) { return similar(a.x, b.x) && similar(a.y, b.y); }
-
-//    boolean isRectangle(Vector<Point> corners) {
-//        return ( similar(corners.get(0).y, corners.get(1).y) && similar(corners.get(2).y, corners.get(3).y) &&
-//                similar(corners.get(0).x, corners.get(3).x) && similar(corners.get(1).x, corners.get(2).x));
-//    }
-
+    static boolean similar(Point a, Point b, double threshold) { return similar(a.x, b.x, threshold) && similar(a.y, b.y, threshold); }
 
     public static Vector<Point> rectToPointVector(Rect R) {
         Vector<Point> result = new Vector<>();
@@ -53,16 +56,20 @@ public class PerspectiveRealigner {
         return result;
     }
 
-    public static boolean similar(Vector<Point> A, Vector<Point> B) {
+    public static boolean similar(Vector<Point> A, Vector<Point> B, double threshold) {
         if (A.size() != B.size()) return false;
         for(int i = 0; i < A.size(); ++i)
-            if (!similar(A.get(i), B.get(i)))
+            if (!similar(A.get(i), B.get(i), threshold))
                 return false;
         return true;
     }
 
-    Vector<Point> getOutputCorners(Size currentFrameMat) {
-        return rectToPointVector(new Rect(new Point(0, 0), new Point(currentFrameMat.width, currentFrameMat.height)));
+    public static boolean similar(Vector<Point> A, Vector<Point> B) {
+        double threshold = 25; return similar(A, B, threshold);
+    }
+
+    private static Vector<Point> getOutputCorners(Size frameSize) {
+        return rectToPointVector(new Rect(new Point(0, 0), new Point(frameSize.width, frameSize.height)));
     }
 
     private boolean allZero(Vector<Point> detectedCorners) {
@@ -72,7 +79,8 @@ public class PerspectiveRealigner {
         return true;
     }
 
-    private boolean couldBeRectangle(Vector<Point> detectedCorners) {
+    // A frame must have 4 corners, and none of them should be closer than 200 pixels from each other
+    private boolean couldBeFrameCorners(Vector<Point> detectedCorners) {
         if (detectedCorners.size() != 4 || allZero(detectedCorners)) return false;
 
         // Check if any two corners are closer than minDist appart
@@ -87,21 +95,29 @@ public class PerspectiveRealigner {
         return true;
     }
 
+    boolean detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter, boolean shouldReturnColorMask) {
+        return detectFrameAndComputeTransformation(currentFrameMat, hueCenter, shouldReturnColorMask, 0);
+    }
 
-    void detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, boolean shouldReturnColorMask) {
+    // Returns true if realignment was made
+    boolean detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, boolean shouldReturnColorMask, double similarityThreshold) {
         Vector<Point> detectedCorners = detectRectangleCorners(currentFrameMat, _hueCenter, shouldReturnColorMask);
 
-        if (lambda == null)
-            lambda = new Mat(1, 1, CvType.CV_8UC1);
+        // Do not recompute new transformation if the change is small!
+        if (lambda != null && similar(detectedCorners, currentCorners, similarityThreshold))
+            return false;
 
         Vector<Point> outputCorners = getOutputCorners(currentFrameMat.size());
 
-        if (!couldBeRectangle(detectedCorners)) {
+        boolean transformationUpdated = true;
+        if (!couldBeFrameCorners(detectedCorners)) {
             // If nothing was found, ensure that transformation leaves the frame unchanged
             detectedCorners = outputCorners;
+            transformationUpdated = false;
         }
 
         update_transformation_lambda(detectedCorners, outputCorners);
+        return transformationUpdated;
     }
 
     Vector<Point> detectRectangleCorners(Mat currentFrameMat, int _hueCenter, boolean shouldUpdateCurrentFrame) {
@@ -151,7 +167,7 @@ public class PerspectiveRealigner {
 
 
     void detectFrameAndComputeTransformation(Mat currentFrameMat, int hueCenter) {
-        detectFrameAndComputeTransformation(currentFrameMat, hueCenter, false);
+        detectFrameAndComputeTransformation(currentFrameMat, hueCenter, false, 0);
     }
 
 

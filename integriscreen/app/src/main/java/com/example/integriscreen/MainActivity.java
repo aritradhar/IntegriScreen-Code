@@ -885,8 +885,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotate90(screenPart, rotatedScreenPart);
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
-//            ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue, false,10);
-            ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue);
+            ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue, false,10);
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
                 transitionISSTo(ISState.VERIFYING_UI);
