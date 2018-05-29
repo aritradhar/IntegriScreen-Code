@@ -15,7 +15,8 @@ public class PerspectiveRealigner {
     private int hueCenter;
     private int defaultHueCenter = 120;
 
-    private Vector<Point> currentCorners;
+    private Vector<Point> currentDetectedCorners;
+    private Vector<Point> currentOutputCorners;
 
 
     static void detectColor(Mat currentFrameMat, Mat outputMat, int hueCenter)
@@ -35,7 +36,8 @@ public class PerspectiveRealigner {
         Mat inMat = Converters.vector_Point2f_to_Mat(detectedCorners);
         Mat outMat = Converters.vector_Point2f_to_Mat(outputCorners);
 
-        currentCorners = detectedCorners;
+        currentDetectedCorners = detectedCorners;
+        currentOutputCorners = outputCorners;
         Imgproc.getPerspectiveTransform(inMat, outMat).copyTo(lambda);
 
         inMat.release();
@@ -80,7 +82,7 @@ public class PerspectiveRealigner {
     }
 
     // A frame must have 4 corners, and none of them should be closer than 200 pixels from each other
-    private boolean couldBeFrameCorners(Vector<Point> detectedCorners) {
+    public boolean couldBeFrameCorners(Vector<Point> detectedCorners) {
         if (detectedCorners.size() != 4 || allZero(detectedCorners)) return false;
 
         // Check if any two corners are closer than minDist appart
@@ -102,12 +104,12 @@ public class PerspectiveRealigner {
     // Returns true if realignment was made
     boolean detectFrameAndComputeTransformation(Mat currentFrameMat, int _hueCenter, boolean shouldReturnColorMask, double similarityThreshold) {
         Vector<Point> detectedCorners = detectRectangleCorners(currentFrameMat, _hueCenter, shouldReturnColorMask);
+        Vector<Point> outputCorners = getOutputCorners(currentFrameMat.size());
 
         // Do not recompute new transformation if the change is small!
-        if (lambda != null && similar(detectedCorners, currentCorners, similarityThreshold))
+        if (lambda != null && similar(detectedCorners, currentDetectedCorners, similarityThreshold) && similar(currentOutputCorners, outputCorners))
             return false;
 
-        Vector<Point> outputCorners = getOutputCorners(currentFrameMat.size());
 
         boolean transformationUpdated = true;
         if (!couldBeFrameCorners(detectedCorners)) {
@@ -136,13 +138,6 @@ public class PerspectiveRealigner {
             detectedCorners.add(new Point(corner[0], corner[1]));
         }
         cornersMat.release();
-
-
-        // Output the detected corners
-        // logF("Detected corners", "-------"
-        // for(int i = 0; i < (int)detectedCorners.size(); ++i)
-        //    logF("Corner " + String.valueOf(i), detectedCorners.get(i).toString());
-
 
         if (shouldUpdateCurrentFrame)
             colorMask.copyTo(currentFrameMat);

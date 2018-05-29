@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-        LM = new LogManager(getApplicationContext());
+        LM = new LogManager(getApplicationContext(), this);
 
         allLoadedForms = new HashMap<>();
 
@@ -1061,7 +1061,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return currentFrameMat;
     }
 
-    private UIElement findActiveElementFromCoorners(Vector<Point> corners) {
+    private UIElement findActiveElementFromCorners(Vector<Point> corners) {
         for(int i = 0; i < targetForm.allElements.size(); ++i) {
             UIElement currentElement = targetForm.allElements.get(i);
 
@@ -1078,16 +1078,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat realignedUpperFrame, List<Pair<Rect, Integer>> changedLocations) {
-        // TODO(ivo): make sure that only editable elements are allowed to change!
+        int hueActiveElement = 220;
+        Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueActiveElement);
+        UIElement activeElement = findActiveElementFromCorners(activeElementCorners);
 
-        int hueBlue = 240;
-        Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueBlue);
-        UIElement activeElement = findActiveElementFromCoorners(activeElementCorners);
-
-        // simply output them
-        for(int i = 0; i < (int)activeElementCorners.size(); ++i)
-            logF("Blue Corner " + String.valueOf(i), activeElementCorners.get(i).toString());
-
+        if (activeElement != null && activeElement.editable == false) {
+            // TODO: handle the case where a non-editable element is somehow active --> it must never change!
+        }
 
         if (activeElement != null) {
             // If we found an active element, we draw a green rectangle
@@ -1127,8 +1124,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 }
 
                 if (currentElement != activeElement) {
-                    logW("Potential Attack", "Non-active element changing!");
-                    outputOnToast("Potential attack: non-active el. changing");
+                    logW("Potential Attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue);
                     // TODO: add more info here
                 }
 

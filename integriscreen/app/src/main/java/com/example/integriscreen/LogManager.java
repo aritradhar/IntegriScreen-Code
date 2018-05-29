@@ -13,8 +13,10 @@ public class LogManager {
 
     private static Context context;
     private static String pathName;
+    private static MainActivity mainActivity;
 
-    public LogManager(Context currentContext) {
+    public LogManager(Context currentContext, MainActivity mActivity) {
+        mainActivity = mActivity;
         context = currentContext;
         pathName = ISImageProcessor.generatePathName("_log", ".txt");
     }
@@ -28,6 +30,7 @@ public class LogManager {
     // Logging decorator for warnings
     public static void logW(String tag, String message) {
         Log.w(tag, message);
+        mainActivity.outputOnToast(tag + ":" + message);
         writeToFile("WARNING:" + tag + ":" + message + "\n\n");
     }
 
