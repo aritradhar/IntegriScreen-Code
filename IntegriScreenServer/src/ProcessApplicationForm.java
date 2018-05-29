@@ -62,7 +62,8 @@ public class ProcessApplicationForm {
 		
 		response.sendRedirect(redirectURL);
 	}
-	
+
+
 	public static void processApplicationFormPhone(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 
@@ -103,8 +104,11 @@ public class ProcessApplicationForm {
 
 				if (phoneResponse.containsKey(key)) phoneVal = phoneResponse.get(key);
 				if (browserResponse.containsKey(key)) browserVal = browserResponse.get(key);
-				
-				if(!phoneVal.equals(browserVal))
+
+
+				// At the moment, we are using approximate matching, ignoring whitespace and cases
+				// if(!phoneVal.equals(browserVal))
+				if (almostIdenticalString(phoneVal, browserVal, false))
 				{
 					JSONObject failJSON = new JSONObject();
 					failJSON.put("elementid", key);
@@ -126,4 +130,50 @@ public class ProcessApplicationForm {
 		response.getWriter().write(outJson.toString(1));
 		response.flushBuffer();
 	}
+
+
+
+	// ======================================================
+	// This code is identical as the Java mobile app code!
+
+	static boolean[][] similar = new boolean[256][256];
+	// We use this function for now to allow for some slack in how well does OCR work, since e.g. i and j are often confused with the current font.
+	public static boolean similarChar(char A, char B, boolean allowMinorMismatch) {
+		if (A >= 256 || B >= 256) return (A == B);
+
+		for(int i = 0; i < 256; ++i)
+			for(int j = 0; j < 256; ++j)
+				similar[i][j] = (i == j);
+
+		if (allowMinorMismatch) { // this allows a bit of "slack" in comparison, by saying it's fine if e.g. i and j get replaced
+			similar['i']['j'] = similar['j']['i'] = true;
+			similar['8']['b'] = similar['b']['8'] = true;
+			similar['0']['8'] = similar['8']['0'] = true;
+			similar['0']['o'] = similar['o']['0'] = true;
+		}
+
+		return similar[A][B];
+	}
+
+	// This method compares two strings, but loosely: ignoring whitesace and punctuation, and allowing that some characters are "similar"
+	public static boolean almostIdenticalString(String A, String B, boolean allowMinorCharMismatch) {
+		A = OCRTrim(A);
+		B = OCRTrim(B);
+
+		if (A.length() != B.length()) return false;
+		for(int i = 0; i < A.length(); ++i)
+			if (!similarChar(A.charAt(i), B.charAt(i), allowMinorCharMismatch))
+				return false;
+
+		return true;
+	}
+
+	public static String OCRTrim(String s) {
+		String punctuationRegex = "[.,:!?\\-]";
+		s = s.toLowerCase().replaceAll("\\s+","");
+		s = s.replaceAll(punctuationRegex,"");
+		return s;
+	}
+
+	// ======================================================
 }
