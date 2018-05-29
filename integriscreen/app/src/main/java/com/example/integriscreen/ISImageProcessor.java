@@ -147,9 +147,6 @@ public class ISImageProcessor {
         }
         logF("All areas", "No. of diffs: " + String.valueOf(rectComponents.rows()) + ", areas: " + allDiffAreas);
 
-        if (largeRects.size() > 50)
-            return new ArrayList<>();
-
         // This is just to showcase what I am finding
         labels.convertTo(labels, CV_8UC1, 10.0);
 

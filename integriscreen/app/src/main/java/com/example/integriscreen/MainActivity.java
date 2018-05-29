@@ -764,7 +764,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return false;
     }
 
-    // int cnt = 0; int freq = 50;
     void processRotatedUpperPart(Mat rotatedUpperPart, Mat currentFrameMat)
     {
         // HANDLE THE UPPER PART!
@@ -812,19 +811,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 validateUIChanges(rotatedUpperPart, changedLocations);
             }
 
+            // This is where we decide to draw the black-and-white on the screen
+//             Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+            diffsUpperPart.release();
 
             String allDiffAreas = "";
             for(Pair<Rect, Integer> P : changedLocations) {
                 allDiffAreas += " | " + P.second.toString();
-                Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 0), 2);
+                Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 255), 2);
             }
 
-            outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
+            if (changedLocations.size() < 20)
+                outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
-            // This is where we decide to draw the black-and-white on the screen
-            // Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
-
-            diffsUpperPart.release();
             return;
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
@@ -886,6 +885,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotate90(screenPart, rotatedScreenPart);
 
         if (shouldDetectTransformation(currentISState)) { // during "verifying UI", we need to have a still screen
+//            ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue, false,10);
             ISUpperFrameContinuousRealigner.detectFrameAndComputeTransformation(rotatedScreenPart, color_border_hue);
 
             if (currentISState == ISState.REALIGNING_AFTER_FORM_LOAD) {
