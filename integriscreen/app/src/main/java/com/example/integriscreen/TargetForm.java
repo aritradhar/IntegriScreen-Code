@@ -145,21 +145,6 @@ public class TargetForm {
     }
 
     /**
-     *  This method updates the value of an input element with the newValue
-     */
-    public void updateElementWithValue(String elementID, String newValue) {
-        for (int i = 0; i < allElements.size(); i++) {
-            UIElement currEl = allElements.get(i);
-            if (currEl.id.equals(elementID)) {
-                logF("ElementChanges", "Id: " + currEl.id + ", old: "
-                        + currEl.currentValue + ", new: " + newValue);
-                allElements.get(i).currentValue = newValue;
-                break;
-            }
-        }
-    }
-
-    /**
      * Get UI Element with index i
      */
     public UIElement getElement(int index) {

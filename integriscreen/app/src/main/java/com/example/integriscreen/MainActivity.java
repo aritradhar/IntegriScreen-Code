@@ -784,10 +784,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(diffsUpperPart,
                     1, 1, 10);
 
-            if (changedLocations.size() > 0 && !activityDetected) {
-                logW("Possible attack", "Warning: UI changes, but no hand movement!");
-            }
-
             // Check if title was impacted. If it was, update the form.
             if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
                 // In this case, we need to recreate the "non-realigned" image to make sure we are extracting the form
@@ -1078,11 +1074,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      */
     long previousFrameTimestamp = 0;
     private void validateUIChanges(Mat realignedUpperFrame, List<Pair<Rect, Integer>> changedLocations) {
+        long currentFrameTimestamp = currentTimeMillis();
+
         int hueActiveElement = 220;
         Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueActiveElement);
         UIElement activeElement = findActiveElementFromCorners(activeElementCorners);
 
         if (activeElement != null && activeElement.editable == false) {
+            logW("Potential Attack", "Non-editable element became active:" + activeElement.currentValue);
             // TODO: handle the case where a non-editable element is somehow active --> it must never change!
         }
 
@@ -1111,54 +1110,36 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             long currentTimestamp = currentTimeMillis();
             long diffTimestamp = currentTimestamp - previousFrameTimestamp;
 
-            // check if diff comes from an element value change
-            if (!currentElement.currentValue.equals(newValue)) {
-
-                if (!isChangeLegit(currentElement.currentValue, newValue, diffTimestamp)) {
+            // Check if diff there is a change in comparison to previous value
+            if (!ISStringProcessor.almostIdenticalString(currentElement.currentValue, newValue, false)) {
+                if (currentElement != activeElement) {
+                    logW("Potential Attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
+                    // TODO: add more info here
+                } else if (!activityDetected) {
+                    logW("Possible attack", "No hands, but active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
+                } else if (!isChangeLegit(currentElement.currentValue, newValue, diffTimestamp)) {
                     String message = "Change from |" + currentElement.currentValue + "| to |" + newValue + "| is not OK in " + diffTimestamp + "ms";
                     // outputOnToast(message);
 //                    outputOnUILabel(message);
                     logW("non legit text change!", message);
 
                     // Todo : implement a method to fire an alert
-                }
+                } else if (activeElement.editable == false) {
+                    logW("Potential Attack", "Non-editable element changing!");
 
-                if (currentElement != activeElement) {
-                    logW("Potential Attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue);
-                    // TODO: add more info here
-                }
+                } else { // Ok, everything seems to be fine, we can update the current active element
+                    targetForm.activeElementLastEdit = currentFrameTimestamp;
 
-                if (currentElement == activeElement) {    // this element is already the active one
-                    //Todo eu: frame timestamp would be more accurate!
-                    targetForm.activeElementLastEdit = currentTimestamp;
-
-                    // value updated
-                    // Todo eu: what if the frame is unclear and the change is unreal
                     String oldValue = currentElement.currentValue;
-                    targetForm.updateElementWithValue(currentElement.id, newValue);
 
-                    //store in the logs
-                    ActiveElementLog tmpLog = new ActiveElementLog(currentElement.id, currentElement.id,
+                    // Update the value
+                    activeElement.currentValue = newValue;
+
+                    // Store in the logs
+                    ActiveElementLog newLogEntry = new ActiveElementLog(currentElement.id, currentElement.id,
                             oldValue, newValue, currentTimestamp, diffTimestamp);
-                    activeElementLogs.add(tmpLog);
+                    activeElementLogs.add(newLogEntry);
                 }
-
-                // else {
-                // new active element
-
-//                    String oldElementID = targetForm.activEl;
-//
-//                    String oldValue = currentElement.currentValue;
-//                    targetForm.activEl = currentElement.id;
-//                    targetForm.activeSince = currentTimestamp;
-//                    targetForm.activeElementLastEdit = currentTimestamp;
-//                    targetForm.updateElementWithValue(currentElement.id, newValue);
-//
-//                    //store in the logs
-//                    ActiveElementLog tmpLog = new ActiveElementLog(oldElementID, currentElement.id,
-//                            oldValue, newValue, currentTimestamp, diffTimestamp);
-//                    activeElementLogs.add(tmpLog);
-                // }
             }
         }
         previousFrameTimestamp = currentTimeMillis();
