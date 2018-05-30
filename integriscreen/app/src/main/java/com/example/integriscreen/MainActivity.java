@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Point upper_left, lower_right;
 
     private int color_border_hue = 130;
+    private long currentFrameNumber = 0;
+    private long previousFrameTimestamp = 0;
+    private long currentFrameTimestamp = 0;
+
 
     public boolean evaluationStarting;
 
@@ -915,7 +919,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return currentFrameMat;
     }
 
+
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        currentFrameNumber = currentFrameNumber + 1;
+        currentFrameTimestamp = currentTimeMillis();
+
+
         Mat currentFrameMat = inputFrame.rgba();
 //        logF(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
@@ -1023,9 +1032,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * This method takes as input the list of changes on the screen and confirms the integrity
      * of screen changes
      */
-    long previousFrameTimestamp = 0;
+
     private boolean superviseUIChanges(Mat realignedUpperFrame, List<Pair<Rect, Integer>> changedLocations) {
-        long currentFrameTimestamp = currentTimeMillis();
         long diffTimestamp = currentFrameTimestamp - previousFrameTimestamp;
 
         int hueActiveElement = 220;
@@ -1038,7 +1046,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // TODO(ivo): integrate this fully: run on every 3rd frame
         // run every 3rd frame or only when changes outside of UI elements are detected
         // It seems for now that running this check on every frame reduces FPS from 6 to 3-4
-        if (limitAreaCheckbox.isChecked()) {
+        if (limitAreaCheckbox.isChecked() && currentFrameNumber % 3 == 0) {
             Mat noUIElementsMat = new Mat(1, 1, 1);
             realignedUpperFrame.copyTo(noUIElementsMat);
 
@@ -1136,6 +1144,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Imgproc.rectangle(realignedUpperFrame, currentElement.box.tl(), currentElement.box.br(), rectangle_color, rectangle_thicknes);
         }
 
+        // TODO: this needs to be fixed / removed
         // This is an ugly hack for now.
         if (limitAreaCheckbox.isChecked())
             allowChanges = true;
