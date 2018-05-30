@@ -479,6 +479,34 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         matPic.release();
     }
 
+    private static String displayTextBlocksOnFrame(Mat currentFrameMat, SparseArray<TextBlock> detectedTextBlocks, Scalar textColor, boolean drawBox) {
+        String concatDelim = "";
+        String concatenatedText = "";
+        int offset = 20;
+        for (int i = 0; i < detectedTextBlocks.size(); ++i) {
+            TextBlock item = detectedTextBlocks.valueAt(i);
+            android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
+
+            if (item != null && item.getValue() != null) {
+                int textHeight = (int) Imgproc.getTextSize(item.getValue(), Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
+                Imgproc.putText(currentFrameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
+                        Core.FONT_HERSHEY_SIMPLEX, 1, textColor, 3);
+
+                if (drawBox) {
+                    Imgproc.rectangle(currentFrameMat, new Point(rect.left - offset, rect.top - offset),
+                            new Point(rect.right + offset, rect.bottom + offset), new Scalar(255, 0, 0), 4);
+                }
+
+                concatenatedText += item.getValue() + concatDelim;
+            }
+        }
+        return concatenatedText;
+    }
+
+    private static String displayTextBlocksOnFrame(Mat currentFrameMat, SparseArray<TextBlock> detectedTextBlocks) {
+        return displayTextBlocksOnFrame(currentFrameMat, detectedTextBlocks, new Scalar(0, 255, 0), false);
+    }
+
     // This method:
     // 1) extracts all the text from a (specific part of) frame
     // 2) concatenates it
@@ -486,31 +514,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // 4) displays it on an UI label
     // 5) returns the concatenated text
     private static String extractAndDisplayTextFromFrame(Mat frameMat) {
-
         SparseArray<TextBlock> texts = detect_text(frameMat);
 
-        String concatDelim = "";
-        String concatenatedText = "";
-        logF("TextDetected", texts.size()+" words");
-        for (int i = 0; i < texts.size(); ++i) {
-            TextBlock item = texts.valueAt(i);
-            android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
-
-            if (item != null && item.getValue() != null) {
-                int textHeight = (int) Imgproc.getTextSize(item.getValue(), Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
-                Imgproc.putText(frameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
-                        Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0,255,0), 2);
-
-                logF("TextDetected", item.getValue());
-                concatenatedText += item.getValue() + concatDelim;
-            }
-        }
-
-        // Also, output on the UI label
-//         if (currentOutputSelection == OutputSelection.RAW && !liveCheckbox.isChecked())
-        // outputOnUILabel(concatenatedText);
-
-        return concatenatedText;
+        return displayTextBlocksOnFrame(frameMat, texts);
     }
 
     /**
@@ -710,18 +716,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rotatedPotentialFormMat.release();
     }
 
-    boolean detectUnspecifiedText(Mat currentFrameMat) {
+    SparseArray<TextBlock> detectUnspecifiedText(Mat currentFrameMat) {
         Mat allWhite = new Mat(currentFrameMat.width(), currentFrameMat.height(), currentFrameMat.type(), new Scalar(255, 255, 255));
         for(UIElement currentElement : targetForm.allElements) {
+            // "Whiten the UI elements
             allWhite.submat(currentElement.box).copyTo(currentFrameMat.submat(currentElement.box));
         }
 //        storePic(currentFrameMat, "ui_el_removed");
         allWhite.release();
 
-        String allText = extractAndDisplayTextFromFrame(currentFrameMat);
+        SparseArray<TextBlock> detectedTextBlocks = detect_text(currentFrameMat);
 
        // storePic(currentFrameMat, "text_extracted");
-        return (allText.length() > 0);
+        return detectedTextBlocks;
     }
 
     void processRotatedUpperPart(Mat rotatedUpperPart, Mat currentFrameMat)
@@ -738,19 +745,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
                 tryLoadingNewForm(currentFrameMat);
             } else {
-                boolean additionalText = false;
-                // TODO(ivo): integrate this fully
-                // It seems for now that running this check on every frame reduces FPS from 6 to 3-4
-                if (limitAreaCheckbox.isChecked()) {
-                    Mat tmp = new Mat(1, 1, 1);
-                    currentFrameMat.copyTo(tmp);
-                    additionalText = detectUnspecifiedText(currentFrameMat);
-                    tmp.release();
-                }
+                boolean acceptingInputs = superviseUIChanges(rotatedUpperPart, changedLocations);
 
-                boolean readyToInput = superviseUIChanges(rotatedUpperPart, changedLocations);
-
-                if (readyToInput && targetForm.initiallyVerified == false) {
+                if (acceptingInputs && targetForm.initiallyVerified == false) {
                     logR("Form Loaded", "Successfully Loaded form: " + targetForm.pageId);
                     targetForm.initiallyVerified = true;
                 }
@@ -1037,9 +1034,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
+        boolean foundAdditionalText = false;
+        // TODO(ivo): integrate this fully: run on every 3rd frame
+        // run every 3rd frame or only when changes outside of UI elements are detected
+        // It seems for now that running this check on every frame reduces FPS from 6 to 3-4
+        if (limitAreaCheckbox.isChecked()) {
+            Mat noUIElementsMat = new Mat(1, 1, 1);
+            realignedUpperFrame.copyTo(noUIElementsMat);
+
+            SparseArray<TextBlock> detectedTextBlocks = detectUnspecifiedText(noUIElementsMat);
+            String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
+            if (detectedString.length() > 0)
+                foundAdditionalText = true;
+
+            noUIElementsMat.release();
+        }
+
         String activeElementNewValue = null;
         boolean allowChanges = true;
-        // TODO(ivo): check if anything additional is being shown on the form!
+
+        // If anything additional was found, don't allow changes!
+        if (foundAdditionalText)
+            allowChanges = false;
 
         for(UIElement currentElement : targetForm.allElements) {
             // If it has been Ok before and nothing seems to have changed, skip this element
