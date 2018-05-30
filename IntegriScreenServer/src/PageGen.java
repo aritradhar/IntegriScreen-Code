@@ -12,25 +12,36 @@ import org.json.JSONObject;
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load data/NAME.json as input and generate generated/NAME.html as output
-		pageGen("email_1080_960");
-		pageGen("email_1920_1080");
-		pageGen("hard_form");
-		pageGen("medium_form");
-		pageGen("easy_form");
+		pageGen("email_1080_960", true);
+		pageGen("email_1920_1080", true);
+		pageGen("secure_email", true);
+		pageGen("Random_30", true);
+		pageGen("Consolas_86", true);
+		pageGen("hard_form", true);
+		pageGen("medium_form", true);
+		pageGen("easy_form", true);
 	}
 
-	public static String[] pageGen(String pageFileName) throws IOException
-	{
+	public static String[] pageGen(String pageFileName, boolean runLocally) throws IOException {
+		String dataLocation;
+		String generatedLocation;
+		if (runLocally) {
+			dataLocation = "data/";
+			generatedLocation = "generated/";
+		} else {
+			dataLocation = MainServer.location;
+			generatedLocation = MainServer.generatedLocation;
+		}
+		
 		// String generatedLocation = "./generated/";
-		String jsonData = new String(Files.readAllBytes(new File(MainServer.location + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
-		String htmlFile = new String(Files.readAllBytes(new File(MainServer.location + "template.txt").toPath()), StandardCharsets.UTF_8);
-
+		String jsonData = new String(Files.readAllBytes(new File(dataLocation + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
+		String htmlFile = new String(Files.readAllBytes(new File(dataLocation + "template.txt").toPath()), StandardCharsets.UTF_8);
 
 		System.out.println("--------------Opening File: " + pageFileName + ".html-----------------");
 
 
-		FileWriter fw = new FileWriter(MainServer.generatedLocation + pageFileName + ".html");
-		FileWriter fwu = new FileWriter(MainServer.generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
+		FileWriter fw = new FileWriter(generatedLocation + pageFileName + ".html");
+		FileWriter fwu = new FileWriter(generatedLocation + pageFileName + "_unicorn.html"); // "_unicorn files are those where the borders are colored"
 
 		JSONObject jObject = new JSONObject(jsonData);
 		String pageName = jObject.getString("page_id");
@@ -165,6 +176,7 @@ public class PageGen {
 		fwu.write(htmlFile);  fwu.close();
 
 		System.out.println("----------------Page generated----------------");
+		// TODO: this is hardcoded to the current location of the server!
 		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
 
@@ -174,6 +186,11 @@ public class PageGen {
 
 		return new String[] {pageFileName, page_title_h2, urlDataName + pageFileName + ".json", urlName + pageFileName + ".html", urlName + pageFileName + "_unicorn.html"};
 
+	}
+
+	public static String[] pageGen(String pageFileName) throws IOException
+	{
+		return pageGen(pageFileName, false);
 	}
 
 }

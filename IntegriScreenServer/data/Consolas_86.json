@@ -19,26 +19,6 @@
       "ulc_y": "2"
     },
     {
-      "width": "67",
-      "initialvalue": "faithless",
-      "editable": "false",
-      "height": "9",
-      "type": "label",
-      "id": "0",
-      "ulc_x": "1.8",
-      "ulc_y": "9"
-    },
-    {
-      "width": "17",
-      "initialvalue": "jaws",
-      "editable": "true",
-      "height": "9",
-      "type": "textarea",
-      "id": "1",
-      "ulc_x": "81.8",
-      "ulc_y": "9"
-    },
-    {
       "width": "37",
       "initialvalue": "tickled",
       "editable": "false",
