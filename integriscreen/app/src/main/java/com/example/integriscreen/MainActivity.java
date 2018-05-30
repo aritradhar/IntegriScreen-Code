@@ -58,7 +58,6 @@ import static com.example.integriscreen.ISImageProcessor.applyCanny;
 import static com.example.integriscreen.ISImageProcessor.rotate270;
 import static com.example.integriscreen.ISImageProcessor.rotate90;
 import static com.example.integriscreen.ISImageProcessor.storePic;
-import static com.example.integriscreen.ISStringProcessor.almostIdenticalString;
 import static com.example.integriscreen.ISStringProcessor.concatTextBlocks;
 import static com.example.integriscreen.ISStringProcessor.isChangeLegit;
 import static com.example.integriscreen.LogManager.logF;
@@ -709,7 +708,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             startIntegriScreen(-1);
         }
         rotatedPotentialFormMat.release();
+    }
 
+    boolean detectUnspecifiedText(Mat currentFrameMat) {
+        Mat allWhite = new Mat(currentFrameMat.width(), currentFrameMat.height(), currentFrameMat.type(), new Scalar(255, 255, 255));
+        for(UIElement currentElement : targetForm.allElements) {
+            allWhite.submat(currentElement.box).copyTo(currentFrameMat.submat(currentElement.box));
+        }
+//        storePic(currentFrameMat, "ui_el_removed");
+        allWhite.release();
+
+        String allText = extractAndDisplayTextFromFrame(currentFrameMat);
+
+       // storePic(currentFrameMat, "text_extracted");
+        return (allText.length() > 0);
     }
 
     void processRotatedUpperPart(Mat rotatedUpperPart, Mat currentFrameMat)
@@ -726,6 +738,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
                 tryLoadingNewForm(currentFrameMat);
             } else {
+                boolean additionalText = false;
+                // TODO(ivo): integrate this fully
+                // It seems for now that running this check on every frame reduces FPS from 6 to 3-4
+                if (limitAreaCheckbox.isChecked()) {
+                    Mat tmp = new Mat(1, 1, 1);
+                    currentFrameMat.copyTo(tmp);
+                    additionalText = detectUnspecifiedText(currentFrameMat);
+                    tmp.release();
+                }
+
                 boolean readyToInput = superviseUIChanges(rotatedUpperPart, changedLocations);
 
                 if (readyToInput && targetForm.initiallyVerified == false) {
