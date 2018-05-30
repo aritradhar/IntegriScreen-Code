@@ -7,20 +7,25 @@ key_count = 0;
 function parallel(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
-    log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
-        if (key_count == 3) attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+        if (key_count == 3) {
+            log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
+            attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+        }
     });
 }
             
 timer = null; attacked = 0;
 function inactive(attack) {
     target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
-    log(`target-${$(target).attr('name')}-${$(target).val()}`);
     $(document).keypress(function() {
         if (timer != null) clearTimeout(timer);
-        if (!attacked) timer = setTimeout(function() { attacked = 1; return attack($(target)); }, 3000); // different dice roll trust me
+        if (!attacked) timer = setTimeout(function() { 
+            attacked = 1; 
+            log(`target-${$(target).attr('name')}-${$(target).val()}`);
+            return attack($(target));
+        }, 3000); // different dice roll trust me
     });
 }
 
