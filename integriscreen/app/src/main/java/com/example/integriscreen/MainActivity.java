@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private long previousFrameTimestamp = 0;
     private long currentFrameTimestamp = 0;
 
+    // This has to be a global variable if we run the check e.g. every 3-rd frame!
+    private boolean foundAdditionalTextOnFrame = false;
+
 
     public boolean evaluationStarting;
 
@@ -669,8 +672,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Rect handsBox = new Rect(new Point(mid_delim, 0), new Point(currentFrameMat.width(), currentFrameMat.height()));
         Mat handsPart = currentFrameMat.submat(handsBox);
 
-        // TODO(ivo): why do we have a bug with hands?!f
-
         int skin_hue_estimate = 26;
         PerspectiveRealigner.detectColor(handsPart, handsPart, skin_hue_estimate);
 
@@ -1042,28 +1043,33 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
-        boolean foundAdditionalText = false;
-        // TODO(ivo): integrate this fully: run on every 3rd frame
-        // run every 3rd frame or only when changes outside of UI elements are detected
-        // It seems for now that running this check on every frame reduces FPS from 6 to 3-4
-        if (limitAreaCheckbox.isChecked() && currentFrameNumber % 3 == 0) {
-            Mat noUIElementsMat = new Mat(1, 1, 1);
-            realignedUpperFrame.copyTo(noUIElementsMat);
-
-            SparseArray<TextBlock> detectedTextBlocks = detectUnspecifiedText(noUIElementsMat);
-            String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
-            if (detectedString.length() > 0)
-                foundAdditionalText = true;
-
-            noUIElementsMat.release();
-        }
-
         String activeElementNewValue = null;
         boolean allowChanges = true;
 
+
+
+        if (limitAreaCheckbox.isChecked()) {
+            // Run on every third frame because users anyways don't notice otherwise?
+            if (currentFrameNumber % 3 == 0) {
+                Mat noUIElementsMat = new Mat(1, 1, 1);
+                realignedUpperFrame.copyTo(noUIElementsMat);
+
+                SparseArray<TextBlock> detectedTextBlocks = detectUnspecifiedText(noUIElementsMat);
+                String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
+
+                foundAdditionalTextOnFrame = (detectedString.length() > 0);
+
+                noUIElementsMat.release();
+            }
+        } else {
+            foundAdditionalTextOnFrame = false;
+        }
+
         // If anything additional was found, don't allow changes!
-        if (foundAdditionalText)
+        if (foundAdditionalTextOnFrame) {
+            logW("Potential attack", "Unspecified text on the screen");
             allowChanges = false;
+        }
 
         for(UIElement currentElement : targetForm.allElements) {
             // If it has been Ok before and nothing seems to have changed, skip this element
@@ -1121,11 +1127,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Plot out all the elements
         for(UIElement currentElement : targetForm.allElements) {
             Scalar rectangle_color;
-            int rectangle_thicknes;
+            int rectangle_thickness;
             if (currentElement.dirty) {
                 // Use red rectangle
                 rectangle_color = new Scalar(255, 0, 0);
-                rectangle_thicknes = 4;
+                rectangle_thickness = 4;
 
                 // Output the text on the UI elements
                 int textHeight = (int) Imgproc.getTextSize(currentElement.currentValue, Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
@@ -1137,11 +1143,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     rectangle_color = new Scalar(0, 255, 0);
                 else
                     rectangle_color = new Scalar(255, 255, 0);
-                rectangle_thicknes = 2;
+                rectangle_thickness = 2;
             }
 
             // Plot the borders of the UI elements
-            Imgproc.rectangle(realignedUpperFrame, currentElement.box.tl(), currentElement.box.br(), rectangle_color, rectangle_thicknes);
+            Imgproc.rectangle(realignedUpperFrame, currentElement.box.tl(), currentElement.box.br(), rectangle_color, rectangle_thickness);
         }
 
         // TODO: this needs to be fixed / removed

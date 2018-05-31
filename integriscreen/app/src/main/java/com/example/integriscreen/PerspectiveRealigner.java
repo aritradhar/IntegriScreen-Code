@@ -4,11 +4,14 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 import java.util.Vector;
+
+import static com.example.integriscreen.LogManager.logF;
 
 public class PerspectiveRealigner {
     private Mat lambda;
@@ -158,6 +161,13 @@ public class PerspectiveRealigner {
         realignImage(inputMat, outputMat);
         outputMat.copyTo(inputMat);
         outputMat.release();
+
+        // Draw just for perspective
+        for( Point P: currentDetectedCorners ) {
+            logF("cir", String.valueOf(P.x) + ", " + String.valueOf(P.y));
+            Imgproc.circle(inputMat, P, 5, new Scalar(255, 0, 0), 5);
+            Imgproc.circle(inputMat, P, 15, new Scalar(0, 255, 0), 5);
+        }
     }
 
 
