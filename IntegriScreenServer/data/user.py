@@ -4,6 +4,10 @@ import time
 
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+
 
 WORDS = np.loadtxt('rnd_forms/dictionary', dtype=str)
 WORDS_LENGTHS = {_i: [y for y in WORDS if len(y) == _i] for _i in np.unique([len(x) for x in WORDS])}
@@ -18,10 +22,12 @@ KBD = np.array([
 def spawn_tester(source, atk_mode, atk_type):
     atk_string = "atk_mode={}&atk_type={}".format(atk_mode, atk_type) if atk_mode and atk_type else ''
     driver.get("http://tildem.inf.ethz.ch/generated/tester.html?setup={}&{}".format(source, atk_string))
-    time.sleep(3)  # HACK: waits optimistically for the page to load
 
 
 def test_page():
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "greenBox"))
+    )
     inputs = driver.find_elements_by_css_selector("input[type='text'], textarea")
     for _input in inputs:
         word = _input.text or _input.get_attribute('value')
@@ -34,7 +40,7 @@ def test_page():
                 distance = abs(ch_idx1[0] - ch_idx2[0]) + abs(ch_idx1[1] - ch_idx2[1])  # result is a list
                 # distance between two keys is in [1, 11]
                 # typing speed should be between 100-200 ms per keypair
-                time.sleep(np.random.normal(120 + 60 / 11.0 * distance, 10) / 1000.0)
+                time.sleep(np.random.normal(120 + 60 * distance / 11.0, 10) / 1000.0)
     driver.find_elements_by_css_selector("input[type='submit']")[0].click()
     for log in driver.get_log('browser'):
         print log['message']
