@@ -734,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     SparseArray<TextBlock> detectUnspecifiedText(Mat currentFrameMat) {
-        Mat allWhite = new Mat(currentFrameMat.width(), currentFrameMat.height(), currentFrameMat.type(), new Scalar(255, 255, 255));
+        Mat allWhite = new Mat(currentFrameMat.height(), currentFrameMat.width(), currentFrameMat.type(), new Scalar(255, 255, 255));
         for(UIElement currentElement : targetForm.allElements) {
             // "Whiten the UI elements
             allWhite.submat(currentElement.box).copyTo(currentFrameMat.submat(currentElement.box));
