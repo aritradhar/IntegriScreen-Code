@@ -1158,12 +1158,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 allowChanges = false;
                 logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
 
-                ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
+                ChangeEventLog activeElementEventLog = new ChangeEventLog(currentFrameTimestamp,
                         currentElement.id,
                         false,
                         currentElement.currentValue,
                         newValue);
-                allChangeLogs.add(eventLog);
+                allChangeLogs.add(activeElementEventLog);
 
                 continue;
             }
