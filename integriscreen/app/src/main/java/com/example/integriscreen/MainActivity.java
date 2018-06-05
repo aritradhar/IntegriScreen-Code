@@ -1,13 +1,18 @@
 package com.example.integriscreen;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private HashMap<String, TargetForm> allLoadedForms;
     private TargetForm targetForm;
     private ArrayList<ActiveElementLog> activeElementLogs;
+    private ArrayList<ChangeEventLog> allChangeLogs;
 
     // static address of the server to fetch list of forms
     private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
@@ -221,7 +227,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.VIBRATE},
                 1);
 
 //        _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
@@ -245,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
+        allChangeLogs = new ArrayList<>();
 
         cameraFrameRealigner = new PerspectiveRealigner();
         ISUpperFrameContinuousRealigner = new PerspectiveRealigner();
@@ -453,37 +462,40 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     // Callback when picture is taken
     public void onPicTaken(byte[] data) {
-        logF(TAG, "onPicTaken: " + currentTimeMillis());
+        makeWarningSound();
+        return;
 
-        //convert to mat
-        Mat matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
-        logF(TAG, "afterImdecode: " + currentTimeMillis());
-
-        // ------------
-        // We keep this for now mainly for testing
-        // store plain pic
-         storePic(data, "_byte");
-
-        Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
-        logF(TAG, "afterCvtColor: " + currentTimeMillis());
-
-        //        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
-
-        // detect the green framebox
-        PerspectiveRealigner myPerspective = new PerspectiveRealigner();
-        myPerspective.detectFrameAndComputeTransformation(matPic, color_border_hue);
-        myPerspective.realignImage(matPic);
-
-        // rotate the mat so we get the proper orientation
-        Mat rotatedPic = new Mat(1, 1, 1);
-        rotate90(matPic, rotatedPic);
-        rotatedPic.copyTo(matPic);
-
-        logF("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
-
-        // store mat image in drive
-        storePic(matPic, "_mat");
-        matPic.release();
+//        logF(TAG, "onPicTaken: " + currentTimeMillis());
+//
+//        //convert to mat
+//        Mat matPic = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_COLOR);
+//        logF(TAG, "afterImdecode: " + currentTimeMillis());
+//
+//        // ------------
+//        // We keep this for now mainly for testing
+//        // store plain pic
+//         storePic(data, "_byte");
+//
+//        Imgproc.cvtColor(matPic, matPic, Imgproc.COLOR_BGR2RGB);
+//        logF(TAG, "afterCvtColor: " + currentTimeMillis());
+//
+//        //        matPic = matPic.submat(new Rect(0, 0, matPic.width() / 2, matPic.height()));
+//
+//        // detect the green framebox
+//        PerspectiveRealigner myPerspective = new PerspectiveRealigner();
+//        myPerspective.detectFrameAndComputeTransformation(matPic, color_border_hue);
+//        myPerspective.realignImage(matPic);
+//
+//        // rotate the mat so we get the proper orientation
+//        Mat rotatedPic = new Mat(1, 1, 1);
+//        rotate90(matPic, rotatedPic);
+//        rotatedPic.copyTo(matPic);
+//
+//        logF("TextDetection", "Detected: " + extractAndDisplayTextFromFrame(matPic));
+//
+//        // store mat image in drive
+//        storePic(matPic, "_mat");
+//        matPic.release();
     }
 
     private static String displayTextBlocksOnFrame(Mat currentFrameMat, SparseArray<TextBlock> detectedTextBlocks, Scalar textColor, boolean drawBox) {
@@ -1025,8 +1037,44 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return null;
     }
 
+    Vibrator v;
+    Ringtone r;
     private void makeWarningSound(){
-        // TODO: implement this
+        // TODO: implement this fully
+
+        if (r != null && r.isPlaying()) {
+            v.cancel();
+            r.stop();
+        }
+
+        // Get instance of Vibrator from current Context
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        // Start without a delay
+        // Vibrate for 200 milliseconds
+        // Sleep for 1000 milliseconds
+        long[] pattern = {0, 200, 1000};
+
+        // The '0' here means to repeat indefinitely
+        // '0' is actually the index at which the pattern keeps repeating from (the start)
+        // To repeat the pattern from any other point, you could increase the index, e.g. '1'
+        v.vibrate(pattern, 1);
+//        v.cancel(); // to stop the vibration
+
+        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        if(alert == null){
+            // alert is null, using backup
+            alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+            // I can't see this ever being null (as always have a default notification)
+            // but just incase
+            if(alert == null) {
+                // alert backup is null, using 2nd backup
+                alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            }
+        }
+        r = RingtoneManager.getRingtone(getApplicationContext(), alert);
+        r.play();
     }
 
     /**
@@ -1040,6 +1088,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         int hueActiveElement = 220;
         Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueActiveElement);
         UIElement activeElement = findActiveElementFromCorners(activeElementCorners);
+
+        //TODO eu: Ivo, this method runs for every frame, right?
+        //store the active element for every frame
+        ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
+                activeElement.id,
+                true,
+                "noocr",
+                "noocr");
+        allChangeLogs.add(eventLog);
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
@@ -1087,12 +1144,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 continue;
             }
 
-            // Check if this is an active element
-            if (currentElement != activeElement) {
+            // Check if this changing element is not the active element
+            if (currentElement != activeElement) {  // TODO eu: double-check this comparison
                 currentElement.dirty = true;
 
                 allowChanges = false;
                 logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
+
+                eventLog = new ChangeEventLog(currentFrameTimestamp,
+                        currentElement.id,
+                        false,
+                        currentElement.currentValue,
+                        newValue);
+                allChangeLogs.add(eventLog);
+
                 continue;
             }
 
@@ -1177,6 +1242,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 // Store in the logs
                 ActiveElementLog newLogEntry = new ActiveElementLog(activeElement.id, activeElement.id,
                         oldValue, activeElementNewValue, currentFrameTimestamp, diffTimestamp);
+                // todo eu: store this info targetForm.pageId in the logs
                 activeElementLogs.add(newLogEntry);
             } else {
                 // We beep to the user to indicate that they should not continue editing
