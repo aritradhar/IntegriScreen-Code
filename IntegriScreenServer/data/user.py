@@ -41,6 +41,7 @@ def test_page():
                 # distance between two keys is in [1, 11]
                 # typing speed should be between 100-200 ms per keypair
                 time.sleep(np.random.normal(120 + 60 * distance / 11.0, 10) / 1000.0)
+        time.sleep(args.tab_time)
     driver.find_elements_by_css_selector("input[type='submit']")[0].click()
     for log in driver.get_log('browser'):
         print log['message']
@@ -56,6 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('--attacker', choices=['parallel', 'inactive'])
     parser.add_argument('--attack_type', choices=['replace_char', 'flip_chars', 'add_char', 'remove_char'])
     parser.add_argument('--time', type=float, default=3)
+    parser.add_argument('--tab_time', type=float, default=0.6)
 
     args = parser.parse_args()
 
