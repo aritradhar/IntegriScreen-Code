@@ -419,9 +419,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
         // currentEvalIndex = evalIndex;
 
-        // TODO: remove
-        makeWarningSound();
-
         transitionISSTo(ISState.DETECTING_FRAME);
         outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
     }
@@ -597,6 +594,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         else {
             TargetForm existingForm = allLoadedForms.get(formUrlToLoad);
+            existingForm.makeAllDirty();
             logF("Re-loading existing form", formUrlToLoad);
             return existingForm;
         }
@@ -1048,8 +1046,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     Vibrator v;
     Ringtone r;
     private void makeWarningSound(){
-        // TODO: implement this fully
-
         if (r != null && r.isPlaying()) {
             v.cancel();
             r.stop();
@@ -1059,30 +1055,32 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // Start without a delay
-        // Vibrate for 200 milliseconds
-        // Sleep for 1000 milliseconds
-        long[] pattern = {0, 200, 1000};
+        // Vibrate for 400 milliseconds
+        // Sleep for 0 milliseconds
+        long[] pattern = {0, 400, 0};
 
         // The '0' here means to repeat indefinitely
         // '0' is actually the index at which the pattern keeps repeating from (the start)
         // To repeat the pattern from any other point, you could increase the index, e.g. '1'
-        v.vibrate(pattern, 1);
-//        v.cancel(); // to stop the vibration
 
-        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        if(alert == null){
-            // alert is null, using backup
-            alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//        v.vibrate(pattern, 1);
+//       v.cancel(); // to stop the vibration
 
-            // I can't see this ever being null (as always have a default notification)
-            // but just incase
-            if(alert == null) {
-                // alert backup is null, using 2nd backup
-                alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-            }
-        }
+        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        // RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        if(alert == null)
+            alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+
         r = RingtoneManager.getRingtone(getApplicationContext(), alert);
         r.play();
+
+        // Stop after 400ms
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                r.stop();
+//            }
+//        }, 400);
     }
 
     /**
@@ -1097,23 +1095,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Vector<Point> activeElementCorners = ISUpperFrameContinuousRealigner.detectRectangleCoordinates(realignedUpperFrame, hueActiveElement);
         UIElement activeElement = findActiveElementFromCorners(activeElementCorners);
 
-        //TODO eu: Ivo, this method runs for every frame, right?
-        //store the active element for every frame
-        if (activeElement != null) {
-            ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
-                    activeElement.id,
-                    true,
-                    "noocr",
-                    "noocr");
-            allChangeLogs.add(eventLog);
-        }
+        // Store the active element for every frame
+        String activeElementId = "null";
+        if (activeElement != null)
+            activeElementId = activeElement.id;
+
+        ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
+                activeElementId,
+                true,
+                "noocr",
+                "noocr");
+        allChangeLogs.add(eventLog);
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
+
         String activeElementNewValue = null;
         boolean allowChanges = true;
-
-
 
         if (limitAreaCheckbox.isChecked()) {
             // Only re-detect on every 5-th frame because users anyways don't notice otherwise
@@ -1154,13 +1152,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
             // Check if this changing element is not the active element
-            if (currentElement != activeElement) {  // TODO eu: double-check this comparison
+            if (currentElement != activeElement) {
                 currentElement.dirty = true;
 
                 allowChanges = false;
                 logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
 
-                eventLog = new ChangeEventLog(currentFrameTimestamp,
+                ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
                         currentElement.id,
                         false,
                         currentElement.currentValue,

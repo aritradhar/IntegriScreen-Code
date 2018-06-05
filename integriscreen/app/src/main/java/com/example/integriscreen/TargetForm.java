@@ -75,6 +75,11 @@ public class TargetForm {
         fetchAndParseFormData(targetUrl);
     }
 
+    public void makeAllDirty() {
+        for(UIElement element: allElements)
+            element.dirty = true;
+    }
+
 
     public UIElement getElementById(String elementId) {
         for(UIElement el : allElements) {
