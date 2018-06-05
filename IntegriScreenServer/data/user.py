@@ -28,6 +28,7 @@ def test_page():
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "greenBox"))
     )
+    time.sleep(2)  # Wait for a bit, for UI validation
     inputs = driver.find_elements_by_css_selector("input[type='text'], textarea")
     for _input in inputs:
         word = _input.text or _input.get_attribute('value')
