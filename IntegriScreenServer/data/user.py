@@ -55,7 +55,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('source')
     parser.add_argument('--attacker', choices=['parallel', 'inactive'])
-    parser.add_argument('--attack_type', choices=['replace_char', 'flip_chars', 'add_char', 'remove_char'])
+    parser.add_argument('--attack_type', choices=['replace_char', 'flip_chars', 'add_char', 'remove_char', 
+'random'], default='random')
     parser.add_argument('--time', type=float, default=3)
     parser.add_argument('--tab_time', type=float, default=0.6)
 

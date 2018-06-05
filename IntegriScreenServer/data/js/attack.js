@@ -92,7 +92,8 @@ $(document).ready(function() {
     var mode = url.searchParams.get("atk_mode");
     var attack = url.searchParams.get("atk_type");
     
-    if (mode == null || attack == null) return;
+    if (mode == null) return;
+    if (attack == 'random' || attack == null) attack = _.sample(Object.keys(attacks));
     
     $('#frameBox form').append(`<input type='hidden' name='atk_mode' value='${mode}'>`);
     $('#frameBox form').append(`<input type='hidden' name='atk_type' value='${attack}'>`);
