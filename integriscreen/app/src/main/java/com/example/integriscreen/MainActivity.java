@@ -1099,12 +1099,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         //TODO eu: Ivo, this method runs for every frame, right?
         //store the active element for every frame
-        ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
-                activeElement.id,
-                true,
-                "noocr",
-                "noocr");
-        allChangeLogs.add(eventLog);
+        if (activeElement != null) {
+            ChangeEventLog eventLog = new ChangeEventLog(currentFrameTimestamp,
+                    activeElement.id,
+                    true,
+                    "noocr",
+                    "noocr");
+            allChangeLogs.add(eventLog);
+        }
 
         logF("ElementChanges", "Total changes: " + changedLocations.size());
 
