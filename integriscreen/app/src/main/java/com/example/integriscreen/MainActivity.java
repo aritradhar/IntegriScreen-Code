@@ -95,12 +95,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Point upper_left, lower_right;
 
     private int color_border_hue = 130;
-    private long currentFrameNumber = 0;
+    private long currentFrameId = 0;
     private long previousFrameTimestamp = 0;
     private long currentFrameTimestamp = 0;
+    private SparseArray<TextBlock> detectedTextBlocks = null;
+
 
     // This has to be a global variable if we run the check e.g. every 3-rd frame!
     private boolean foundAdditionalTextOnFrame = false;
+
+    private int realignmentFrequency = 5;
+    private int detectUnspecifiedTextFrequency = 5;
+
+
 
 
     public boolean evaluationStarting;
@@ -602,7 +609,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             ISState.DATA_MISMATCH);
 
     boolean shouldDetectTransformation(ISState currentISState) {
-        if (liveCheckbox.isChecked())
+        // If it's true, try realigning every 4th frame
+        if (liveCheckbox.isChecked() && currentFrameId % realignmentFrequency == 0)
             return true;
 
         if (dontDetectTransformation.contains(currentISState))
@@ -934,7 +942,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        currentFrameNumber = currentFrameNumber + 1;
+        currentFrameId = currentFrameId + 1;
         currentFrameTimestamp = currentTimeMillis();
 
 
@@ -1106,18 +1114,17 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         if (limitAreaCheckbox.isChecked()) {
-            // Run on every third frame because users anyways don't notice otherwise?
-            if (currentFrameNumber % 3 == 0) {
+            // Only re-detect on every 5-th frame because users anyways don't notice otherwise
+            if (currentFrameId % detectUnspecifiedTextFrequency == 0 || detectedTextBlocks == null) {
                 Mat noUIElementsMat = new Mat(1, 1, 1);
                 realignedUpperFrame.copyTo(noUIElementsMat);
 
-                SparseArray<TextBlock> detectedTextBlocks = detectUnspecifiedText(noUIElementsMat);
-                String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
-
-                foundAdditionalTextOnFrame = (detectedString.length() > 0);
-
+                detectedTextBlocks = detectUnspecifiedText(noUIElementsMat);
                 noUIElementsMat.release();
             }
+
+            String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
+            foundAdditionalTextOnFrame = (detectedString.length() > 0);
         } else {
             foundAdditionalTextOnFrame = false;
         }
