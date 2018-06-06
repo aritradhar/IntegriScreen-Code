@@ -149,25 +149,21 @@ public class PerspectiveRealigner {
         return detectedCorners;
     }
 
-    void realignImage(Mat inputMat, Mat outputMat) {
+    Vector<Point> realignImage(Mat inputMat, Mat outputMat) {
         if (lambda == null)
             detectFrameAndComputeTransformation(inputMat, defaultHueCenter);
 
         Imgproc.warpPerspective(inputMat, outputMat, lambda, outputMat.size());
+        return currentDetectedCorners;
     }
 
-    void realignImage(Mat inputMat) {
+    Vector<Point> realignImage(Mat inputMat) {
         Mat outputMat = inputMat.clone();
-        realignImage(inputMat, outputMat);
+        Vector<Point> usedCorners = realignImage(inputMat, outputMat);
         outputMat.copyTo(inputMat);
         outputMat.release();
 
-        // Draw just for perspective
-        for( Point P: currentDetectedCorners ) {
-            logF("cir", String.valueOf(P.x) + ", " + String.valueOf(P.y));
-            Imgproc.circle(inputMat, P, 5, new Scalar(255, 0, 0), 5);
-            Imgproc.circle(inputMat, P, 15, new Scalar(0, 255, 0), 5);
-        }
+        return usedCorners;
     }
 
 
