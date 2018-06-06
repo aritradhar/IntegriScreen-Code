@@ -911,13 +911,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             rotate90(currentFrameMat, rotatedScreenMat);
 
         int textX = 300;
-        int textY = 1100;
+        int textY = 1400;
         if (currentISState == ISState.EVERYTHING_OK) {
             Imgproc.putText(rotatedScreenMat, "EVERYTHING OK!", new Point(textX, textY),
                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
         } else if (currentISState == ISState.DATA_MISMATCH) {
             Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
-                    Core.FONT_HERSHEY_SIMPLEX, 4, new Scalar(255, 0, 0), 5);
+                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(255, 0, 0), 5);
 
             Imgproc.putText(rotatedScreenMat, "BROWSER", new Point(textX, textY + 200),
                     Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 255), 5);

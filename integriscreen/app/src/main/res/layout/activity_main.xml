@@ -13,6 +13,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
 -->
 
+    <!--
     <Button
         android:id="@+id/detect_text_button"
         android:layout_width="wrap_content"
@@ -20,22 +21,34 @@
         android:layout_marginStart="60dp"
         android:onClick="onClickDetectText"
         android:text="OCR" />
+-->
+
+<!--    android:layout_toEndOf="@+id/detect_text_button"
+         android:layout_marginLeft="1200px"
+-->
 
     <Button
         android:id="@+id/raw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/detect_text_button"
+        android:layout_toLeftOf="@id/detect_frame"
+        android:layout_marginTop="100px"
+        android:rotation="-90"
         android:onClick="onClickShowRaw"
         android:text="Raw" />
 
+    <!--         android:layout_toEndOf="@+id/liveCheckbox"
+-->
     <Button
         android:id="@+id/detect_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/liveCheckbox"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="100px"
+        android:layout_marginTop="100px"
+        android:rotation="-90"
         android:onClick="onClickShowColor"
-        android:text="Detect Frame" />
+        android:text="Detect" />
 
 
     <com.example.integriscreen.CustomCameraView
@@ -60,6 +73,8 @@
         android:layout_toEndOf="@+id/liveCheckbox"
         android:layout_below="@id/detect_frame"
         android:background="@android:color/holo_green_light"
+        android:rotation="-90"
+
         android:text="130"
         android:textColor="@android:color/white" />
 
@@ -70,62 +85,86 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/colorSeekBar"
         android:layout_marginEnd="1dp"
+        android:rotation="-90"
         android:layout_toEndOf="@+id/colorSeekBar"
         android:max="2"
         android:progress="1" />
 
-    <CheckBox
-        android:id="@+id/liveCheckbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/realignCheckBox"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="6dp"
-        android:padding="8dp"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:checked="false"
-        android:text="Live" />
 
     <CheckBox
         android:id="@+id/limitAreaCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/raw"
-        android:layout_marginStart="8dp"
-        android:padding="8dp"
-        android:layout_marginTop="6dp"
+        android:layout_toLeftOf="@+id/realignCheckBox"
+        android:paddingRight="8dp"
+        android:layout_marginTop="100px"
+
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"
+        android:rotation="-90"
         android:text="Limit" />
 
     <CheckBox
         android:id="@+id/realignCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/limitAreaCheckBox"
-        android:layout_marginStart="8dp"
-        android:padding="8dp"
-        android:layout_marginTop="6dp"
+        android:paddingRight="8dp"
+        android:layout_toLeftOf="@+id/liveCheckbox"
+        android:layout_marginTop="100px"
+
+        android:rotation="-90"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:checked="false"
-        android:text="Realign" />
+        android:text="Real." />
 
-    <TextView
-        android:id="@+id/textOutput"
+    <!--
+            android:layout_marginStart="8dp"
+        android:layout_marginTop="6dp"
+-->
+    <CheckBox
+        android:id="@+id/liveCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/main_surface"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
+        android:paddingRight="8dp"
+        android:layout_toLeftOf="@+id/raw"
+        android:layout_marginTop="100px"
+
+        android:rotation="-90"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
-        android:maxHeight="100dp"
+        android:checked="false"
+        android:text="Live" />
+
+
+
+    <!--          android:layout_width="1080px"
+        android:layout_alignEnd="@+id/main_surface"
+android:layout_gravity="right|left"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+
+   -->
+    <TextView
+        android:id="@+id/textOutput"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_width="1440px"
+
+        android:layout_alignRight="@+id/main_surface"
+        android:layout_marginRight="-620px"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:maxHeight="200px"
+
+        android:rotation="-90"
+
+
         android:text="OCR not started" />
 
-
+<!--
     <Button
         android:id="@+id/takePictureButton"
         android:layout_width="wrap_content"
@@ -134,44 +173,69 @@
         android:layout_toEndOf="@+id/canny"
         android:onClick="onClickTakePic"
         android:text="TakePic" />
+-->
 
     <Button
         android:id="@+id/startEval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textOutput"
-        android:layout_toEndOf="@+id/takePictureButton"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="100px"
         android:onClick="onClickStartEval"
+
+        android:rotation="-90"
+        android:layout_gravity="right|left"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+
         android:text="Eval" />
 
 
     <Button
         android:id="@+id/ISStart"
-        android:layout_marginStart="200dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textOutput"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+        android:layout_toLeftOf="@+id/ISSubmitData"
         android:onClick="onClickStartIS"
+        android:rotation="-90"
         android:text="IS Start" />
 
+    <!--         android:layout_above="@+id/textOutput"
+-->
     <Button
         android:id="@+id/ISSubmitData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textOutput"
-        android:layout_toEndOf="@+id/ISStart"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+
+
+        android:layout_toLeftOf="@+id/diff"
         android:onClick="onClickSubmitData"
+        android:rotation="-90"
         android:text="IS Submit" />
 
     <Button
         android:id="@+id/diff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textOutput"
-        android:layout_toEndOf="@+id/ISSubmitData"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+
+        android:layout_toLeftOf="@+id/startEval"
         android:onClick="onClickShowDiff"
+        android:rotation="-90"
         android:text="Diff" />
 
+    <!--
     <Button
         android:id="@+id/canny"
         android:layout_width="wrap_content"
@@ -181,6 +245,7 @@
         android:onClick="onClickShowCanny"
         android:text="Canny"
         />
+        -->
 
     <!-- Square view shown when touch to focus -->
     <com.example.integriscreen.DrawingView
