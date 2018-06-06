@@ -43,11 +43,9 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -1088,6 +1086,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
      * of screen changes
      */
 
+    long timeOfLastFocusChange; // last time that active element switched
+    long timeOfLastUpdateOfActiveElementValue;
+
+    long minTimeOnEditedActiveElement = 1500;
+    long minTimeAfterActiveElementEdit = 200;
+    UIElement previousActiveElement = null;
     private boolean superviseUIChanges(Mat realignedUpperFrame, List<Pair<Rect, Integer>> changedLocations) {
         long diffTimestamp = currentFrameTimestamp - previousFrameTimestamp;
 
@@ -1112,6 +1116,27 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         String activeElementNewValue = null;
         boolean allowChanges = true;
+
+
+        // Check if Active element is changing too quickly
+        if (activeElement != previousActiveElement) {
+            if (previousActiveElement != null && timeOfLastUpdateOfActiveElementValue > timeOfLastFocusChange) {
+                // This happens if someone changes the active element and moves focus in less than 2 seconds in total
+                if (currentFrameTimestamp - timeOfLastFocusChange < minTimeOnEditedActiveElement) {
+                    logW("Potential attack (UI not acting according to specification!)", "Active element changing too quickly! " + previousActiveElement.id);
+                    allowChanges = false;
+                }
+
+                // This happens if after element changes, the focus changes too quickly
+                if (currentFrameTimestamp - timeOfLastUpdateOfActiveElementValue < minTimeAfterActiveElementEdit) {
+                    logW("Potential attack (UI not acting according to specification!)", "Focus changing too quickly after element edit: " + previousActiveElement.id);
+                    allowChanges = false;
+                }
+            }
+
+            timeOfLastFocusChange = currentFrameTimestamp;
+            previousActiveElement = activeElement;
+        }
 
         if (limitAreaCheckbox.isChecked()) {
             // Only re-detect on every 5-th frame because users anyways don't notice otherwise
@@ -1167,6 +1192,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                 continue;
             }
+
+
+            timeOfLastUpdateOfActiveElementValue = currentFrameTimestamp;
+
 
             // Ok, when active element is changing, are hands also active?
             if (!handActivityDetected) {  // We are now an active element --> Has there been any hand activity?
