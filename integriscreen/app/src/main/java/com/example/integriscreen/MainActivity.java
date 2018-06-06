@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int realignmentFrequency = 5;
     private int detectUnspecifiedTextFrequency = 5;
 
-
+    private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
 
 
     public boolean evaluationStarting;
@@ -509,9 +509,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
 
             if (item != null && item.getValue() != null) {
-                int textHeight = (int) Imgproc.getTextSize(item.getValue(), Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
+                int textHeight = (int) Imgproc.getTextSize(item.getValue(), defaultFont, 1, 2, new int[1]).height;
                 Imgproc.putText(currentFrameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
-                        Core.FONT_HERSHEY_SIMPLEX, 1, textColor, 3);
+                        defaultFont, 1, textColor, 3);
 
                 if (drawBox) {
                     Imgproc.rectangle(currentFrameMat, new Point(rect.left - offset, rect.top - offset),
@@ -718,7 +718,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return false;
     }
 
-    private void tryLoadingNewForm(Mat currentFrameMat) {
+    private boolean tryLoadingNewForm(Mat currentFrameMat) {
         // In this case, we need to recreate the "non-realigned" image to make sure we are extracting the form
         Rect screenBox = new Rect(new Point(0, 0), new Point(currentFrameMat.width() / 2, currentFrameMat.height()));
         Mat screenPart = currentFrameMat.submat(screenBox);
@@ -730,11 +730,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         String potentialFormUrl = detectFormNameAndGetUrl(rotatedPotentialFormMat);
         TargetForm newForm = loadFormBasedOnUrl(potentialFormUrl, rotatedPotentialFormMat);
+
+        boolean didReaload = false;
         if (newForm != null && !newForm.formUrl.equals(targetForm.formUrl)) {
             targetForm = newForm;
+            didReaload = true;
             startIntegriScreen(-1);
         }
         rotatedPotentialFormMat.release();
+
+        return didReaload;
     }
 
     SparseArray<TextBlock> detectUnspecifiedText(Mat currentFrameMat) {
@@ -752,11 +757,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return detectedTextBlocks;
     }
 
-    void processRotatedUpperPart(Mat rotatedUpperPart, Mat currentFrameMat)
+    boolean processRotatedUpperPart(Mat rotatedUpperPart, Mat nonRealignedUpperPart)
     {
         // HANDLE THE UPPER PART!
         // ---------------- Based on the state that we are in, handle the upper part ------
 
+        boolean acceptingInput = false;
         if (currentISState == ISState.SUPERVISING_USER_INPUT) {
             Mat diffsUpperPart = rotatedUpperPart.clone();
             List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(diffsUpperPart,
@@ -764,11 +770,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // Check if title was impacted. If it was, update the form.
             if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
-                tryLoadingNewForm(currentFrameMat);
+                tryLoadingNewForm(nonRealignedUpperPart);
             } else {
-                boolean acceptingInputs = superviseUIChanges(rotatedUpperPart, changedLocations);
+                acceptingInput = superviseUIChanges(rotatedUpperPart, changedLocations);
 
-                if (acceptingInputs && targetForm.initiallyVerified == false) {
+                if (acceptingInput && targetForm.initiallyVerified == false) {
                     logR("Form Loaded", "Successfully Loaded form: " + targetForm.pageId);
                     targetForm.initiallyVerified = true;
                 }
@@ -788,7 +794,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (changedLocations.size() < 0)
                 outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
 
-            return;
+            return acceptingInput;
 
         } else if (currentISState == ISState.SUBMITTING_DATA) {
             logF("SubmittingData", "bla");
@@ -813,13 +819,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                     UIElement currentElement = targetForm.getElementById(elementID);
 
-                    int textHeight = (int)Imgproc.getTextSize(browserVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 2, new int[1]).height;
+                    int textHeight = (int)Imgproc.getTextSize(browserVal, defaultFont, 1.3, 2, new int[1]).height;
                     Imgproc.putText(rotatedUpperPart, browserVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y+textHeight+10),
-                            Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 255), 2);
+                            defaultFont, 1, new Scalar(0, 255, 255), 2);
 
-                    textHeight = textHeight + (int)Imgproc.getTextSize(phoneVal, Core.FONT_HERSHEY_SIMPLEX, 1.3, 2, new int[1]).height;
+                    textHeight = textHeight + (int)Imgproc.getTextSize(phoneVal, defaultFont, 1.3, 2, new int[1]).height;
                     Imgproc.putText(rotatedUpperPart, phoneVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 20),
-                            Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 0), 2);
+                            defaultFont, 1, new Scalar(0, 255, 0), 2);
 
                     Imgproc.rectangle(rotatedUpperPart, currentElement.box.tl(), currentElement.box.br(), new Scalar(255, 0, 0), 4);
                 }
@@ -832,9 +838,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         } else {
             extractAndDisplayTextFromFrame(rotatedUpperPart);
         }
+
+        return false;
     }
 
-    void handleUpperPart(Mat currentFrameMat, long mid_delim) {
+    boolean handleUpperPart(Mat currentFrameMat, long mid_delim) {
         // ==== 1) Handle the upper part of the screen:
         // -- Rotate by 90
         // -- Detect the transformation
@@ -857,7 +865,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         if (realignCheckbox.isChecked()) {
-            ISUpperFrameContinuousRealigner.realignImage(rotatedScreenPart);
+            Vector<Point> detectedCorners = ISUpperFrameContinuousRealigner.realignImage(rotatedScreenPart);
+
+            // Draw just for perspective
+//            for( Point P: detectedCorners) {
+//                Imgproc.circle(rotatedScreenPart, P, 5, new Scalar(255, 0, 0), 5);
+//                Imgproc.circle(rotatedScreenPart, P, 15, new Scalar(0, 255, 0), 5);
+//            }
+
         }
 
         if (currentISState == ISState.DETECTING_FRAME && formsListManager.isReady()) {   // make sure that forms are already downloaded
@@ -870,7 +885,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
 
         // Depending on the app state, run detection of text, find changes, etc.
-        processRotatedUpperPart(rotatedScreenPart, currentFrameMat);
+        boolean acceptingInput = processRotatedUpperPart(rotatedScreenPart, currentFrameMat);
 
         rotate270(rotatedScreenPart, screenPart);
         rotatedScreenPart.release();
@@ -881,6 +896,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // Combine the two parts
         screenPart.copyTo(currentFrameMat.submat(screenBox));
         screenPart.release();
+
+        return acceptingInput;
     }
 
     // This function runs a state machine, which will in each frame transition to the next state if specific conditions are met.
@@ -895,7 +912,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         // ======== Handle and update the upport part of the screen: rotate, detect frame, realign, process, rotate back, update
-        handleUpperPart(currentFrameMat, mid_delim);
+        boolean acceptingInput = handleUpperPart(currentFrameMat, mid_delim);
 
 
         // ======== Handle the lower part of the screen
@@ -903,32 +920,48 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         detectHandsAndUpdateActivity(currentFrameMat, mid_delim);
         // =============================================
 
+
         // NOTE!!!! Before I started using a helper rotatedScreenMat, this caused memory leaks!
         Mat rotatedScreenMat = new Mat(1, 1, 1);
-        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
             rotate90(currentFrameMat, rotatedScreenMat);
 
         int textX = 300;
         int textY = 1400;
-        if (currentISState == ISState.EVERYTHING_OK) {
-            Imgproc.putText(rotatedScreenMat, "EVERYTHING OK!", new Point(textX, textY),
-                   Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0),3);
+        if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            String textToShow = (acceptingInput ? "Ready" : "STOP");
+            Scalar textColor = (acceptingInput ? new Scalar(0, 255, 0): new Scalar(255, 0, 0));
+
+            Imgproc.putText(rotatedScreenMat, textToShow, new Point(textX, textY),
+                    defaultFont, 3, textColor,3);
+
+            if (!acceptingInput) {
+                Imgproc.putText(rotatedScreenMat, "Expected", new Point(textX, textY + 200),
+                        defaultFont, 3, new Scalar(255, 0, 0), 5);
+
+                Imgproc.putText(rotatedScreenMat, "Detected", new Point(textX, textY + 300),
+                        defaultFont, 3, new Scalar(0, 255, 255), 5);
+            }
+        }
+        else if (currentISState == ISState.EVERYTHING_OK) {
+            Imgproc.putText(rotatedScreenMat, "SUCCESS!", new Point(textX, textY),
+                    defaultFont, 3, new Scalar(0, 255, 0),3);
         } else if (currentISState == ISState.DATA_MISMATCH) {
             Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
-                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(255, 0, 0), 5);
+                    defaultFont, 3, new Scalar(255, 0, 0), 5);
 
             Imgproc.putText(rotatedScreenMat, "BROWSER", new Point(textX, textY + 200),
-                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 255), 5);
+                    defaultFont, 3, new Scalar(0, 255, 255), 5);
 
             Imgproc.putText(rotatedScreenMat, "PHONE", new Point(textX, textY + 300),
-                    Core.FONT_HERSHEY_SIMPLEX, 3, new Scalar(0, 255, 0), 5);
+                    defaultFont, 3, new Scalar(0, 255, 0), 5);
         } else {
             // Draw the separating line, choose color depending on activity
             Scalar lineColor = (handActivityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
             line(rotatedScreenMat, new Point(mid_delim, rotatedScreenMat.height()), new Point(mid_delim, 0), lineColor, 3);
         }
 
-        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH)
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
             rotate270(rotatedScreenMat, currentFrameMat);
 
         rotatedScreenMat.release();
@@ -1180,6 +1213,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (currentElement != activeElement) {
                 currentElement.dirty = true;
 
+                // Write the OCR-d value
+
+                int textHeight = (int) Imgproc.getTextSize(newValue, defaultFont, 1, 2, new int[1]).height;
+                Imgproc.putText(realignedUpperFrame, newValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 60),
+                        defaultFont, 1, new Scalar(0, 255, 255), 2);
+
                 allowChanges = false;
                 logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
 
@@ -1235,9 +1274,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 rectangle_thickness = 4;
 
                 // Output the text on the UI elements
-                int textHeight = (int) Imgproc.getTextSize(currentElement.currentValue, Core.FONT_HERSHEY_SIMPLEX, 1, 2, new int[1]).height;
-                Imgproc.putText(realignedUpperFrame, currentElement.currentValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 40),
-                        Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+                int textHeight = (int) Imgproc.getTextSize(currentElement.currentValue, defaultFont, 1, 2, new int[1]).height;
+                Imgproc.putText(realignedUpperFrame, currentElement.currentValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight),
+                        defaultFont, 1, new Scalar(255, 0, 0), 2);
             } else {
                 // Use yellow rectangle
                 if (allowChanges)

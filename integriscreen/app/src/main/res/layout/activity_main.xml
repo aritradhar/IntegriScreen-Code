@@ -72,8 +72,9 @@
         android:id="@+id/colorLabel"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/raw"
-        android:layout_marginTop="400px"
+        android:layout_above="@+id/textOutput"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="150px"
         android:background="@android:color/holo_green_light"
         android:rotation="-90"
 
