@@ -32,6 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/detect_frame"
+        android:layout_marginRight="-120px"
+
         android:layout_marginTop="100px"
         android:rotation="-90"
         android:onClick="onClickShowRaw"
@@ -70,8 +72,8 @@
         android:id="@+id/colorLabel"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/liveCheckbox"
-        android:layout_below="@id/detect_frame"
+        android:layout_toLeftOf="@+id/raw"
+        android:layout_marginTop="400px"
         android:background="@android:color/holo_green_light"
         android:rotation="-90"
 
@@ -81,12 +83,12 @@
     <SeekBar
         android:id="@+id/detect_method"
         style="@style/Widget.AppCompat.SeekBar.Discrete"
-        android:layout_width="150dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/colorSeekBar"
-        android:layout_marginEnd="1dp"
         android:rotation="-90"
-        android:layout_toEndOf="@+id/colorSeekBar"
+        android:layout_toStartOf="@+id/colorSeekBar"
+        android:layout_marginRight="-100px"
         android:max="2"
         android:progress="1" />
 
@@ -96,6 +98,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@+id/realignCheckBox"
+        android:layout_marginRight="-120px"
+
         android:paddingRight="8dp"
         android:layout_marginTop="100px"
 
@@ -111,6 +115,7 @@
         android:layout_height="wrap_content"
         android:paddingRight="8dp"
         android:layout_toLeftOf="@+id/liveCheckbox"
+        android:layout_marginRight="-110px"
         android:layout_marginTop="100px"
 
         android:rotation="-90"
@@ -129,6 +134,7 @@
         android:layout_height="wrap_content"
         android:paddingRight="8dp"
         android:layout_toLeftOf="@+id/raw"
+        android:layout_marginRight="-60px"
         android:layout_marginTop="100px"
 
         android:rotation="-90"
@@ -202,6 +208,8 @@ android:layout_gravity="right|left"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="50px"
         android:layout_toLeftOf="@+id/ISSubmitData"
+        android:layout_marginRight="-120px"
+
         android:onClick="onClickStartIS"
         android:rotation="-90"
         android:text="IS Start" />
@@ -218,6 +226,8 @@ android:layout_gravity="right|left"
 
 
         android:layout_toLeftOf="@+id/diff"
+        android:layout_marginRight="-120px"
+
         android:onClick="onClickSubmitData"
         android:rotation="-90"
         android:text="IS Submit" />
@@ -231,6 +241,7 @@ android:layout_gravity="right|left"
         android:layout_marginBottom="50px"
 
         android:layout_toLeftOf="@+id/startEval"
+        android:layout_marginRight="-120px"
         android:onClick="onClickShowDiff"
         android:rotation="-90"
         android:text="Diff" />
