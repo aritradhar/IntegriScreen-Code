@@ -68,6 +68,8 @@ html, body, input, select, textarea, button{
 <script type='text/javascript' src='js/underscore-min.js'></script>
 <script type='text/javascript' src='js/restore.js'></script>
 <script type='text/javascript' src='js/attack.js'></script>
+<script type='text/javascript' src='js/focus.js'></script>
+
 </head>
 
 !!body!!
