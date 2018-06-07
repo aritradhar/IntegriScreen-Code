@@ -81,6 +81,7 @@ public class TargetForm {
     }
 
 
+
     public UIElement getElementById(String elementId) {
         for(UIElement el : allElements) {
             if (el.id.equals(elementId))
@@ -89,25 +90,6 @@ public class TargetForm {
         return null;
     }
 
-
-
-    /**
-     * Set the active element based on the rectangle where the diff happens
-     */
-    public void setActivElAtDiff(Rect rect) {
-        Point tl = new Point(rect.x, rect.y);
-        Point rb = new Point(rect.x + rect.width, rect.y + rect.height);
-
-        for (int i = 0; i < allElements.size(); i++) {
-            if (allElements.get(i).box.contains(tl) &&
-                    allElements.get(i).box.contains(rb)) {
-                activEl = allElements.get(i).id;
-                activeSince = System.currentTimeMillis();
-                activeElementLastEdit = System.currentTimeMillis();
-                break;
-            }
-        }
-    }
 
 
     // if X is < low, return low, if larger than high, return high

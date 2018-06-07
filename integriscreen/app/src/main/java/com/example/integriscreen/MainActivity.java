@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.icu.util.Output;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -106,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int detectUnspecifiedTextFrequency = 5;
 
     private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
+    private static Scalar detectedOCRColor = new Scalar(0, 255, 255);
+    private static Scalar expectedOCRColor = new Scalar( 255, 0, 0);
+
 
 
     public boolean evaluationStarting;
@@ -929,19 +934,25 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         int textX = 300;
         int textY = 1400;
         if (currentISState == ISState.SUPERVISING_USER_INPUT) {
-            String textToShow = (acceptingInput ? "Ready" : "STOP");
+            String textToShow = (acceptingInput ? "All OK, continue" : "STOP Input!");
             Scalar textColor = (acceptingInput ? new Scalar(0, 255, 0): new Scalar(255, 0, 0));
+            int fontScale = (acceptingInput ? 2 : 3);
 
             Imgproc.putText(rotatedScreenMat, textToShow, new Point(textX, textY),
-                    defaultFont, 3, textColor,3);
+                    defaultFont, fontScale, textColor,3);
 
             if (!acceptingInput) {
-                Imgproc.putText(rotatedScreenMat, "Expected", new Point(textX, textY + 200),
-                        defaultFont, 3, new Scalar(255, 0, 0), 5);
+                Imgproc.putText(rotatedScreenMat, "Expected values", new Point(textX, textY + 200),
+                        defaultFont, 2, expectedOCRColor, 3);
 
-                Imgproc.putText(rotatedScreenMat, "Detected", new Point(textX, textY + 300),
-                        defaultFont, 3, new Scalar(0, 255, 255), 5);
+                Imgproc.putText(rotatedScreenMat, "Detected values", new Point(textX, textY + 300),
+                        defaultFont, 2, detectedOCRColor, 3);
             }
+
+            // Draw the separating line, choose color depending on activity
+            int handLineOffset = 150;
+            Scalar handLineColor = (handActivityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
+            line(rotatedScreenMat, new Point(0, textY-handLineOffset), new Point(rotatedScreenMat.height (), textY-handLineOffset), handLineColor, 5);
         }
         else if (currentISState == ISState.EVERYTHING_OK) {
             Imgproc.putText(rotatedScreenMat, "SUCCESS!", new Point(textX, textY),
@@ -950,15 +961,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
                     defaultFont, 3, new Scalar(255, 0, 0), 5);
 
-            Imgproc.putText(rotatedScreenMat, "BROWSER", new Point(textX, textY + 200),
-                    defaultFont, 3, new Scalar(0, 255, 255), 5);
+            Imgproc.putText(rotatedScreenMat, "Browser data", new Point(textX, textY + 200),
+                    defaultFont, 2, new Scalar(0, 255, 255), 3);
 
-            Imgproc.putText(rotatedScreenMat, "PHONE", new Point(textX, textY + 300),
-                    defaultFont, 3, new Scalar(0, 255, 0), 5);
-        } else {
-            // Draw the separating line, choose color depending on activity
-            Scalar lineColor = (handActivityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
-            line(rotatedScreenMat, new Point(mid_delim, rotatedScreenMat.height()), new Point(mid_delim, 0), lineColor, 3);
+            Imgproc.putText(rotatedScreenMat, "Phone data", new Point(textX, textY + 300),
+                    defaultFont, 2, new Scalar(0, 255, 0), 3);
         }
 
         if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
@@ -1181,7 +1188,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 noUIElementsMat.release();
             }
 
-            String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, new Scalar(255, 0, 0), true);
+            String detectedString = displayTextBlocksOnFrame(realignedUpperFrame, detectedTextBlocks, detectedOCRColor, true);
             foundAdditionalTextOnFrame = (detectedString.length() > 0);
         } else {
             foundAdditionalTextOnFrame = false;
@@ -1213,11 +1220,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (currentElement != activeElement) {
                 currentElement.dirty = true;
 
-                // Write the OCR-d value
-
+                // Show the OCR-d value which is different than expected
                 int textHeight = (int) Imgproc.getTextSize(newValue, defaultFont, 1, 2, new int[1]).height;
                 Imgproc.putText(realignedUpperFrame, newValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 60),
-                        defaultFont, 1, new Scalar(0, 255, 255), 2);
+                        defaultFont, 1, detectedOCRColor, 2);
 
                 allowChanges = false;
                 logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
@@ -1276,7 +1282,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 // Output the text on the UI elements
                 int textHeight = (int) Imgproc.getTextSize(currentElement.currentValue, defaultFont, 1, 2, new int[1]).height;
                 Imgproc.putText(realignedUpperFrame, currentElement.currentValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight),
-                        defaultFont, 1, new Scalar(255, 0, 0), 2);
+                        defaultFont, 1, expectedOCRColor, 2);
             } else {
                 // Use yellow rectangle
                 if (allowChanges)
@@ -1292,8 +1298,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // TODO: this needs to be fixed / removed
         // This is an ugly hack for now.
-        if (limitAreaCheckbox.isChecked())
-            allowChanges = true;
 
         if (activeElement != null && allowChanges) {
             // If we found an active element, we draw a green rectangle

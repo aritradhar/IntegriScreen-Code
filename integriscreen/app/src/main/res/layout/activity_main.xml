@@ -199,7 +199,7 @@ android:layout_gravity="right|left"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
 
-        android:text="Eval" />
+        android:text="IS Eval" />
 
 
     <Button
