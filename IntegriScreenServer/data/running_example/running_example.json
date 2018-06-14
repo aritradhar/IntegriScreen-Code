@@ -1,0 +1,175 @@
+{
+  "ratio": "1080:960",
+  "vspace": "80",
+  "page_id": "running_example",
+  "border_thickness":"1",
+  "font_family": "'Helvetica', sans-serif",
+  "letter_spacing": "normal",
+  "form_action":"/IntegriScreenServer/MainServer",
+  "elements": [
+    {
+      "id": "form_title",
+      "type": "title",
+      "initialvalue": "Money Transfer",
+      "editable": "false",
+      "ulc_x": "5",
+      "ulc_y": "5",
+      "width": "55",
+      "height": "10"
+    },
+
+    {
+      "id": "name_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Beneficiary",
+      "ulc_x": "5",
+      "ulc_y": "18",
+      "width": "20",
+      "height": "6"
+    },
+
+    {
+      "id": "address_l1",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Account",
+      "ulc_x": "10",
+      "ulc_y": "26",
+      "width": "20",
+      "height": "4"
+    },
+
+    {
+      "id": "address_1",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "35",
+      "ulc_y": "26",
+      "width": "35",
+      "height": "4"
+    },
+
+    {
+      "id": "address_l2",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "In favor of",
+      "ulc_x": "10",
+      "ulc_y": "34",
+      "width": "20",
+      "height": "4"
+    },
+
+    {
+      "id": "address_1",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "35",
+      "ulc_y": "34",
+      "width": "35",
+      "height": "4"
+    },
+
+    {
+      "id": "city_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Payment details",
+      "ulc_x": "5",
+      "ulc_y": "45",
+      "width": "25",
+      "height": "6"
+    },
+
+    {
+      "id": "state_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Amount",
+      "ulc_x": "10",
+      "ulc_y": "53",
+      "width": "20",
+      "height": "4"
+    },
+    
+        {
+      "id": "state_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "USD",
+      "ulc_x": "35",
+      "ulc_y": "53",
+      "width": "8",
+      "height": "4"
+    },
+
+    {
+      "id": "state",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "45",
+      "ulc_y": "53",
+      "width": "25",
+      "height": "4"
+    },
+
+    {
+      "id": "zip_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Reference no.",
+      "ulc_x": "10",
+      "ulc_y": "61",
+      "width": "20",
+      "height": "4"
+    },
+
+    {
+      "id": "zip",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "35",
+      "ulc_y": "61",
+      "width": "55",
+      "height": "4"
+    },
+
+    {
+      "id": "country_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Execution date",
+      "ulc_x": "10",
+      "ulc_y": "69",
+      "width": "20",
+      "height": "4"
+    },
+
+    {
+      "id": "country",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "01.07.2018",
+      "ulc_x": "35",
+      "ulc_y": "69",
+      "width": "15",
+      "height": "4"
+    },
+    
+    {
+      "id": "submit",
+      "type": "button",
+      "editable": "true",
+      "initialvalue": "Next",
+      "ulc_x": "5",
+      "ulc_y": "86",
+      "width": "10",
+      "height": "6"
+    }
+  ]
+}
