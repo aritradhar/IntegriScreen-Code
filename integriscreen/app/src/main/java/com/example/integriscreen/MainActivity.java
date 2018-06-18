@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public enum ISState {
         DETECTING_FRAME,       // Start detecting the green frame
-        DETECTING_TITLE,       // Start OCR-ing to find the title
         LOADING_FORM,          // Load the form based on title
         REALIGNING_AFTER_FORM_LOAD,    // Realign once more, this time speficially to the form ratio
         SUPERVISING_USER_INPUT,  // Accept user's input for as long as everything is OK
@@ -395,8 +394,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void cleanAllData() {
-        targetForm = null;
-        allLoadedForms = new HashMap<>();
+        // This ensures state machine goes from the beginning
+        currentISState = ISState.DETECTING_FRAME;
+
+        if (targetForm != null)
+            allLoadedForms.remove(targetForm.formUrl);
+//        allLoadedForms = new HashMap<>();
     }
 
     public void onClickISAbort(View view) {
@@ -404,6 +407,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.RAW;
 
         cleanAllData();
+        outputOnUILabel("Input Aborted!");
 
         // evaluationStarting = true;
         // myEvaluationController.startEvaluation();
