@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>Bank Transfer</title>
 <style>
 
 html, body{
@@ -73,23 +74,23 @@ html, body, input, select, textarea, button{
 </head>
 
 <body><div style="height:65vh; width:90vh; margin: 0 auto; position:relative;" id="frameBox">
-<div style="border:1vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute; box-sizing:border-box;" id="greenBox"></div>
-<h2 style="width:55.0%; height:10.0%; left:5%; top:5%; position:absolute;font-weight:200;font-size: 2.3em;">Money Transfer</h2>
-<hr style="width:90.0%;left:5%; top:15%; position:absolute;color:#fff">
-<form action="/IntegriScreenServer/MainServer" method="post" enctype="multipart/form-data"><input name="page_type" value="input_form" type="hidden"><input name="page_id" value="running_example" type="hidden"><label style="width:20.0%; height:6.0%; left:5%; top:18%; position:absolute; font-family:inherit; letter-spacing:normal;font-size:1.5em !important"><b>Beneficiary</b></label>
-<label style="width:20.0%; height:4.0%; left:10%; top:26%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Account <span style='color:red'>*</span></label>
-<input name="address_1" maxlength="30" style="width:35.0%; height:4.0%; left:35%; top:26%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
-<label style="width:20.0%; height:4.0%; left:10%; top:34%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">In favor of</label>
-<input name="address_1" maxlength="30" style="width:35.0%; height:4.0%; left:35%; top:34%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
-<label style="width:25.0%; height:6.0%; left:5%; top:45%; position:absolute; font-family:inherit; letter-spacing:normal;font-size:1.5em !important"><b>Payment details</b></label>
-<label style="width:20.0%; height:4.0%; left:10%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Amount <span style='color:red'>*</span></label>
-<label style="width:8.0%; height:4.0%; left:35%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;">USD</label>
-<input name="state" maxlength="30" style="width:25.0%; height:4.0%; left:45%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
-<label style="width:20.0%; height:4.0%; left:10%; top:61%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Reference no.</label>
-<input name="zip" maxlength="30" style="width:55.0%; height:4.0%; left:35%; top:61%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
-<label style="width:20.0%; height:4.0%; left:10%; top:69%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Execution date <span style='color:red'>*</span></label>
-<input name="country" value="01.07.2018" maxlength="30" style="width:15.0%; height:4.0%; left:35%; top:69%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
-<input value="Next" style="width:10.0%; height:6.0%; left:5%; top:86%; position:absolute;//background-color: #a0ef61;//border:1px solid #479f00;//border-radius: 2px;" type="submit"></form>
+<div style="border:1vh solid #00ff00; height:80%; width:75%; margin: 0 auto; position:absolute; box-sizing:border-box;" id="greenBox"></div>
+<h2 style="width:55.0%; height:10.0%; left:5%; top:5%; position:absolute;font-weight:200;font-size: 2.3em;">Bank Transfer</h2>
+<hr style="width:65.0%;left:5%; top:15%; position:absolute;color:#fff">
+<form action="/IntegriScreenServer/MainServer" method="post" enctype="multipart/form-data"><input name="page_type" value="input_form" type="hidden"><input name="page_id" value="running_example" type="hidden"><label style="width:20.0%; height:6.0%; left:5%; top:18%; position:absolute; font-family:inherit; letter-spacing:normal;font-size:1.5em !important"><b>Recipient</b></label>
+<label style="width:20.0%; height:6.0%; left:10%; top:26%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">IBAN <span style='color:red'>*</span></label>
+<input name="address_1" maxlength="30" style="width:35.0%; height:6.0%; left:35%; top:26%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
+<label style="width:20.0%; height:6.0%; left:10%; top:34%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Account Name</label>
+<input name="address_1" maxlength="30" style="width:35.0%; height:6.0%; left:35%; top:34%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
+<label style="width:30.0%; height:6.0%; left:5%; top:45%; position:absolute; font-family:inherit; letter-spacing:normal;font-size:1.5em !important"><b>Payment details</b></label>
+<label style="width:20.0%; height:6.0%; left:10%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Amount <span style='color:red'>*</span></label>
+<label style="width:8.0%; height:6.0%; left:35%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;">USD</label>
+<input name="state" maxlength="30" style="width:25.0%; height:6.0%; left:45%; top:53%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
+<label style="width:20.0%; height:6.0%; left:10%; top:61%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Ref. no.</label>
+<input name="zip" maxlength="30" style="width:35.0%; height:6.0%; left:35%; top:61%; position:absolute; font-family:inherit; letter-spacing:normal;" type="text">
+<label style="width:20.0%; height:6.0%; left:10%; top:69%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right">Execution date <span style='color:red'>*</span></label>
+<input name="country" value="01.07.2018" maxlength="30" style="width:16.0%; height:6.0%; left:35%; top:69%; position:absolute; font-family:inherit; padding-top:1.8%;" type="text">
+<input value="Next" style="width:10.0%; height:6.0%; left:60%; top:69%; position:absolute; padding-top:0.4%;//background-color: #a0ef61;//border:1px solid #479f00;//border-radius: 2px;" type="submit"></form>
 </div>
 
 

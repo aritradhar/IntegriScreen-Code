@@ -20,9 +20,11 @@ ELEMENT_POOL = [
 
 def random_word(x_space):
     max_len = 4 if x_space < 3 else 8 if x_space < 6 else 12
-    word = np.random.choice(WORDS)
-    while len(word) > max_len:
-        word = np.random.choice(WORDS)
+    word = ''.join(np.random.choice(list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
+                                    np.random.choice(range(3, max_len))))
+    # word = np.random.choice(WORDS)
+    # while len(word) > max_len:
+    #     word = np.random.choice(WORDS)
     return word
 
 
@@ -33,12 +35,11 @@ def find_max_end(x, _i, next_element):
 
 
 def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-serif', randomfont=False):
-
     # Form will have a ratio between 15:12 and 12:15
     min_width, max_width = 12, 15
     ratio_wh = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
 
-    height_perc = np.random.randint(65, 80) # Percentage of the total browser height
+    height_perc = np.random.randint(65, 80)  # Percentage of the total browser height
 
     form = {
         "ratio": "{}:{}".format(*ratio_wh),
@@ -70,7 +71,8 @@ def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-s
     # Who takes the role of the button?
     button_elem = np.random.choice(range(num_elements))
 
-    elements_coords = [(x, find_max_end(x, _i, elements_start_pos[_i+1] if _i+1 < len(elements_start_pos) else 90)) for _i, x in enumerate(elements_start_pos)]
+    elements_coords = [(x, find_max_end(x, _i, elements_start_pos[_i + 1] if _i + 1 < len(elements_start_pos) else 90))
+                       for _i, x in enumerate(elements_start_pos)]
 
     print elements_coords
 

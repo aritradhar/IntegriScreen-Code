@@ -1,6 +1,6 @@
 {
   "ratio": "1080:960",
-  "vspace": "80",
+"vspace": "72",
   "page_id": "running_example",
   "border_thickness":"1",
   "font_family": "'Helvetica', sans-serif",
@@ -13,152 +13,152 @@
       "initialvalue": "Money Transfer",
       "editable": "false",
       "ulc_x": "5",
-      "ulc_y": "5",
+      "ulc_y": "7",
       "width": "55",
-      "height": "10"
+      "height": "12"
     },
 
     {
-      "id": "name_l",
+      "id": "recipient_l",
       "type": "label",
       "editable": "true",
-      "initialvalue": "Beneficiary",
+      "initialvalue": "Recipient",
       "ulc_x": "5",
-      "ulc_y": "18",
-      "width": "20",
-      "height": "6"
-    },
-
-    {
-      "id": "address_l1",
-      "type": "label",
-      "editable": "true",
-      "initialvalue": "Account",
-      "ulc_x": "10",
-      "ulc_y": "26",
-      "width": "20",
-      "height": "4"
-    },
-
-    {
-      "id": "address_1",
-      "type": "textfield",
-      "editable": "true",
-      "initialvalue": "",
-      "ulc_x": "35",
-      "ulc_y": "26",
+      "ulc_y": "23",
       "width": "35",
-      "height": "4"
+      "height": "7"
     },
 
     {
-      "id": "address_l2",
+      "id": "iban_l",
       "type": "label",
       "editable": "true",
-      "initialvalue": "In favor of",
+      "initialvalue": "IBAN *",
       "ulc_x": "10",
-      "ulc_y": "34",
-      "width": "20",
-      "height": "4"
+      "ulc_y": "32",
+      "width": "30",
+      "height": "8"
     },
 
     {
-      "id": "address_1",
-      "type": "textfield",
-      "editable": "true",
-      "initialvalue": "",
-      "ulc_x": "35",
-      "ulc_y": "34",
-      "width": "35",
-      "height": "4"
-    },
-
-    {
-      "id": "city_l",
-      "type": "label",
-      "editable": "true",
-      "initialvalue": "Payment details",
-      "ulc_x": "5",
-      "ulc_y": "45",
-      "width": "25",
-      "height": "6"
-    },
-
-    {
-      "id": "state_l",
-      "type": "label",
-      "editable": "true",
-      "initialvalue": "Amount",
-      "ulc_x": "10",
-      "ulc_y": "53",
-      "width": "20",
-      "height": "4"
-    },
-    
-        {
-      "id": "state_l",
-      "type": "label",
-      "editable": "true",
-      "initialvalue": "USD",
-      "ulc_x": "35",
-      "ulc_y": "53",
-      "width": "8",
-      "height": "4"
-    },
-
-    {
-      "id": "state",
+      "id": "iban",
       "type": "textfield",
       "editable": "true",
       "initialvalue": "",
       "ulc_x": "45",
-      "ulc_y": "53",
-      "width": "25",
-      "height": "4"
+      "ulc_y": "32",
+      "width": "50",
+      "height": "10"
     },
 
     {
-      "id": "zip_l",
+      "id": "account_name_l",
       "type": "label",
       "editable": "true",
-      "initialvalue": "Reference no.",
+      "initialvalue": "Account Name",
       "ulc_x": "10",
-      "ulc_y": "61",
-      "width": "20",
-      "height": "4"
+      "ulc_y": "42",
+      "width": "30",
+      "height": "8"
     },
 
     {
-      "id": "zip",
+      "id": "account_name",
       "type": "textfield",
       "editable": "true",
       "initialvalue": "",
-      "ulc_x": "35",
-      "ulc_y": "61",
-      "width": "55",
-      "height": "4"
+      "ulc_x": "45",
+      "ulc_y": "42",
+      "width": "50",
+      "height": "10"
     },
 
     {
-      "id": "country_l",
+      "id": "payment_details_l",
       "type": "label",
       "editable": "true",
-      "initialvalue": "Execution date",
-      "ulc_x": "10",
-      "ulc_y": "69",
-      "width": "20",
-      "height": "4"
+      "initialvalue": "Payment details",
+      "ulc_x": "5",
+      "ulc_y": "58",
+      "width": "40",
+      "height": "7"
     },
 
     {
-      "id": "country",
+      "id": "amount_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Amount *",
+      "ulc_x": "10",
+      "ulc_y": "67",
+      "width": "30",
+      "height": "8"
+    },
+    
+        {
+      "id": "currency_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "USD",
+      "ulc_x": "45",
+      "ulc_y": "67",
+      "width": "10",
+      "height": "8"
+    },
+
+    {
+      "id": "amount",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "58",
+      "ulc_y": "67",
+      "width": "37",
+      "height": "10"
+    },
+
+    {
+      "id": "ref_no_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Ref. no.",
+      "ulc_x": "10",
+      "ulc_y": "77",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "ref_no",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "45",
+      "ulc_y": "77",
+      "width": "50",
+      "height": "10"
+    },
+
+    {
+      "id": "execution_date_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Execution date *",
+      "ulc_x": "10",
+      "ulc_y": "88",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "execution_date",
       "type": "textfield",
       "editable": "true",
       "initialvalue": "01.07.2018",
-      "ulc_x": "35",
-      "ulc_y": "69",
-      "width": "15",
-      "height": "4"
+      "ulc_x": "45",
+      "ulc_y": "88",
+      "width": "20",
+      "height": "10"
     },
     
     {
@@ -166,10 +166,10 @@
       "type": "button",
       "editable": "true",
       "initialvalue": "Next",
-      "ulc_x": "5",
-      "ulc_y": "86",
-      "width": "10",
-      "height": "6"
+      "ulc_x": "75",
+      "ulc_y": "88",
+      "width": "15",
+      "height": "10"
     }
   ]
 }
