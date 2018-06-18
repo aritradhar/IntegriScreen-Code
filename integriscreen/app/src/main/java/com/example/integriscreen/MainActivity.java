@@ -394,12 +394,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             outputOnToast("The form is not loaded yet!");
     }
 
-    public void onClickStartEval(View view) {
-        evaluationStarting = true;
-        myEvaluationController.startEvaluation();
+    private void cleanAllData() {
+        targetForm = null;
+        allLoadedForms = new HashMap<>();
     }
 
-    public void onClickShowOptions(View view) {
+    public void onClickISAbort(View view) {
+        realignCheckbox.setChecked(false);
+        currentOutputSelection = OutputSelection.RAW;
+
+        cleanAllData();
+
+        // evaluationStarting = true;
+        // myEvaluationController.startEvaluation();
+    }
+
+    public void onClickToggleOptions(View view) {
         // currentOutputSelection = OutputSelection.DIFF;
         int newVisibility = (limitAreaCheckbox.getVisibility() == View.VISIBLE) ? View.INVISIBLE : View.VISIBLE;
 
@@ -668,13 +678,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         else if (newState == ISState.SUBMITTING_DATA) {
             cancelTimers();
-            outputOnToast("Polling the server every 5 seconds...");
+            // outputOnToast("Polling the server every 5 seconds...");
 
             submitDataTimer = new Timer();
             submitDataTimerTask= new TimerTask() {
                 @Override
                 public void run() {
-                    outputOnToast("Sending: " + (new Date()).toString());
+                    // outputOnToast("Sending: " + (new Date()).toString());
                     targetForm.submitFormData(serverURL + serverPageTypeURLParam);
                 }
             };

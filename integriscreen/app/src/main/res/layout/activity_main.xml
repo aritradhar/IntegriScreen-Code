@@ -182,24 +182,7 @@ android:layout_gravity="right|left"
         android:text="TakePic" />
 -->
 
-    <Button
-        android:id="@+id/startEval"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
 
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50px"
-
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="100px"
-        android:onClick="onClickStartEval"
-
-        android:rotation="-90"
-        android:layout_gravity="right|left"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-
-        android:text="IS Eval" />
 
 
     <Button
@@ -213,10 +196,8 @@ android:layout_gravity="right|left"
 
         android:onClick="onClickStartIS"
         android:rotation="-90"
-        android:text="IS Start" />
+        android:text="Start" />
 
-    <!--         android:layout_above="@+id/textOutput"
--->
     <Button
         android:id="@+id/ISSubmitData"
         android:layout_width="wrap_content"
@@ -226,12 +207,26 @@ android:layout_gravity="right|left"
         android:layout_marginBottom="50px"
 
 
-        android:layout_toLeftOf="@+id/options"
+        android:layout_toLeftOf="@+id/ISReset"
         android:layout_marginRight="-120px"
 
         android:onClick="onClickSubmitData"
         android:rotation="-90"
-        android:text="IS Submit" />
+        android:text="Submit" />
+
+    <Button
+        android:id="@+id/ISReset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+
+        android:layout_toLeftOf="@+id/options"
+        android:layout_marginRight="-120px"
+        android:onClick="onClickISAbort"
+        android:rotation="-90"
+        android:text="Abort" />
 
     <Button
         android:id="@+id/options"
@@ -241,10 +236,15 @@ android:layout_gravity="right|left"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="50px"
 
-        android:layout_toLeftOf="@+id/startEval"
-        android:layout_marginRight="-120px"
-        android:onClick="onClickShowOptions"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="100px"
+        android:onClick="onClickToggleOptions"
+
         android:rotation="-90"
+        android:layout_gravity="right|left"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+
         android:text="Options" />
 
     <!--
