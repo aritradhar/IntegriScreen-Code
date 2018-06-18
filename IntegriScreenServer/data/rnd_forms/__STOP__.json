@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal",
-  "vspace": "85",
+  "vspace": "60",
   "elements": [
     {
       "width": "50",
@@ -13,7 +13,7 @@
       "ulc_y": "2"
     }
   ],
-  "ratio": "12:9",
+  "ratio": "12:12",
   "form_action": "/IntegriScreenServer/MainServer",
   "border_thickness": "1",
   "page_id": "__STOP__",
