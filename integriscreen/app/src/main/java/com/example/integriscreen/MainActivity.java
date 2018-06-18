@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static CheckBox realignCheckbox;
     private static CheckBox limitAreaCheckbox;
     private static CheckBox liveCheckbox;
+    private static Button detectButton;
+    private static Button rawButton;
+
 
     private static LogManager LM;
 
@@ -261,6 +264,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         limitAreaCheckbox = (CheckBox) findViewById(R.id.limitAreaCheckBox);
         liveCheckbox = (CheckBox) findViewById(R.id.liveCheckbox);
 
+        rawButton = (Button) findViewById(R.id.raw);
+        detectButton = (Button) findViewById(R.id.detect_frame);
+
+
         // initialize logs
         activeElementLogs = new ArrayList<>();
         allChangeLogs = new ArrayList<>();
@@ -392,8 +399,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         myEvaluationController.startEvaluation();
     }
 
-    public void onClickShowDiff(View view) {
-        currentOutputSelection = OutputSelection.DIFF;
+    public void onClickShowOptions(View view) {
+        // currentOutputSelection = OutputSelection.DIFF;
+        int newVisibility = (limitAreaCheckbox.getVisibility() == View.VISIBLE) ? View.INVISIBLE : View.VISIBLE;
+
+        detectButton.setVisibility(newVisibility);
+        rawButton.setVisibility(newVisibility);
+        huePicker.setVisibility(newVisibility);
+        detectPicker.setVisibility(newVisibility);
+        colorLabel.setVisibility(newVisibility);
+        limitAreaCheckbox.setVisibility(newVisibility);
+        realignCheckbox.setVisibility(newVisibility);
+        liveCheckbox.setVisibility(newVisibility);
     }
 
     public void onClickShowColor(View view) {

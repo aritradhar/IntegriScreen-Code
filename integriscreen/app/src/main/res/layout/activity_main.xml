@@ -226,7 +226,7 @@ android:layout_gravity="right|left"
         android:layout_marginBottom="50px"
 
 
-        android:layout_toLeftOf="@+id/diff"
+        android:layout_toLeftOf="@+id/options"
         android:layout_marginRight="-120px"
 
         android:onClick="onClickSubmitData"
@@ -234,7 +234,7 @@ android:layout_gravity="right|left"
         android:text="IS Submit" />
 
     <Button
-        android:id="@+id/diff"
+        android:id="@+id/options"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
@@ -243,9 +243,9 @@ android:layout_gravity="right|left"
 
         android:layout_toLeftOf="@+id/startEval"
         android:layout_marginRight="-120px"
-        android:onClick="onClickShowDiff"
+        android:onClick="onClickShowOptions"
         android:rotation="-90"
-        android:text="Diff" />
+        android:text="Options" />
 
     <!--
     <Button
