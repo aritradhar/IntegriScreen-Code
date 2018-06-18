@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.icu.util.Output;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -52,7 +51,6 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -397,9 +395,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // This ensures state machine goes from the beginning
         currentISState = ISState.DETECTING_FRAME;
 
-        if (targetForm != null)
-            allLoadedForms.remove(targetForm.formUrl);
-//        allLoadedForms = new HashMap<>();
+        // Either delete only the specified one, or all of them
+//        if (targetForm != null)
+//            allLoadedForms.remove(targetForm.formUrl);
+        allLoadedForms = new HashMap<>();
     }
 
     public void onClickISAbort(View view) {
@@ -616,6 +615,32 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return formsListManager.getFormURLFromName(formNameToLoad);
     }
 
+    private void storeAllFormVerificationResults() {
+        int totalCnt = 0;
+        Vector<String> successes = new Vector<>();
+        Vector<String> failures = new Vector<>();
+
+        for(String currentUrl: allLoadedForms.keySet()) {
+            TargetForm currentForm = allLoadedForms.get(currentUrl);
+            if (currentForm.pageId.equals("STOP"))
+                continue;
+
+            ++totalCnt;
+            if (currentForm.initiallyVerified) {
+                successes.add(currentUrl);
+            } else {
+                failures.add(currentUrl);
+            }
+        }
+
+        logR("Overall success", String.valueOf((double)successes.size() / totalCnt));
+        String allFailuresList = "\n";
+        for(String failForm : failures)
+            allFailuresList += failForm + "\n";
+
+        logR("All failures", allFailuresList);
+    }
+
     public TargetForm loadFormBasedOnUrl(String formUrlToLoad, Mat rotatedUpperFrameMat) {
         if (formUrlToLoad == null) return null;
 
@@ -810,8 +835,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             } else {
                 acceptingInput = superviseUIChanges(rotatedUpperPart, changedLocations);
 
+                // This is a special case which we use to handle handle automated tests
+
                 if (acceptingInput && targetForm.initiallyVerified == false) {
-                    logR("Form Loaded", "Successfully Loaded form: " + targetForm.pageId);
+                    if (targetForm.pageId.equals("STOP")) {
+                        storeAllFormVerificationResults();
+                    }
+
+                    logR("Successfully verified form",  targetForm.pageId);
                     targetForm.initiallyVerified = true;
                 }
             }

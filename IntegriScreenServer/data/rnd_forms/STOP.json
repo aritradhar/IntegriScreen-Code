@@ -6,16 +6,26 @@
       "width": "50",
       "initialvalue": "STOP",
       "editable": "false",
-      "height": "5",
+      "height": "10",
       "type": "title",
       "id": "form_title",
       "ulc_x": "5",
-      "ulc_y": "2"
+      "ulc_y": "5"
+    },
+    {
+      "width": "37",
+      "initialvalue": "Experiment finished",
+      "editable": "false",
+      "height": "9",
+      "type": "label",
+      "id": "0",
+      "ulc_x": "40",
+      "ulc_y": "40"
     }
   ],
   "ratio": "12:12",
   "form_action": "/IntegriScreenServer/MainServer",
   "border_thickness": "1",
-  "page_id": "__STOP__",
+  "page_id": "STOP",
   "font_family": "'Arial', sans-serif"
 }
