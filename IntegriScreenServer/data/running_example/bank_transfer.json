@@ -36,7 +36,7 @@
       "id": "iban_l",
       "type": "label",
       "editable": "false",
-      "initialvalue": "Account Number",
+      "initialvalue": "IBAN",
       "fontsize": "14pt",
       "ulc_x": "10",
       "ulc_y": "33",
@@ -50,7 +50,7 @@
       "editable": "true",
       "initialvalue": "",
       "ulc_x": "42",
-      "ulc_y": "32",
+      "ulc_y": "33",
       "width": "50",
       "height": "8"
     },
@@ -59,7 +59,7 @@
       "id": "account_name_l",
       "type": "label",
       "editable": "false",
-      "initialvalue": "Account Name",
+      "initialvalue": "Name",
       "fontsize": "14pt",
       "ulc_x": "10",
       "ulc_y": "43",
@@ -73,7 +73,7 @@
       "editable": "true",
       "initialvalue": "",
       "ulc_x": "42",
-      "ulc_y": "42",
+      "ulc_y": "43",
       "width": "50",
       "height": "8"
     },
@@ -119,7 +119,7 @@
       "editable": "true",
       "initialvalue": "",
       "ulc_x": "55",
-      "ulc_y": "64",
+      "ulc_y": "65",
       "width": "37",
       "height": "8"
     },
@@ -142,7 +142,7 @@
       "editable": "true",
       "initialvalue": "",
       "ulc_x": "42",
-      "ulc_y": "75",
+      "ulc_y": "76",
       "width": "50",
       "height": "8"
     },
@@ -165,7 +165,7 @@
       "editable": "true",
       "initialvalue": "01.07.2018",
       "ulc_x": "42",
-      "ulc_y": "85",
+      "ulc_y": "86",
       "width": "23",
       "height": "8"
     },
@@ -177,7 +177,7 @@
       "initialvalue": "Submit Payment",
       "fontsize": "14pt",
       "ulc_x": "68",
-      "ulc_y": "85",
+      "ulc_y": "86",
       "width": "24",
       "height": "8"
     }
