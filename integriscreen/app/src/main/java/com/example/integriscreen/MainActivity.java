@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.FpsMeter;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static Button rawButton;
     private static Button startButton;
 
+    private static boolean optionalElementsVisible = true;
 
     private static LogManager LM;
 
@@ -110,11 +112,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private int detectUnspecifiedTextFrequency = 5;
 
     private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
-    private static Scalar detectedOCRColor = new Scalar(0, 255, 255);
-    private static Scalar expectedOCRColor = new Scalar(255, 0, 0);
+//    private static Scalar detectedOCRColor = new Scalar(65, 143, 244);
+//    private static Scalar expectedOCRColor = new Scalar(255, 128, 0);
+    private static Scalar detectedOCRColor = new Scalar(0, 143, 0);
+    private static Scalar expectedOCRColor = new Scalar(65, 143, 244);
+
+    private static int comparisonFontScale = 2;
+    private static int comparisonFontThickness = 4;
+    private static String emptyVal = "[null]";
 
 
-    public boolean evaluationStarting;
 
     // the form created based on specs received from Server
     private HashMap<String, TargetForm> allLoadedForms;
@@ -234,7 +241,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
-        evaluationStarting = false;
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
@@ -409,15 +415,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.RAW;
 
         cleanAllData();
-        outputOnUILabel("Input Aborted!");
+        outputOnUILabel("Input reset.");
 
         startButton.setText("Start");
-
-        // evaluationStarting = true;
     }
 
     public void toggleAllOptionalElementsVisibility() {
-        int newVisibility = (limitAreaCheckbox.getVisibility() == View.VISIBLE) ? View.INVISIBLE : View.VISIBLE;
+        int newVisibility = (optionalElementsVisible) ? View.INVISIBLE : View.VISIBLE;
 
         detectButton.setVisibility(newVisibility);
         rawButton.setVisibility(newVisibility);
@@ -427,6 +431,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         limitAreaCheckbox.setVisibility(newVisibility);
         realignCheckbox.setVisibility(newVisibility);
         liveCheckbox.setVisibility(newVisibility);
+        textOutput.setVisibility(newVisibility);
+
+        /*
+        if (newVisibility == View.INVISIBLE) {
+            _cameraBridgeViewBase.disableFpsMeter();
+        } else {
+            _cameraBridgeViewBase.enableFpsMeter();
+        }*/
+
+        optionalElementsVisible = (newVisibility == View.VISIBLE);
     }
 
     public void onClickToggleOptions(View view) {
@@ -553,9 +567,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             android.graphics.Rect rect = new android.graphics.Rect(item.getBoundingBox());
 
             if (item != null && item.getValue() != null) {
-                int textHeight = (int) Imgproc.getTextSize(item.getValue(), defaultFont, 1, 2, new int[1]).height;
+                int textHeight = (int) Imgproc.getTextSize(item.getValue(), defaultFont, comparisonFontScale, comparisonFontThickness, new int[1]).height;
                 Imgproc.putText(currentFrameMat, item.getValue(), new Point(rect.left, rect.top + textHeight + 10),
-                        defaultFont, 1, textColor, 3);
+                        defaultFont, comparisonFontScale, textColor, comparisonFontThickness);
 
                 if (drawBox) {
                     Imgproc.rectangle(currentFrameMat, new Point(rect.left - offset, rect.top - offset),
@@ -790,7 +804,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (handsPart.channels() == 1)
             Imgproc.cvtColor(handsPart, handsPart, Imgproc.COLOR_GRAY2RGBA);
 
-        handsPart.copyTo(currentFrameMat.submat(handsBox));
+        if (optionalElementsVisible)
+            handsPart.copyTo(currentFrameMat.submat(handsBox));
         handsPart.release();
     }
 
@@ -857,7 +872,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     1, 1, 10);
 
             // Check if title was impacted. If it was, update the form.
-            if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
+            if (targetForm.titleElement != null && optionalElementsVisible && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
                 tryLoadingNewForm(nonRealignedUpperPart);
             } else {
                 acceptingInput = superviseUIChanges(rotatedUpperPart, changedLocations);
@@ -909,17 +924,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     String phoneVal = currDiff.getString("phone");
                     String browserVal = currDiff.getString("browser");
 
+                    if (phoneVal.equals("")) phoneVal = emptyVal;
+                    if (browserVal.equals("")) phoneVal = emptyVal;
+
                     logF("diffs", elementID + "|" + browserVal);
 
                     UIElement currentElement = targetForm.getElementById(elementID);
 
-                    int textHeight = (int)Imgproc.getTextSize(browserVal, defaultFont, 1.3, 2, new int[1]).height;
-                    Imgproc.putText(rotatedUpperPart, browserVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y+textHeight+10),
-                            defaultFont, 1, new Scalar(0, 255, 255), 2);
+                    int textHeight = (int)Imgproc.getTextSize(browserVal, defaultFont, comparisonFontScale, comparisonFontThickness, new int[1]).height;
+                    Imgproc.putText(rotatedUpperPart, browserVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight - 40),
+                            defaultFont, comparisonFontScale, expectedOCRColor, comparisonFontThickness);
 
-                    textHeight = textHeight + (int)Imgproc.getTextSize(phoneVal, defaultFont, 1.3, 2, new int[1]).height;
-                    Imgproc.putText(rotatedUpperPart, phoneVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 20),
-                            defaultFont, 1, new Scalar(0, 255, 0), 2);
+                    textHeight = (int)Imgproc.getTextSize(phoneVal, defaultFont, comparisonFontScale, comparisonFontThickness, new int[1]).height;
+                    Imgproc.putText(rotatedUpperPart, phoneVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 60),
+                            defaultFont, comparisonFontScale, detectedOCRColor, comparisonFontThickness);
 
                     Imgproc.rectangle(rotatedUpperPart, currentElement.box.tl(), currentElement.box.br(), new Scalar(255, 0, 0), 4);
                 }
@@ -1022,6 +1040,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         int textX = 300;
         int textY = 1400;
+        // int handLineOffset = 150;
+        int handLineOffset = (int)mid_delim + 10;
+
         if (currentISState == ISState.SUPERVISING_USER_INPUT) {
             String textToShow = (acceptingInput ? "All OK, continue" : "STOP Input!");
             Scalar textColor = (acceptingInput ? new Scalar(0, 255, 0): new Scalar(255, 0, 0));
@@ -1039,22 +1060,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
             // Draw the separating line, choose color depending on activity
-            int handLineOffset = 150;
             Scalar handLineColor = (handActivityDetected) ? new Scalar(0, 255, 0) : new Scalar(255, 0, 0);
-            line(rotatedScreenMat, new Point(0, textY-handLineOffset), new Point(rotatedScreenMat.height (), textY-handLineOffset), handLineColor, 5);
+//            line(rotatedScreenMat, new Point(0, textY-handLineOffset), new Point(rotatedScreenMat.height (), textY-handLineOffset), handLineColor, 5);
+            line(rotatedScreenMat, new Point(0, handLineOffset), new Point(rotatedScreenMat.height (), handLineOffset), handLineColor, 5);
+
         }
         else if (currentISState == ISState.EVERYTHING_OK) {
-            Imgproc.putText(rotatedScreenMat, "SUCCESS!", new Point(textX, textY),
-                    defaultFont, 3, new Scalar(0, 255, 0),3);
+            Imgproc.putText(rotatedScreenMat, "SUCCESS", new Point(textX, textY),
+                    defaultFont, 2.5, new Scalar(0, 255, 0),5);
         } else if (currentISState == ISState.DATA_MISMATCH) {
             Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
                     defaultFont, 3, new Scalar(255, 0, 0), 5);
 
-            Imgproc.putText(rotatedScreenMat, "Browser data", new Point(textX, textY + 200),
-                    defaultFont, 2, new Scalar(0, 255, 255), 3);
+            Imgproc.putText(rotatedScreenMat, "Browser submitted", new Point(textX, textY + 200),
+                    defaultFont, 2, expectedOCRColor, 3);
 
-            Imgproc.putText(rotatedScreenMat, "Phone data", new Point(textX, textY + 300),
-                    defaultFont, 2, new Scalar(0, 255, 0), 3);
+            Imgproc.putText(rotatedScreenMat, "Phone submitted", new Point(textX, textY + 300),
+                    defaultFont, 2, detectedOCRColor, 3);
         }
 
         if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
@@ -1240,7 +1262,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 "noocr");
         allChangeLogs.add(eventLog);
 
-        logF("ElementChanges", "Total changes: " + changedLocations.size());
+//        logF("ElementChanges", "Total changes: " + changedLocations.size());
 
 
         String activeElementNewValue = null;
@@ -1316,13 +1338,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (currentElement != activeElement) {
                 currentElement.dirty = true;
 
-                // Show the OCR-d value which is different than expected
-                int textHeight = (int) Imgproc.getTextSize(newValue, defaultFont, 1, 2, new int[1]).height;
-                Imgproc.putText(realignedUpperFrame, newValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 60),
-                        defaultFont, 1, detectedOCRColor, 2);
-
                 allowChanges = false;
-                logW("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
+                logF("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
 
                 ChangeEventLog activeElementEventLog = new ChangeEventLog(currentFrameTimestamp,
                         currentElement.id,
@@ -1375,16 +1392,27 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 rectangle_color = new Scalar(255, 0, 0);
                 rectangle_thickness = 4;
 
+                String expectedVal = (currentElement.currentValue.equals("")) ? emptyVal : currentElement.currentValue;
+                String detectedVal  = (currentElement.lastMismatch.second.equals("")) ? emptyVal : currentElement.lastMismatch.second;
+
                 // Output the text on the UI elements
-                int textHeight = (int) Imgproc.getTextSize(currentElement.currentValue, defaultFont, 1, 2, new int[1]).height;
-                Imgproc.putText(realignedUpperFrame, currentElement.currentValue, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight),
-                        defaultFont, 1, expectedOCRColor, 2);
+                int textHeight = (int) Imgproc.getTextSize(expectedVal, defaultFont, comparisonFontScale, comparisonFontThickness, new int[1]).height;
+                Imgproc.putText(realignedUpperFrame, expectedVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight - 40),
+                        defaultFont, comparisonFontScale, expectedOCRColor, comparisonFontThickness);
+
+                // Show the OCR-d value which is different than expected
+                textHeight = (int) Imgproc.getTextSize(detectedVal, defaultFont, comparisonFontScale, comparisonFontThickness, new int[1]).height;
+                Imgproc.putText(realignedUpperFrame, detectedVal, new Point(currentElement.box.tl().x, currentElement.box.tl().y + textHeight + 60),
+                        defaultFont, comparisonFontScale, detectedOCRColor, comparisonFontThickness);
+
             } else {
-                // Use yellow rectangle
-                if (allowChanges)
+                if (allowChanges) {
+                    // Draw all rectangles in green
                     rectangle_color = new Scalar(0, 255, 0);
-                else
-                    rectangle_color = new Scalar(255, 255, 0);
+                } else {
+                    // Draw all others with some gray-ish color
+                    rectangle_color = new Scalar(180, 180, 180);
+                }
                 rectangle_thickness = 2;
             }
 
@@ -1399,9 +1427,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // If we found an active element, we draw a green rectangle
             Imgproc.rectangle(realignedUpperFrame, activeElement.box.tl(), activeElement.box.br(), new Scalar(0, 255, 0), 8);
         } else {
-            // If we haven't been able to correlat with any UI element, we draw a red rectangle
+            // If we haven't been able to correlat with any UI element, we draw a red rectangle where we find it
             Rect myRect = new Rect(activeElementCorners.get(0), activeElementCorners.get(2));
-            Imgproc.rectangle(realignedUpperFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
+            // But only if it's large enough, otherwise it's likely just noise
+            if (myRect.area() > 500)
+                Imgproc.rectangle(realignedUpperFrame, myRect.tl(), myRect.br(), new Scalar(255, 0, 0), 8);
         }
 
         if (activeElementNewValue != null) {
@@ -1484,30 +1514,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         SparseArray<TextBlock> texts = textRecognizer.detect(frame);
         return texts;
-    }
-
-    public boolean shouldStopEvaluation() {
-        if (targetForm == null || !targetForm.isLoaded)
-            return false;
-
-        if (targetForm.pageId.equals("__STOP__"))
-            return true;
-
-        // This is a slightly hacky way to stop whenever the user has chosen some other output
-        if (!evaluationStarting && currentOutputSelection != OutputSelection.INTEGRISCREEN)
-            return true;
-
-        return false;
-    }
-
-    public boolean previousFormSuccessfullyVerified() {
-        return (currentISState == ISState.SUPERVISING_USER_INPUT);
-    }
-
-    public void reportEvaluationResult(int cntSuccess, int cntTotal) {
-        String message = "Success rate: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal;
-        logF("Evaluation Finished:", message);
-        outputOnToast(message);
     }
 
     // get motion events
