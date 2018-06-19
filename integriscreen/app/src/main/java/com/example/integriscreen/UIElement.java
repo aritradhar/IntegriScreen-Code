@@ -2,6 +2,8 @@ package com.example.integriscreen;
 
 
 
+import android.util.Pair;
+
 import org.opencv.core.Rect;
 
 
@@ -15,6 +17,9 @@ public class UIElement {
     public long lastUpdated;  // track the time of last update
     public boolean dirty;       // true if the element's value should be checked before allowing any model updates
 
+    public boolean everVerified; // Has this input element ever been verified as according to expectation?
+    public Pair<String, String> lastMismatch;  // Used during analysis of UI Verification
+
 //    public ArrayList<> traces;  // list all changes for an UI element
 //    public int certainity;      // store the confidence
 
@@ -27,6 +32,8 @@ public class UIElement {
         defaultVal = dV;
         currentValue = defaultVal;
         lastUpdated = System.currentTimeMillis();
+        everVerified = false;
+        lastMismatch = new Pair<>("", "");
         dirty = true;
     }
 

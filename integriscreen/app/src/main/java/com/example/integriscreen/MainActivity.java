@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // static address of the server to fetch list of forms
     private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
+    private static String stopFormId = "STOP"; // The header of the form that we use to stop experiments.
 
     //    private CameraBridgeViewBase _cameraBridgeViewBase;
     private CustomCameraView _cameraBridgeViewBase;
@@ -616,29 +617,46 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void storeAllFormVerificationResults() {
-        int totalCnt = 0;
-        Vector<String> successes = new Vector<>();
-        Vector<String> failures = new Vector<>();
+        int formCnt = 0;
+        Vector<String> formSuccesses = new Vector<>();
+        Vector<String> formFailures = new Vector<>();
 
+        int elementCnt = 0;
+        Vector<Pair<String, String> > elementMismatches = new Vector<>();
         for(String currentUrl: allLoadedForms.keySet()) {
             TargetForm currentForm = allLoadedForms.get(currentUrl);
-            if (currentForm.pageId.equals("STOP"))
+            if (currentForm.pageId.equals(stopFormId))
                 continue;
 
-            ++totalCnt;
+            ++formCnt;
+            elementCnt += currentForm.allElements.size();
             if (currentForm.initiallyVerified) {
-                successes.add(currentUrl);
+                formSuccesses.add(currentUrl);
             } else {
-                failures.add(currentUrl);
+                formFailures.add(currentUrl);
+
+                for(UIElement currentElement: currentForm.allElements) {
+                    if (!currentElement.everVerified) {
+                        elementMismatches.add(currentElement.lastMismatch);
+                    }
+                }
             }
         }
 
-        logR("Overall success", String.valueOf((double)successes.size() / totalCnt));
-        String allFailuresList = "\n";
-        for(String failForm : failures)
-            allFailuresList += failForm + "\n";
+        logR("Overall form success rate", String.valueOf((double)formSuccesses.size() / formCnt));
+        String allFormFailuresList = "\n";
+        for(String failForm : formFailures)
+            allFormFailuresList += failForm + "\n";
 
-        logR("All failures", allFailuresList);
+        logR("All form failures", allFormFailuresList);
+
+
+        logR("Overall element success rate", String.valueOf((double)(elementCnt - elementMismatches.size()) / elementCnt));
+        String allElementMismatches = "\n";
+        for(Pair<String, String> mismatch: elementMismatches)
+            allElementMismatches += "|" + mismatch.first + "|\n|" + mismatch.second + "|\n\n";
+
+        logR("All element mismatches", allElementMismatches);
     }
 
     public TargetForm loadFormBasedOnUrl(String formUrlToLoad, Mat rotatedUpperFrameMat) {
@@ -838,7 +856,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 // This is a special case which we use to handle handle automated tests
 
                 if (acceptingInput && targetForm.initiallyVerified == false) {
-                    if (targetForm.pageId.equals("STOP")) {
+                    if (targetForm.pageId.equals(stopFormId)) {
                         storeAllFormVerificationResults();
                     }
 
@@ -1275,7 +1293,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             if (ISStringProcessor.almostIdenticalString(currentElement.currentValue, newValue, false)) {
                 // Set this element to not be dirty and continue to next one
                 currentElement.dirty = false;
+                currentElement.everVerified = true;
                 continue;
+            }
+
+            // Here we store the last mismatch that an element has had before it was ever accepted
+            //   as successfully verified.
+            if (currentElement.everVerified == false) {
+                currentElement.lastMismatch = new Pair<>(currentElement.currentValue, newValue);
             }
 
             // Check if this changing element is not the active element
