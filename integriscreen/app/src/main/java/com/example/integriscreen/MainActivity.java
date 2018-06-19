@@ -1035,7 +1035,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // NOTE!!!! Before I started using a helper rotatedScreenMat, this caused memory leaks!
         Mat rotatedScreenMat = new Mat(1, 1, 1);
-        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH
+                || currentISState == ISState.SUPERVISING_USER_INPUT || currentISState == ISState.SUBMITTING_DATA)
             rotate90(currentFrameMat, rotatedScreenMat);
 
         int textX = 300;
@@ -1065,12 +1066,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             line(rotatedScreenMat, new Point(0, handLineOffset), new Point(rotatedScreenMat.height (), handLineOffset), handLineColor, 5);
 
         }
-        else if (currentISState == ISState.EVERYTHING_OK) {
-            Imgproc.putText(rotatedScreenMat, "SUCCESS", new Point(textX, textY),
-                    defaultFont, 2.5, new Scalar(0, 255, 0),5);
+        else if (currentISState == ISState.SUBMITTING_DATA) {
+            Imgproc.putText(rotatedScreenMat, "DATA SUBMITTED...", new Point(textX, textY),
+                    defaultFont, 2, new Scalar(150, 150, 0), 3);
+        } else if (currentISState == ISState.EVERYTHING_OK) {
+            Imgproc.putText(rotatedScreenMat, "PERFECT MATCH!", new Point(textX, textY),
+                    defaultFont, 2, new Scalar(0, 255, 0), 5);
         } else if (currentISState == ISState.DATA_MISMATCH) {
-            Imgproc.putText(rotatedScreenMat, "MISMATCH!", new Point(textX, textY),
-                    defaultFont, 3, new Scalar(255, 0, 0), 5);
+            Imgproc.putText(rotatedScreenMat, "DATA MISMATCH!", new Point(textX, textY),
+                    defaultFont, 2, new Scalar(255, 0, 0), 5);
 
             Imgproc.putText(rotatedScreenMat, "Browser submitted", new Point(textX, textY + 200),
                     defaultFont, 2, expectedOCRColor, 3);
@@ -1079,7 +1083,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     defaultFont, 2, detectedOCRColor, 3);
         }
 
-        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH || currentISState == ISState.SUPERVISING_USER_INPUT)
+        if (currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH ||
+                currentISState == ISState.SUPERVISING_USER_INPUT || currentISState == ISState.SUBMITTING_DATA)
             rotate270(rotatedScreenMat, currentFrameMat);
 
         rotatedScreenMat.release();
