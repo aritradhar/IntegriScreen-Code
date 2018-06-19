@@ -101,7 +101,7 @@ public class PageGen {
 			double height = inObject.getDouble("height");
 
     		String elemFont = inObject.has("font") ? inObject.getString("font") : "inherit";
-    		String elemFontSize = inObject.has("fontsize") ? inObject.getString("fontsize") : "inherit";
+    		String elemFontSize = inObject.has("fontsize") ? inObject.getString("fontsize") : fontsize;
     		String letterSpacing = inObject.has("spacing") ? inObject.getString("spacing") : "normal";
 
     		String maxInputChars = inObject.has("maxlength") ? inObject.getString("maxlength") : "30";
@@ -117,7 +117,7 @@ public class PageGen {
 					System.exit(1);
 				}
 
-				elementHtmlString.append(String.format("<h2 style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute'>%s</h2>\n", width, height, ulc_x, ulc_y, initialValue));
+				elementHtmlString.append(String.format("<h2 style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; font-family:%s; font-size:%s !important;  position:absolute'>%s</h2>\n", width, height, ulc_x, ulc_y, elemFont, elemFontSize, initialValue));
 				page_title_h2 = initialValue;
 
 				//form action
