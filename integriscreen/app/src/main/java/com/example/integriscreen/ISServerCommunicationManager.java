@@ -45,7 +45,7 @@ public class ISServerCommunicationManager {
     private void getListOfForms(String url) {
         logF("ListOfForms", "trying to get the listOfForms from: " + url);
 
-        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
                 url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
