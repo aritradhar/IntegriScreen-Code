@@ -26,6 +26,7 @@ import static com.example.integriscreen.LogManager.logF;
 public class TargetForm {
     private String TAG = "TargetForm";
     private Context applicationContext;
+
     public String formUrl;
 
     public UIElement titleElement;
@@ -203,7 +204,7 @@ public class TargetForm {
     /**
      * This method sends a POST request to the server with a json including form data
      */
-    public void submitFormData(String url) {
+    public void submitFormData(String submitUrl) {
         logF("submitform", "Submit form with id: " + pageId);
         Map<String, String> postParam = new HashMap<String, String>();
         postParam.put("page_id", pageId);
@@ -218,7 +219,7 @@ public class TargetForm {
         }
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
-                url, new JSONObject(postParam),
+                submitUrl, new JSONObject(postParam),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // static address of the server to fetch list of forms
     // private static String serverUrl = "http://tildem.inf.ethz.ch";
     private static String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
-    private static String serverEndpoint = serverUrl + "/IntegriScreenServer/MainServer";
 
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
     private static String stopFormId = "STOP"; // The header of the form that we use to stop experiments.
@@ -741,7 +740,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 @Override
                 public void run() {
                     // outputOnToast("Sending: " + (new Date()).toString());
-                    targetForm.submitFormData(serverEndpoint + serverPageTypeURLParam);
+                    // This could also be fetched from the form's form_action field (but we don't do it yet)
+                    targetForm.submitFormData(serverUrl + "/IntegriScreenServer/MainServer" + serverPageTypeURLParam);
                 }
             };
 
