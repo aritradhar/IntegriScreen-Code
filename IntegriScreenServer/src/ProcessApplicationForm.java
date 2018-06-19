@@ -20,7 +20,9 @@ public class ProcessApplicationForm {
 
 	public static volatile Map<String, HashMap<String, String>> allBrowserResponses = new ConcurrentHashMap<>();
 	
-	public static final String pageDefaultLoc = "http://tildem.inf.ethz.ch/generated/";
+// 	public static final String serverUrl = "http://tildem.inf.ethz.ch";
+	public static final String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+	public static final String pageDefaultLoc = serverUrl + "/generated/";
 	/**\
 	 * page_id = title = filname
 	 * @param request

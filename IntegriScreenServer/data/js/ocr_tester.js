@@ -1,5 +1,8 @@
 $(document).ready(function() {
 
+	var serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
+	// var serverUrl = "http://tildem.inf.ethz.ch"
+		
     var url = new URL(window.location.href);
     var setup = url.searchParams.get("setup");
     var time = url.searchParams.get("time");
@@ -14,7 +17,7 @@ $(document).ready(function() {
         var target = start != page_targets.length -1 ? page_targets[start] : '__STOP__.html';
         console.log(target);
 
-        iframe.attr('src', `http://tildem.inf.ethz.ch/generated/${target}?${url.searchParams.toString()}`);
+        iframe.attr('src', serverUrl + `/generated/${target}?${url.searchParams.toString()}`);
         start += 1;
     }
     window.next = next_page;

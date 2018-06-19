@@ -23,6 +23,9 @@ public class PageGen {
 	}
 
 	public static String[] pageGen(String pageFileName, boolean runLocally) throws IOException {
+		// String serverUrl = "http://tildem.inf.ethz.ch";
+		String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+		
 		String dataLocation;
 		String generatedLocation;
 		if (runLocally) {
@@ -177,8 +180,8 @@ public class PageGen {
 
 		System.out.println("----------------Page generated----------------");
 		// TODO: this is hardcoded to the current location of the server!
-		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
-		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", "http://tildem.inf.ethz.ch");
+		String urlName = MainServer.generatedLocation.replace("/home/dhara/tomcat/static", serverUrl);
+		String urlDataName = MainServer.location.replace("/home/dhara/tomcat/static", serverUrl);
 
 
 		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Unicorn => " + urlName + pageFileName + "_unicorn.html" +

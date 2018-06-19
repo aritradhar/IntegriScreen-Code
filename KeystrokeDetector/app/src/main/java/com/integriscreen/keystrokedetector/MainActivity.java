@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 //    public Map<FieldName, FieldValue> clfIn;
 //    List<Integer> fields = new ArrayList<>();
     public RequestQueue queue;
+
     public String url = "http://tildem.inf.ethz.ch:1731/predict";
     private int keystrokeCount;
 

@@ -19,10 +19,13 @@ KBD = np.array([
     list("zxcvbnm,./"),
 ])
 
+# serverUrl = "http://tildem.inf.ethz.ch"
+serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
+
 
 def spawn_tester(source, atk_mode, atk_type):
     atk_string = "atk_mode={}&atk_type={}".format(atk_mode, atk_type) if atk_mode and atk_type else ''
-    driver.get("http://tildem.inf.ethz.ch/generated/tester.html?setup={}&{}".format(source, atk_string))
+    driver.get(serverUrl + "/generated/tester.html?setup={}&{}".format(source, atk_string))
 
 
 def test_page():
