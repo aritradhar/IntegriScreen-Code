@@ -21,7 +21,7 @@
     {
       "id": "recipient_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Recipient",
       "ulc_x": "5",
       "ulc_y": "23",
@@ -32,7 +32,7 @@
     {
       "id": "iban_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "IBAN",
       "ulc_x": "10",
       "ulc_y": "32",
@@ -54,7 +54,7 @@
     {
       "id": "account_name_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Account Name",
       "ulc_x": "10",
       "ulc_y": "42",
@@ -76,7 +76,7 @@
     {
       "id": "payment_details_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Payment details",
       "ulc_x": "5",
       "ulc_y": "55",
@@ -87,18 +87,18 @@
     {
       "id": "amount_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Amount",
       "ulc_x": "10",
       "ulc_y": "64",
       "width": "30",
       "height": "8"
     },
-    
+
         {
       "id": "currency_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "USD",
       "ulc_x": "48",
       "ulc_y": "64",
@@ -120,7 +120,7 @@
     {
       "id": "ref_no_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Ref. no.",
       "ulc_x": "10",
       "ulc_y": "75",
@@ -142,7 +142,7 @@
     {
       "id": "execution_date_l",
       "type": "label",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Execution date",
       "ulc_x": "10",
       "ulc_y": "85",
@@ -160,11 +160,11 @@
       "width": "25",
       "height": "8"
     },
-    
+
     {
       "id": "submit",
       "type": "button",
-      "editable": "true",
+      "editable": "false",
       "initialvalue": "Next",
       "ulc_x": "75",
       "ulc_y": "85",
