@@ -34,6 +34,7 @@ public class MainServer extends HttpServlet {
 
 	public static final String location = "/home/dhara/tomcat/static/data/";
 	public static final String generatedLocation = "/home/dhara/tomcat/static/generated/";
+	public static final String manifest = "/home/dhara/tomcat/static/generated/fileList.txt";
 
 
 	private static final long serialVersionUID = 1L;
@@ -73,6 +74,8 @@ public class MainServer extends HttpServlet {
 
 		//System.out.println(page_type);
 
+		//show the list
+		
 		//page response from the browser
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
@@ -220,6 +223,11 @@ public class MainServer extends HttpServlet {
 				outJson.put("response", jarray);
 
 				response.getWriter().append(outJson.toString(1));
+				
+				FileWriter fw = new FileWriter(manifest);
+				fw.append(outJson.toString(1));
+				fw.close();
+				
 			}
 		}
 	}
