@@ -454,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // currentEvalIndex = evalIndex;
 
         transitionISSTo(ISState.DETECTING_FRAME);
-        outputOnUILabel("Make the green frame visible in the top part, then click Realign.");
+        outputOnUILabel("Make the green frame visible in the upper part of the screen.");
     }
 
     public void onClickStartIS(View view) {
