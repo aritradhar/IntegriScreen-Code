@@ -10,7 +10,7 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Compose Secure Email",
+      "initialvalue": "Secure Email",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "2",
