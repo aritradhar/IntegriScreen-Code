@@ -165,8 +165,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private ISImageProcessor lowerFrameISImageProcessor;
     private ISImageProcessor wholeFrameISImageProcessor;
 
-    private EvaluationController myEvaluationController;
-
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -277,8 +275,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         upperFrameISImageProcessor = new ISImageProcessor();
         lowerFrameISImageProcessor = new ISImageProcessor();
         wholeFrameISImageProcessor = new ISImageProcessor();
-
-        myEvaluationController = new EvaluationController(this);
 
         huePicker = (SeekBar) findViewById(R.id.colorSeekBar);
         huePicker.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -412,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         outputOnUILabel("Input Aborted!");
 
         // evaluationStarting = true;
-        // myEvaluationController.startEvaluation();
     }
 
     public void onClickToggleOptions(View view) {
@@ -460,9 +455,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickStartIS(View view) {
-        // Make sure we stop any potentially existing evaluations
-        if (myEvaluationController != null) myEvaluationController.abortAll();
-
         startIntegriScreen(-1);
     }
 
@@ -1497,21 +1489,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return (currentISState == ISState.SUPERVISING_USER_INPUT);
     }
 
-    public String getCurrentFormName() {
-        if (targetForm == null) return "__NULL__";
-        return targetForm.pageId;
-    }
-
     public void reportEvaluationResult(int cntSuccess, int cntTotal) {
         String message = "Success rate: " + cntSuccess + "/ " + cntTotal + " = " + (double)cntSuccess / cntTotal;
         logF("Evaluation Finished:", message);
         outputOnToast(message);
     }
-
-//    public void startEvaluation(int startIndex, int endIndex) {
-//        // TODO: not implemented yet
-//    }
-
 
     // get motion events
     @Override
