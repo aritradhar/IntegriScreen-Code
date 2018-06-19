@@ -43,29 +43,40 @@ function same(attack) {
 
 keystroke_buffer = [];
 time_cheating = 0;
+focus_override = null;
 function change_focus(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
+    typed_amount = 3;
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
-        if (key_count === 3) {
-            log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
-            $(targets[1]).keydown(function(e) {
-                e.preventDefault();
-                console.log(e);
-                keystroke_buffer.push(e.key);
-            });
-            $(targets[1]).focus();
-            typed_chars = attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+        if (key_count === typed_amount) {
             setTimeout(function() {
-                $(targets[0]).focus();
-                keystroke_buffer.forEach(function(char, idx) {
-                    setTimeout(function() {
-                        $(targets[0]).keydown(char);
-                    }, 80 * (idx + 1))
-                })
-            }, typed_chars * 120 + time_cheating)
-
+                if (focus_override) {
+                    minTimeFocusOutAfterEdit = 0;
+                    minTimeStayingFocused = 0;
+                    time_cheating = focus_override === "fast" ? 250 : 0;
+                }
+                log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
+                $(targets[1]).keydown(function(e) {
+                    e.preventDefault();
+                    console.log(e);
+                    keystroke_buffer.push(e.key);
+                });
+                $(targets[1]).focus();
+                typed_chars = attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+                char_base_idx = targets[0].selectionStart;
+                setTimeout(function() {
+                    $(targets[0]).focus();
+                    keystroke_buffer.forEach(function(char, idx) {
+                        setTimeout(function() {
+                            base_val = [...$(targets[0]).val()];
+                            base_val.splice(char_base_idx+idx, 0, char);
+                            $(targets[0]).val(base_val.join(''));
+                        }, 80 * (idx + 1))
+                    })
+                }, typed_chars * 120 + time_cheating)
+            }, 20);
         }
     });
 }
@@ -171,6 +182,7 @@ $(document).ready(function() {
     let url = new URL(window.location.href);
     let mode = url.searchParams.get("atk_mode");
     let attack = url.searchParams.get("atk_type");
+    focus_override = url.searchParams.get("speed");
 
     if (mode == null) return;
     if (attack === 'random' || attack == null) attack = _.sample(Object.keys(attacks));
