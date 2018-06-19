@@ -71,7 +71,7 @@ import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.line;
 import static org.opencv.imgproc.Imgproc.rectangle;
 
-public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener, EvaluationListener {
+public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, OnDataLoadedEventListener {
 
     private static final String TAG = "MainActivity";
 
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static CheckBox liveCheckbox;
     private static Button detectButton;
     private static Button rawButton;
+    private static Button startButton;
 
 
     private static LogManager LM;
@@ -110,8 +111,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
     private static Scalar detectedOCRColor = new Scalar(0, 255, 255);
-    private static Scalar expectedOCRColor = new Scalar( 255, 0, 0);
-
+    private static Scalar expectedOCRColor = new Scalar(255, 0, 0);
 
 
     public boolean evaluationStarting;
@@ -123,8 +123,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private ArrayList<ChangeEventLog> allChangeLogs;
 
     // static address of the server to fetch list of forms
-    // private static String serverURL = "http://tildem.inf.ethz.ch/IntegriScreenServer/MainServer";
-    private static String serverURL = "http://idvm-infk-capkun01.inf.ethz.ch:8085/IntegriScreenServer/MainServer";
+    // private static String serverUrl = "http://tildem.inf.ethz.ch";
+    private static String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+    private static String serverEndpoint = serverUrl + "/IntegriScreenServer/MainServer";
 
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
     private static String stopFormId = "STOP"; // The header of the form that we use to stop experiments.
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         allLoadedForms = new HashMap<>();
 
-        formsListManager = new ISServerCommunicationManager(serverURL, getApplicationContext());
+        formsListManager = new ISServerCommunicationManager(serverUrl, getApplicationContext());
 
         currentOutputSelection = OutputSelection.RAW;
 //        currentOutputSelection = OutputSelection.CANNY;
@@ -264,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         rawButton = (Button) findViewById(R.id.raw);
         detectButton = (Button) findViewById(R.id.detect_frame);
-
+        startButton = (Button) findViewById(R.id.ISStart);
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
@@ -376,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.CANNY;
     }
 
-    public void onClickSubmitData(View view) {
+    public void handleSubmit() {
         if (currentISState == null)
             return;
 
@@ -390,6 +391,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             outputOnToast("The form is not loaded yet!");
     }
 
+    public void onClickSubmitData(View view) {
+        handleSubmit();
+    }
+
     private void cleanAllData() {
         // This ensures state machine goes from the beginning
         currentISState = ISState.DETECTING_FRAME;
@@ -400,18 +405,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         allLoadedForms = new HashMap<>();
     }
 
-    public void onClickISAbort(View view) {
+    public void onClickISReset(View view) {
         realignCheckbox.setChecked(false);
         currentOutputSelection = OutputSelection.RAW;
 
         cleanAllData();
         outputOnUILabel("Input Aborted!");
 
+        startButton.setText("Start");
+
         // evaluationStarting = true;
     }
 
-    public void onClickToggleOptions(View view) {
-        // currentOutputSelection = OutputSelection.DIFF;
+    public void toggleAllOptionalElementsVisibility() {
         int newVisibility = (limitAreaCheckbox.getVisibility() == View.VISIBLE) ? View.INVISIBLE : View.VISIBLE;
 
         detectButton.setVisibility(newVisibility);
@@ -422,6 +428,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         limitAreaCheckbox.setVisibility(newVisibility);
         realignCheckbox.setVisibility(newVisibility);
         liveCheckbox.setVisibility(newVisibility);
+    }
+
+    public void onClickToggleOptions(View view) {
+        toggleAllOptionalElementsVisibility();
     }
 
     public void onClickShowColor(View view) {
@@ -446,16 +456,21 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
-    public void startIntegriScreen(int evalIndex) {
+    public void startIntegriScreen() {
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
-        // currentEvalIndex = evalIndex;
 
         transitionISSTo(ISState.DETECTING_FRAME);
         outputOnUILabel("Make the green frame visible in the upper part of the screen.");
     }
 
     public void onClickStartIS(View view) {
-        startIntegriScreen(-1);
+        if (startButton.getText().equals("Start")) {
+            startIntegriScreen();
+            startButton.setText("Submit");
+        } else {
+            handleSubmit();
+            startButton.setText("Start");
+        }
     }
 
     // Button callback to handle taking a picture
@@ -726,7 +741,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 @Override
                 public void run() {
                     // outputOnToast("Sending: " + (new Date()).toString());
-                    targetForm.submitFormData(serverURL + serverPageTypeURLParam);
+                    targetForm.submitFormData(serverEndpoint + serverPageTypeURLParam);
                 }
             };
 
@@ -808,7 +823,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if (newForm != null && !newForm.formUrl.equals(targetForm.formUrl)) {
             targetForm = newForm;
             didReaload = true;
-            startIntegriScreen(-1);
+            startIntegriScreen();
         }
         rotatedPotentialFormMat.release();
 

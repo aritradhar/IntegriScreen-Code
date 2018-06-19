@@ -28,7 +28,7 @@ public class ISServerCommunicationManager {
         allExistingForms = new HashMap<>();
         // initialize the RequestQueue of volley
         queue = Volley.newRequestQueue(applicationContext);
-        getListOfForms(serverURL);
+        getListOfForms(serverURL + "/generated/fileList.txt");
     }
 
     public String getFormURLFromName(String formName) {
@@ -50,12 +50,12 @@ public class ISServerCommunicationManager {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        // logF("ListOfForms", "response: " + response.toString());
-
                         try {
                             // Parsing json object response
                             JSONArray JSONElements = response.getJSONArray("response");
                             // logF("ListOfForms", "ArrayList: " + JSONElements.toString());
+
+                            logF("ListOfForms", "Total number:" + JSONElements.length());
 
                             // iterate through all elements
                             for (int i = 0; i < JSONElements.length(); i++) {
