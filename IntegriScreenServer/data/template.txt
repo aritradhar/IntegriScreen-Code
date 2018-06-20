@@ -32,11 +32,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::selection {
-    background: transparent;
+    background: rgb(220, 220, 220);
 }
 
 ::moz-selection {
-    background: transparent;
+    background: rgb(220, 220, 220);
 }
 
 label, textarea, input, button {
@@ -52,7 +52,7 @@ label, textarea, input, button {
     -o-user-select: none;
     user-select: none;
 
-    caret-color: transparent;
+    caret-color: rgb(150, 150, 150);
 }
 
 html, body, input, select, textarea, button{
