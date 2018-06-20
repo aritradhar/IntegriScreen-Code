@@ -53,7 +53,7 @@ function generateLinks() {
       document.getElementById("linkList").innerHTML += link + "<br><br>";
     }
     else {      // attack happens
-      link = "<a href=\"" + mainURL + "?form=" + (i + 1) + "&exp=" + attackCode[j] + randomStr  + unique + attackArr[j] + "\" target=\"_blank\">Transaction #" + (i + 1) + "</a>";
+      link = "<a href=\"" + mainURL + "?form=" + (i + 1) + "&exp=" + attackCode[j] + randomStr  + unique + "&" + attackArr[j] + "\" target=\"_blank\">Transaction #" + (i + 1) + "</a>";
       // link = "<a>" + i + attackArr[j];
       j++;
       document.getElementById("linkList").innerHTML += link + "<br><br>";
