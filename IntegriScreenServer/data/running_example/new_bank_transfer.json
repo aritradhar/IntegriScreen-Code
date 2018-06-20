@@ -1,0 +1,175 @@
+{
+  "ratio": "135:104",
+  "vspace": "52",
+  "page_id": "new_bank_transfer",
+  "border_thickness":"1",
+  "font_family": "'Helvetica', sans-serif",
+  "letter_spacing": "normal",
+  "form_action":"/IntegriScreenServer/MainServer",
+  "elements": [
+    {
+      "id": "form_title",
+      "type": "title",
+      "initialvalue": "Bank Transfer",
+      "editable": "false",
+      "ulc_x": "2",
+      "ulc_y": "2",
+      "width": "55",
+      "height": "8"
+    },
+
+    {
+      "id": "recipient_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Recipient",
+      "ulc_x": "5",
+      "ulc_y": "18",
+      "width": "35",
+      "height": "9"
+    },
+
+    {
+      "id": "iban_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "IBAN",
+      "ulc_x": "10",
+      "ulc_y": "28",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "iban",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "45",
+      "ulc_y": "28",
+      "width": "50",
+      "height": "8"
+    },
+
+    {
+      "id": "account_name_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Name",
+      "ulc_x": "10",
+      "ulc_y": "40",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "account_name",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "45",
+      "ulc_y": "40",
+      "width": "50",
+      "height": "8"
+    },
+
+    {
+      "id": "payment_details_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Payment details",
+      "ulc_x": "5",
+      "ulc_y": "52",
+      "width": "40",
+      "height": "9"
+    },
+
+    {
+      "id": "amount_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Amount",
+      "ulc_x": "10",
+      "ulc_y": "64",
+      "width": "30",
+      "height": "8"
+    },
+    
+        {
+      "id": "currency_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "USD",
+      "ulc_x": "48",
+      "ulc_y": "64",
+      "width": "10",
+      "height": "8"
+    },
+
+    {
+      "id": "amount",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "58",
+      "ulc_y": "64",
+      "width": "37",
+      "height": "8"
+    },
+
+    {
+      "id": "ref_no_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Reference",
+      "ulc_x": "10",
+      "ulc_y": "75",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "ref_no",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "45",
+      "ulc_y": "75",
+      "width": "50",
+      "height": "8"
+    },
+
+    {
+      "id": "execution_date_l",
+      "type": "label",
+      "editable": "true",
+      "initialvalue": "Execution date",
+      "ulc_x": "10",
+      "ulc_y": "85",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "execution_date",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "01.07.2018",
+      "ulc_x": "45",
+      "ulc_y": "85",
+      "width": "25",
+      "height": "8"
+    },
+    
+    {
+      "id": "submit",
+      "type": "button",
+      "editable": "true",
+      "initialvalue": "Next",
+      "ulc_x": "80",
+      "ulc_y": "85",
+      "width": "15",
+      "height": "8"
+    }
+  ]
+}

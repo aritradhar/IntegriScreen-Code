@@ -67,6 +67,7 @@ function change_focus(attack) {
                 typed_chars = attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
                 char_base_idx = targets[0].selectionStart;
                 setTimeout(function() {
+                    $(targets[1]).off('keydown');
                     $(targets[0]).focus();
                     keystroke_buffer.forEach(function(char, idx) {
                         setTimeout(function() {

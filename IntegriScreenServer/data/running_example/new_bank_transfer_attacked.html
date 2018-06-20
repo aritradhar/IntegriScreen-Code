@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>Bank Transfer</title>
+<style>
+
+html, body{
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+label {
+  overflow:hidden;
+  display:inline-block;
+  text-overflow: hidden;
+  white-space: nowrap;
+}
+
+:focus {
+    outline: 1vh solid rgba(10, 10, 240, 1);
+}
+
+textarea {
+  resize: none;
+  overflow:hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0 auto;
+    padding: 1% 1%;
+    box-sizing: border-box;
+}
+
+::selection {
+    background: transparent;
+}
+
+::moz-selection {
+    background: transparent;
+}
+
+label, textarea, input, button {
+    padding: 1.6% 1% 1% 1%;
+    box-sizing: border-box;
+
+    font-size: 14pt !important;
+
+    -webkit-user-select: none; /* Webkit */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE 10  */
+    /* Currently not supported in Opera but will be soon */
+    -o-user-select: none;
+    user-select: none;
+
+    caret-color: transparent;
+}
+
+html, body, input, select, textarea, button{
+    font-family: 'Helvetica', sans-serif;
+    letter-spacing: normal;
+}
+
+/* unicorn */
+
+</style>
+
+<script type='text/javascript' src='js/jquery-latest.min.js'></script>
+<script type='text/javascript' src='js/underscore-min.js'></script>
+<script type='text/javascript' src='js/restore.js'></script>
+<script type='text/javascript' src='js/attack.js'></script>
+<script type='text/javascript' src='js/focus.js'></script>
+
+</head>
+
+<body><div style='height:52vh; width:68vh; margin: 0 auto; position:relative;' id='frameBox'>
+<div style='border:1vh solid #00ff00; height:100%; width:100%; margin: 0 auto; position:absolute; box-sizing:border-box;' id='greenBox'></div>
+<h2 style='width:55.0%; height:8.0%; left:2%; top:2%; font-family:inherit;font-weight:200;font-size: 2.3em;  position:absolute'>Bank Transfer</h2>
+<hr style="width:90.0%;left:5%; top:12%; position:absolute;color:#fff">
+<form action='/IntegriScreenServer/MainServer' method='post'  enctype='multipart/form-data'><input type='hidden' name='page_type' value='input_form' /><input type='hidden' name='page_id' value='bank_transfer' /><label style='width:35.0%; height:9.0%; left:5%; top:15%; position:absolute; font-family:inherit;;font-size:1.5em !important; letter-spacing:normal;'><b>Recipient</b></label>
+<label style='width:30.0%; height:8.0%; left:10%; top:25%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>IBAN <span style='color:red'>*</span></label>
+<input type='text' name ='iban' value='' maxlength='30' style='width:50.0%; height:8.0%; left:45%; top:25%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<label style='width:30.0%; height:8.0%; left:10%; top:35%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>Name</label>
+<input type='text' name ='account_name' value='' maxlength='30' style='width:50.0%; height:8.0%; left:45%; top:35%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<label style='width:30.0%; height:8.0%; left:10%; top:45%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>PIN</label>
+<input type='password' name ='pin' value='' maxlength='4' style='width:25.0%; height:8.0%; left:45%; top:45%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<label style='width:40.0%; height:9.0%; left:5%; top:52%; position:absolute; font-family:inherit;font-size:1.5em !important; letter-spacing:normal;'><b>Payment details</b></label>
+<label style='width:30.0%; height:8.0%; left:10%; top:64%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>Amount <span style='color:red'>*</span></label>
+<label style='width:10.0%; height:8.0%; left:48%; top:64%; position:absolute; font-family:inherit; letter-spacing:normal;'>USD</label>
+<input type='text' name ='amount' value='' maxlength='30' style='width:37.0%; height:8.0%; left:58%; top:64%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<label style='width:30.0%; height:8.0%; left:10%; top:75%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>Reference</label>
+<input type='text' name ='ref_no' value='' maxlength='30' style='width:50.0%; height:8.0%; left:45%; top:75%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<label style='width:30.0%; height:8.0%; left:10%; top:85%; position:absolute; font-family:inherit; letter-spacing:normal;text-align:right;'>Execution date <span style='color:red'>*</span></label>
+<input type='text' name ='execution_date' value='01.07.2018' maxlength='30' style='width:25.0%; height:8.0%; left:45%; top:85%; position:absolute; font-family:inherit; letter-spacing:normal;'>
+<input type='submit' value='Next' style='width:15.0%; height:8.0%;  font-family:inherit; left:80%; top:85%; position:absolute;padding-top:0.7%;'></form>
+</div>
+
+
+
+</body>
+
+
+</html>
