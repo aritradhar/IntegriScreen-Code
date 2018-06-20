@@ -120,16 +120,18 @@ public class MainServer extends HttpServlet {
 				}
 				String fileData = writer.toString();
 
-				System.out.println("FILENAME:" + fileName + " Received");
+				
 
 				FileWriter fw;
 				try {
 					fw = new FileWriter(location+ "/" + fileName);
 					fw.append(fileData);
 					fw.close();
+					
+					System.out.println("FILENAME:" + fileName + " Received");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println("User just pressed the upload without any file. Total moron!");
 				}
 
 				try {
