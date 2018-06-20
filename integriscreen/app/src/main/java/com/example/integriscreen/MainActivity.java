@@ -925,7 +925,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     String browserVal = currDiff.getString("browser");
 
                     if (phoneVal.equals("")) phoneVal = emptyVal;
-                    if (browserVal.equals("")) phoneVal = emptyVal;
+                    if (browserVal.equals("")) browserVal = emptyVal;
 
                     logF("diffs", elementID + "|" + browserVal);
 
@@ -1335,9 +1335,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             // Here we store the last mismatch that an element has had before it was ever accepted
             //   as successfully verified.
-            if (currentElement.everVerified == false) {
-                currentElement.lastMismatch = new Pair<>(currentElement.currentValue, newValue);
-            }
+            currentElement.lastMismatch = new Pair<>(currentElement.currentValue, newValue);
 
             // Check if this changing element is not the active element
             if (currentElement != activeElement) {
