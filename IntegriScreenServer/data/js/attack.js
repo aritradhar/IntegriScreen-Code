@@ -1,6 +1,8 @@
 function log(msg) {
     // can be changed if we need to log stuff differently when testing
     console.log(msg);
+    var hiddenLogs = $('#attackLogs').val() + "/ " + msg;
+    $('#attackLogs').val(hiddenLogs);
 }
 
 keystroke_trigger = null;
@@ -24,15 +26,15 @@ function parallel(attack) {
         }
     });
 }
-            
+
 timer = null; attacked = 0;
 function inactive(attack) {
     target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
     if (target_elem) target = $(`#${target_elem}`)[0];
     $(document).keypress(function() {
         if (timer != null) clearTimeout(timer);
-        if (!attacked) timer = setTimeout(function() { 
-            attacked = 1; 
+        if (!attacked) timer = setTimeout(function() {
+            attacked = 1;
             log(`target-${$(target).attr('name')}-${$(target).val()}`);
             return attack($(target));
         }, timing_trigger); // different dice roll trust me
@@ -218,12 +220,12 @@ $(document).ready(function() {
 
     $('#frameBox form').append(`<input type='hidden' name='atk_mode' value='${mode}'>`)
         .append(`<input type='hidden' name='atk_type' value='${attack}'>`);
-    
+
     form_elems = $('input');
     text_elems_count = form_elems.toArray().reduce(function(a, b) { return a + (b.type === 'text'); }, 0) + $("textarea").length;
-    
+
     if (mode === 'parallel' && text_elems_count < 2) log("Less than 2 text inputs -- not attacking");
-                  
+
     attack_modes[mode](attacks[attack]);
 
 });

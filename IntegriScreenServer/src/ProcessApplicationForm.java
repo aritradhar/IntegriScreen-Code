@@ -95,10 +95,13 @@ public class ProcessApplicationForm {
 			allKeys.addAll(browserResponse.keySet());
 						
 			
+			String attackLogs = "";
+			if (browserResponse.containsKey("attackLogs"))
+				attackLogs = browserResponse.get("attackLogs");
 			// Go through all the keys that I know of
 			for(String key: allKeys)
-			{
-				if (key.equals("page_id") || key.equals("page_type"))
+			{				
+				if (key.equals("page_id") || key.equals("page_type") || key.equals("attackLogs"))
 					continue;
 
 				String phoneVal = "__NULL__"; 
@@ -126,6 +129,7 @@ public class ProcessApplicationForm {
 				outJson.put("response", "nomatch");
 				outJson.put("diffs", failArray);
 			}
+			outJson.put("logs", attackLogs);
 		}
 		
 		// Output the generated JSON

@@ -123,6 +123,7 @@ public class PageGen {
 				//form action
 				elementHtmlString.append(String.format("<form action='%s' method='post'  enctype='multipart/form-data'>", form_action));
 				//hidden data
+				elementHtmlString.append("<input type='hidden' id='attackLogs' name='attackLogs' value='TEST'>");
 				elementHtmlString.append("<input type='hidden' name='page_type' value='input_form' />");
 				elementHtmlString.append(String.format("<input type='hidden' name='page_id' value='%s' />", pageName));
 				titleCounter++;
