@@ -3,13 +3,16 @@ function log(msg) {
     console.log(msg);
 }
 
+keystroke_trigger = null;
+timing_trigger = null;
+
 key_count = 0;
 function parallel(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
-        if (key_count === 3) {
+        if (key_count === keystroke_trigger) {
             log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
             attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
         }
@@ -25,59 +28,60 @@ function inactive(attack) {
             attacked = 1; 
             log(`target-${$(target).attr('name')}-${$(target).val()}`);
             return attack($(target));
-        }, 3000); // different dice roll trust me
+        }, timing_trigger); // different dice roll trust me
     });
 }
 
 function same(attack) {
     let target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
-    const trigger = Math.floor(Math.random() * 3) + 4;
     log(`binded-${$(target).attr('name')}-${$(target).val()}`);
     $(target).keydown(function() {
         key_count += 1;
-        if (key_count === trigger) {
+        if (key_count === keystroke_trigger) {
             attack($(target));    // chosen by fair dice roll, guaranteed to be random
         }
     });
 }
 
 keystroke_buffer = [];
-time_cheating = 0;
-focus_override = null;
 function change_focus(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
-    typed_amount = 3;
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
-        if (key_count === typed_amount) {
+        if (key_count === keystroke_trigger) {
+
+            function keystroke_trap(e) {
+                e.preventDefault();
+                keystroke_buffer.push(e.key);
+            }
+
+            $(targets[0]).keydown(keystroke_trap);
+            $(targets[1]).keydown(keystroke_trap);
+
             setTimeout(function() {
-                if (focus_override) {
-                    minTimeFocusOutAfterEdit = 0;
-                    minTimeStayingFocused = 0;
-                    time_cheating = focus_override === "fast" ? 250 : 0;
-                }
                 log(`target-${$(targets[1]).attr('name')}-${$(targets[1]).val()}`);
-                $(targets[1]).keydown(function(e) {
-                    e.preventDefault();
-                    console.log(e);
-                    keystroke_buffer.push(e.key);
-                });
                 $(targets[1]).focus();
+                updateFocusTimestamp();
+
                 typed_chars = attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+                updateLastEdit();
+
                 char_base_idx = targets[0].selectionStart;
                 setTimeout(function() {
+                    $(targets[0]).off('keydown');
                     $(targets[1]).off('keydown');
+                    manageFocus();
                     $(targets[0]).focus();
                     keystroke_buffer.forEach(function(char, idx) {
                         setTimeout(function() {
                             base_val = [...$(targets[0]).val()];
                             base_val.splice(char_base_idx+idx, 0, char);
                             $(targets[0]).val(base_val.join(''));
-                        }, 80 * (idx + 1))
+                        }, 100 * (idx + 1))
                     })
-                }, typed_chars * 120 + time_cheating)
-            }, 20);
+                }, typed_chars * 120)
+            }, 20); // To move the focus A --> B
         }
     });
 }
@@ -139,7 +143,6 @@ function add_bunch(target) {
     n_char = _.sample(alphabet, howmany);
     n_char.forEach(function(chr, idx) {
         setTimeout(function(){
-            console.log(target, chr, idx);
             value.splice(t_char+idx, 0, chr);
             target.val(value.join(''));
         }, 120 * (idx + 1))
@@ -184,10 +187,25 @@ $(document).ready(function() {
     let mode = url.searchParams.get("atk_mode");
     let attack = url.searchParams.get("atk_type");
     focus_override = url.searchParams.get("speed");
+    keystroke_trigger = url.searchParams.get("keystroke_trigger");
+    timing_trigger = url.searchParams.get("timing_trigger");
+
 
     if (mode == null) return;
     if (attack === 'random' || attack == null) attack = _.sample(Object.keys(attacks));
-    
+    if (keystroke_trigger == null) keystroke_trigger = 3;
+    if (timing_trigger == null) timing_trigger = 3000;
+
+    if (focus_override === 'fast') {
+        minTimeFocusOutAfterEdit = 250;
+        minTimeStayingFocused = 1000;
+    }
+    else if (focus_override === 'faster') {
+        minTimeFocusOutAfterEdit = 0;
+        minTimeStayingFocused = 0;
+    }
+
+
     $('#frameBox form').append(`<input type='hidden' name='atk_mode' value='${mode}'>`)
         .append(`<input type='hidden' name='atk_type' value='${attack}'>`);
     
