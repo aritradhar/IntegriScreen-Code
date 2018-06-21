@@ -417,7 +417,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         cleanAllData();
         outputOnUILabel("Input reset.");
 
-        startButton.setText("Start");
+        startIntegriScreen();
+        startButton.setText("Submit");
     }
 
     public void toggleAllOptionalElementsVisibility() {
@@ -455,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickShowRaw(View view) {
+        realignCheckbox.setChecked(false);
         currentOutputSelection = OutputSelection.RAW;
     }
 

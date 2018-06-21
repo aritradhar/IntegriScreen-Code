@@ -2,7 +2,7 @@
   "ratio": "1080:960",
 "vspace": "72",
   "page_id": "bank_transfer",
-  "border_thickness":"1",
+  "border_thickness":"2",
   "fontsize": "16pt",
   "font_family": "'Helvetica', sans-serif",
   "letter_spacing": "normal",
