@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static int comparisonFontScale = 2;
     private static int comparisonFontThickness = 4;
-    private static String emptyVal = "[null]";
+    private static String emptyVal = "\"\"";
 
 
 
@@ -1067,8 +1067,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         }
         else if (currentISState == ISState.SUBMITTING_DATA) {
-            Imgproc.putText(rotatedScreenMat, "DATA SUBMITTED...", new Point(textX, textY),
-                    defaultFont, 2, new Scalar(150, 150, 0), 3);
+            Imgproc.putText(rotatedScreenMat, "DATA SUBMITTED.", new Point(textX, textY),
+                    defaultFont, 1.5, new Scalar(150, 150, 0), 3);
+
+            Imgproc.putText(rotatedScreenMat, "Now submit from the browser.", new Point(textX, textY+70),
+                    defaultFont, 1.5, new Scalar(150, 150, 0), 3);
+
         } else if (currentISState == ISState.EVERYTHING_OK) {
             Imgproc.putText(rotatedScreenMat, "PERFECT MATCH!", new Point(textX, textY),
                     defaultFont, 2, new Scalar(0, 255, 0), 5);
