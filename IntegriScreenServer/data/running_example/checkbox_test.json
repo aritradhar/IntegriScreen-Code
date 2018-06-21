@@ -1,7 +1,7 @@
 {
   "ratio": "1080:960",
 "vspace": "72",
-  "page_id": "bank_transfer",
+  "page_id": "checkbox_test",
   "border_thickness":"1",
   "fontsize": "16pt",
   "font_family": "'Helvetica', sans-serif",
@@ -11,7 +11,7 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Bank Transfer",
+      "initialvalue": "Checkbox Test",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "3",
@@ -128,7 +128,7 @@
       "id": "ref_no_l",
       "type": "label",
       "editable": "false",
-      "initialvalue": "Description",
+      "initialvalue": "Reference",
       "fontsize": "14pt",
       "ulc_x": "10",
       "ulc_y": "76",
@@ -169,7 +169,39 @@
       "width": "23",
       "height": "8"
     },
-
+    {
+      "id": "standing_l",
+      "type": "label",
+      "editable": "false",
+      "fontsize": "18pt",
+      "initialvalue": "Standing Order?",
+      "ulc_x": "28",
+      "ulc_y": "16",
+      "width": "35",
+      "height": "8"
+    },
+    {
+      "id": "standing_input",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "X",
+      "fontsize": "18pt",
+      "ulc_x": "68",
+      "ulc_y": "16",
+      "width": "5",
+      "height": "8"
+    },
+    {
+      "id": "standing_check",
+      "type": "checkbox",
+      "editable": "true",
+      "initialvalue": "X",
+      "fontsize": "18pt",
+      "ulc_x": "68",
+      "ulc_y": "26",
+      "width": "5",
+      "height": "5"
+    },
     {
       "id": "submit",
       "type": "button",
