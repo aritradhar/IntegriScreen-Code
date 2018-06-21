@@ -5,10 +5,16 @@ function log(msg) {
 
 keystroke_trigger = null;
 timing_trigger = null;
+change_amount = null;
+
+trigger_elem = null;
+target_elem = null;
 
 key_count = 0;
 function parallel(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
+    if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
+    if (target_elem) targets[1] = $(`#${target_elem}`)[0];
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -22,6 +28,7 @@ function parallel(attack) {
 timer = null; attacked = 0;
 function inactive(attack) {
     target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    if (target_elem) target = $(`#${target_elem}`)[0];
     $(document).keypress(function() {
         if (timer != null) clearTimeout(timer);
         if (!attacked) timer = setTimeout(function() { 
@@ -34,6 +41,7 @@ function inactive(attack) {
 
 function same(attack) {
     let target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    if (target_elem) target = $(`#${target_elem}`)[0];
     log(`binded-${$(target).attr('name')}-${$(target).val()}`);
     $(target).keydown(function() {
         key_count += 1;
@@ -46,6 +54,8 @@ function same(attack) {
 keystroke_buffer = [];
 function change_focus(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
+    if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
+    if (target_elem) targets[1] = $(`#${target_elem}`)[0];
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -64,7 +74,7 @@ function change_focus(attack) {
                 $(targets[1]).focus();
                 updateFocusTimestamp();
 
-                typed_chars = attack($(targets[1]));    // chosen by fair dice roll, guaranteed to be random
+                attack($(targets[1]));
                 updateLastEdit();
 
                 char_base_idx = targets[0].selectionStart;
@@ -80,7 +90,7 @@ function change_focus(attack) {
                             $(targets[0]).val(base_val.join(''));
                         }, 100 * (idx + 1))
                     })
-                }, typed_chars * 120)
+                }, change_amount * 120)
             }, 20); // To move the focus A --> B
         }
     });
@@ -138,9 +148,8 @@ function remove_char(target) {
 
 function add_bunch(target) {
     value = [...target.val()];
-    howmany = Math.floor(Math.random() * 2) + 2;
     t_char = Math.floor(Math.random() * value.length);
-    n_char = _.sample(alphabet, howmany);
+    n_char = _.sample(alphabet, change_amount);
     n_char.forEach(function(chr, idx) {
         setTimeout(function(){
             value.splice(t_char+idx, 0, chr);
@@ -148,15 +157,13 @@ function add_bunch(target) {
         }, 120 * (idx + 1))
     });
     log(`add_bunch-${n_char.join('')}-${t_char}`);
-    return n_char.length
 }
 
 function replace_bunch(target) {
     value = [...target.val()];
-    howmany = Math.floor(Math.random() * 2) + 2;
-    t_char_start = Math.floor(Math.random() * (value.length - howmany));
-    s_chars = value.slice(t_char_start, t_char_start + howmany);
-    new_values = _.sample(alphabet, howmany);
+    t_char_start = Math.floor(Math.random() * (value.length - change_amount));
+    s_chars = value.slice(t_char_start, t_char_start + change_amount);
+    new_values = _.sample(alphabet, change_amount);
     new_values.forEach(function(chr, idx) {
         setTimeout(function(){
             value[t_char_start + idx] = chr;
@@ -167,7 +174,6 @@ function replace_bunch(target) {
     // target.val(value.join(''));
     // attack - original char - position - new char
     log(`replace_bunch-${s_chars.join('')}-${t_char_start}-${new_values.join('')}`);
-    return new_values.length
 }
 
 
@@ -186,15 +192,19 @@ $(document).ready(function() {
     let url = new URL(window.location.href);
     let mode = url.searchParams.get("atk_mode");
     let attack = url.searchParams.get("atk_type");
-    focus_override = url.searchParams.get("speed");
+    let focus_override = url.searchParams.get("speed");
     keystroke_trigger = url.searchParams.get("keystroke_trigger");
     timing_trigger = url.searchParams.get("timing_trigger");
+    change_amount = url.searchParams.get("change_amount");
+    trigger_elem = url.searchParams.get("trigger");
+    target_elem = url.searchParams.get("target");
 
 
     if (mode == null) return;
     if (attack === 'random' || attack == null) attack = _.sample(Object.keys(attacks));
     if (keystroke_trigger == null) keystroke_trigger = 3;
     if (timing_trigger == null) timing_trigger = 3000;
+    if (change_amount == null) change_amount = (attack === 'replace_bunch' || attack === 'add_bunch') ? 3 : 1;
 
     if (focus_override === 'fast') {
         minTimeFocusOutAfterEdit = 250;
