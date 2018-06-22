@@ -167,7 +167,26 @@ function add_bunch(target) {
     log(`add_bunch-${n_char.join('')}-${t_char}`);
 }
 
+function random_same_type(c, num=1)
+{
+  new_values = "";
+  if ($.inArray(c, alphabet) != -1)
+    new_values += _.sample(alphabet, num).join('');
+  else if ($.inArray(c, upper_alphabet) != -1)
+      new_values += _.sample(upper_alphabet, num).join('');
+  else if ($.inArray(c, numbers) != -1)
+    new_values += _.sample(numbers, num).join('');
+  else
+    new_values += c.repeat(num);
+
+    return new_values;
+}
+
 function replace_bunch(target) {
+    if (target.val().length < change_amount) {
+      target.val(target.val() + random_same_type(target.val()[0], change_amount-target.val().length));
+    }
+
     value = [...target.val()];
 
     t_char_start = Math.floor(Math.random() * (value.length - change_amount));
@@ -176,17 +195,12 @@ function replace_bunch(target) {
     // Choose a bunch of new values, but make sure that they are of the same type as the original ones!
     new_values = "";
     for(var i = 0; i < s_chars.length; ++i) {
-        if ($.inArray(s_chars[i], alphabet) != -1)
-          new_values += _.sample(alphabet, 1).join('');
-          else if ($.inArray(s_chars[i], upper_alphabet) != -1)
-            new_values += _.sample(upper_alphabet, 1).join('');
-        else if ($.inArray(s_chars[i], numbers) != -1)
-          new_values += _.sample(numbers, 1).join('');
-        else
-          new_values += s_chars[i];
+        new_values += random_same_type(s_chars[i]);
     }
+    if (new_values.length < s_chars.length)
+      new_values += _.sample(alphabet, change_amount - new_values.length).join('');
     log(new_values);
-    
+
     [...new_values].forEach(function(chr, idx) {
         setTimeout(function(){
             value[t_char_start + idx] = chr;
