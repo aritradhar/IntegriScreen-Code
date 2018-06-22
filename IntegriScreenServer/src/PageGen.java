@@ -117,7 +117,7 @@ public class PageGen {
 					System.exit(1);
 				}
 
-				elementHtmlString.append(String.format("<h2 style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; font-family:%s; font-size:%s !important;  position:absolute'>%s</h2>\n", width, height, ulc_x, ulc_y, elemFont, elemFontSize, initialValue));
+				elementHtmlString.append(String.format("<h2 id='%s' name='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; font-family:%s; font-size:%s !important;  position:absolute'>%s</h2>\n", id, id, width, height, ulc_x, ulc_y, elemFont, elemFontSize, initialValue));
 				page_title_h2 = initialValue;
 
 				//form action
@@ -131,19 +131,21 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("textarea"))
 			{
-				elementHtmlString.append(String.format("<textarea name='%s' style='left:%s%%; top:%s%%; position:absolute; height:%s%%; width:%s%%; font-family:%s; font-size:%s !important; letter-spacing:%s;'>%s</textarea>\n", id, ulc_x, ulc_y, height, width, elemFont, elemFontSize, letterSpacing, initialValue));
+				elementHtmlString.append(String.format("<textarea name='%s' id='%s' style='left:%s%%; top:%s%%; position:absolute; height:%s%%; width:%s%%; font-family:%s; font-size:%s !important; letter-spacing:%s;'>%s</textarea>\n", 
+						id, id, ulc_x, ulc_y, height, width, elemFont, elemFontSize, letterSpacing, initialValue));
 
 			}
 
 			else if(type.equalsIgnoreCase("textfield"))
 			{
 
-				elementHtmlString.append(String.format("<input type='text' name ='%s' value='%s' maxlength='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; font-size:%s !important; letter-spacing:%s;'>\n", id, initialValue, maxInputChars, width, height, ulc_x, ulc_y, elemFont, elemFontSize, letterSpacing));
+				elementHtmlString.append(String.format("<input type='text' name ='%s'  id='%s' value='%s' maxlength='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; font-size:%s !important; letter-spacing:%s;'>\n", 
+						id, id, initialValue, maxInputChars, width, height, ulc_x, ulc_y, elemFont, elemFontSize, letterSpacing));
 			}
 
 			else if(type.equalsIgnoreCase("button"))
 			{
-				elementHtmlString.append(String.format("<input type='submit' value='%s' style='width:%s%%; height:%s%%;  font-family:%s; font-size:%s !important; left:%s%%; top:%s%%; position:absolute;'>", initialValue, width, height, elemFont, elemFontSize, ulc_x, ulc_y));
+				elementHtmlString.append(String.format("<input type='submit' name='%s' id='%s' value='%s' style='width:%s%%; height:%s%%;  font-family:%s; font-size:%s !important; left:%s%%; top:%s%%; position:absolute;'>", id, id, initialValue, width, height, elemFont, elemFontSize, ulc_x, ulc_y));
 			}
 
 			else if(type.equalsIgnoreCase("checkbox"))
@@ -154,7 +156,7 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("label"))
 			{
-				elementHtmlString.append(String.format("<label style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; font-size:%s !important; letter-spacing:%s;'>%s</label>\n", width, height, ulc_x, ulc_y, elemFont, elemFontSize, letterSpacing, initialValue));
+				elementHtmlString.append(String.format("<label name='%s' id='%s' style='width:%s%%; height:%s%%; left:%s%%; top:%s%%; position:absolute; font-family:%s; font-size:%s !important; letter-spacing:%s;'>%s</label>\n", id, id, width, height, ulc_x, ulc_y, elemFont, elemFontSize, letterSpacing, initialValue));
 			}
 
 			divCounter++;
