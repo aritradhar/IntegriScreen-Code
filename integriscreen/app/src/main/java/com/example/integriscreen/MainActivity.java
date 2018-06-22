@@ -508,9 +508,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // outputOnUILabel(responseJSON.toString());
         try {
             String responseVal = receivedJSONObject.getString("response");
+            String attackLogs = receivedJSONObject.getString("attackLogs");
             if (responseVal.equals("match")) {
+                logR("Attack Logs", "|" + attackLogs + "|");
                 transitionISSTo(ISState.EVERYTHING_OK);
             } else if (responseVal.equals("nomatch")) {
+                logR("Attack Logs", "|" + attackLogs + "|");
                 transitionISSTo(ISState.DATA_MISMATCH);
             }
 
