@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static int comparisonFontScale = 2;
     private static int comparisonFontThickness = 4;
-    private static String emptyVal = "\"\"";
+    private static String emptyVal = "[empty]";
 
 
 
