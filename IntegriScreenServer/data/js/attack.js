@@ -1,7 +1,7 @@
 function log(msg) {
     // can be changed if we need to log stuff differently when testing
     console.log(msg);
-    var hiddenLogs = $('#attackLogs').val() + "/ " + msg;
+    var hiddenLogs = $('#attackLogs').val() + "|" + msg;
     $('#attackLogs').val(hiddenLogs);
 }
 
@@ -17,6 +17,7 @@ function parallel(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
     if (target_elem) targets[1] = $(`#${target_elem}`)[0];
+    log("Parallel")
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -31,6 +32,7 @@ timer = null; attacked = 0;
 function inactive(attack) {
     target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
     if (target_elem) target = $(`#${target_elem}`)[0];
+    log("Inactive")
     $(document).keypress(function() {
         if (timer != null) clearTimeout(timer);
         if (!attacked) timer = setTimeout(function() {
@@ -44,6 +46,7 @@ function inactive(attack) {
 function same(attack) {
     let target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
     if (target_elem) target = $(`#${target_elem}`)[0];
+    log("Same")
     log(`binded-${$(target).attr('name')}-${$(target).val()}`);
     $(target).keydown(function() {
         key_count += 1;
@@ -58,6 +61,7 @@ function change_focus(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
     if (target_elem) targets[1] = $(`#${target_elem}`)[0];
+    log("Focus")
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -195,18 +199,17 @@ $(document).ready(function() {
     let mode = url.searchParams.get("atk_mode");
     let attack = url.searchParams.get("atk_type");
     let focus_override = url.searchParams.get("speed");
-    keystroke_trigger = url.searchParams.get("keystroke_trigger");
-    timing_trigger = url.searchParams.get("timing_trigger");
-    change_amount = url.searchParams.get("change_amount");
+    keystroke_trigger = parseInt(url.searchParams.get("keystroke_trigger"));
+    timing_trigger =  parseInt(url.searchParams.get("timing_trigger"));
+    change_amount = parseInt(url.searchParams.get("change_amount"));
     trigger_elem = url.searchParams.get("trigger");
     target_elem = url.searchParams.get("target");
 
-
     if (mode == null) return;
     if (attack === 'random' || attack == null) attack = _.sample(Object.keys(attacks));
-    if (keystroke_trigger == null) keystroke_trigger = 3;
-    if (timing_trigger == null) timing_trigger = 3000;
-    if (change_amount == null) change_amount = (attack === 'replace_bunch' || attack === 'add_bunch') ? 3 : 1;
+    if (isNaN(keystroke_trigger)) keystroke_trigger = 3;
+    if (isNaN(timing_trigger)) timing_trigger = 3000;
+    if (isNaN(change_amount)) change_amount = (attack === 'replace_bunch' || attack === 'add_bunch') ? 3 : 1;
 
     if (focus_override === 'fast') {
         minTimeFocusOutAfterEdit = 250;
