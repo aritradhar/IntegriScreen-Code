@@ -129,7 +129,7 @@ public class ProcessApplicationForm {
 				outJson.put("response", "nomatch");
 				outJson.put("diffs", failArray);
 			}
-			outJson.put("logs", attackLogs);
+			outJson.put("attackLogs", attackLogs);
 		}
 		
 		// Output the generated JSON
