@@ -110,6 +110,8 @@ attack_modes = {
 };
 
 alphabet = [...'abcdefghijklmnopqrstuvwxyz'];
+upper_alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+numbers = [...'0123456789'];
 
 function replace_char(target) {
     value = [...target.val()];
@@ -167,10 +169,25 @@ function add_bunch(target) {
 
 function replace_bunch(target) {
     value = [...target.val()];
+
     t_char_start = Math.floor(Math.random() * (value.length - change_amount));
     s_chars = value.slice(t_char_start, t_char_start + change_amount);
-    new_values = _.sample(alphabet, change_amount);
-    new_values.forEach(function(chr, idx) {
+
+    // Choose a bunch of new values, but make sure that they are of the same type as the original ones!
+    new_values = "";
+    for(var i = 0; i < s_chars.length; ++i) {
+        if ($.inArray(s_chars[i], alphabet) != -1)
+          new_values += _.sample(alphabet, 1).join('');
+          else if ($.inArray(s_chars[i], upper_alphabet) != -1)
+            new_values += _.sample(upper_alphabet, 1).join('');
+        else if ($.inArray(s_chars[i], numbers) != -1)
+          new_values += _.sample(numbers, 1).join('');
+        else
+          new_values += s_chars[i];
+    }
+    log(new_values);
+    
+    [...new_values].forEach(function(chr, idx) {
         setTimeout(function(){
             value[t_char_start + idx] = chr;
             target.val(value.join(''));
@@ -179,7 +196,7 @@ function replace_bunch(target) {
     // value = value.slice(0, t_char_start).concat(new_values, value.slice(t_char_start + howmany));
     // target.val(value.join(''));
     // attack - original char - position - new char
-    log(`replace_bunch-${s_chars.join('')}-${t_char_start}-${new_values.join('')}`);
+    log(`replace_bunch-${s_chars.join('')}-${t_char_start}-${new_values}`);
 }
 
 
