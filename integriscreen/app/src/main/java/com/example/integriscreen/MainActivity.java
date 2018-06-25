@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // This has to be a global variable if we run the check e.g. every 3-rd frame!
     private boolean foundAdditionalTextOnFrame = false;
 
-    private int realignmentFrequency = 5;
+    private int realignmentFrequency = 10;
     private int detectUnspecifiedTextFrequency = 5;
 
     private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
@@ -587,20 +587,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return concatenatedText;
     }
 
-    private static String displayTextBlocksOnFrame(Mat currentFrameMat, SparseArray<TextBlock> detectedTextBlocks) {
-        return displayTextBlocksOnFrame(currentFrameMat, detectedTextBlocks, new Scalar(0, 255, 0), false);
-    }
-
     // This method:
     // 1) extracts all the text from a (specific part of) frame
     // 2) concatenates it
     // 3) draws it on the screen
     // 4) displays it on an UI label
     // 5) returns the concatenated text
-    private static String extractAndDisplayTextFromFrame(Mat frameMat) {
-        SparseArray<TextBlock> texts = detect_text(frameMat);
+    private static String extractAndDisplayTextFromFrame(Mat frameMat, Scalar textColor) {
+        SparseArray<TextBlock> detectedTextBlocks = detect_text(frameMat);
 
-        return displayTextBlocksOnFrame(frameMat, texts);
+        return displayTextBlocksOnFrame(frameMat, detectedTextBlocks, textColor, false);
+    }
+
+    private static String extractAndDisplayTextFromFrame(Mat frameMat) {
+        return extractAndDisplayTextFromFrame(frameMat, new Scalar(0, 255, 0));
     }
 
     /**
@@ -870,16 +870,20 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         // HANDLE THE UPPER PART!
         // ---------------- Based on the state that we are in, handle the upper part ------
 
-        boolean acceptingInput = false;
-        if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+        // Reload the new form if needed
+        if (currentISState == ISState.SUPERVISING_USER_INPUT || currentISState == ISState.EVERYTHING_OK || currentISState == ISState.DATA_MISMATCH) {
             Mat diffsUpperPart = rotatedUpperPart.clone();
             List<Pair<Rect, Integer>> changedLocations = upperFrameISImageProcessor.diffFramesAndGetAllChangeLocations(diffsUpperPart,
                     1, 1, 10);
 
+            boolean acceptingInput = false;
             // Check if title was impacted. If it was, update the form.
-            if (targetForm.titleElement != null && optionalElementsVisible && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
-                tryLoadingNewForm(nonRealignedUpperPart);
-            } else {
+            if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
+                // If I managed to reload the form, just return
+                if (tryLoadingNewForm(nonRealignedUpperPart))
+                    return false;
+
+            } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
                 acceptingInput = superviseUIChanges(rotatedUpperPart, changedLocations);
 
                 // This is a special case which we use to handle handle automated tests
@@ -889,28 +893,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                         storeAllFormVerificationResults();
                     }
 
-                    logR("Successfully verified form",  targetForm.pageId);
+                    logR("Successfully verified form", targetForm.pageId);
                     targetForm.initiallyVerified = true;
                 }
+
+                // This is where we could choose to draw the black-and-white on the screen
+                // Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
+                diffsUpperPart.release();
+
+                String allDiffAreas = "";
+                for (Pair<Rect, Integer> P : changedLocations) {
+                    allDiffAreas += " | " + P.second.toString();
+                    Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 255), 2);
+                }
+
+                // At the moment, we are not outputing this at all
+                if (changedLocations.size() < 0)
+                    outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
+
+                return acceptingInput;
             }
+        }
 
-            // This is where we could choose to draw the black-and-white on the screen
-            // Imgproc.cvtColor(diffsUpperPart, rotatedUpperPart, Imgproc.COLOR_GRAY2RGBA);
-            diffsUpperPart.release();
+        // The execution only reaches this point if the app is neither supervising an existing form, nor reloading a new one
 
-            String allDiffAreas = "";
-            for(Pair<Rect, Integer> P : changedLocations) {
-                allDiffAreas += " | " + P.second.toString();
-                Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 255), 2);
-            }
-
-            // At the moment, we are not outputing this at all
-            if (changedLocations.size() < 0)
-                outputOnUILabel("No. of diffs: " + changedLocations.size() + ", areas: " + allDiffAreas);
-
-            return acceptingInput;
-
-        } else if (currentISState == ISState.SUBMITTING_DATA) {
+        if (currentISState == ISState.SUBMITTING_DATA) {
             logF("SubmittingData", "bla");
         } else if (currentISState == ISState.EVERYTHING_OK) {
             //          outputOnUILabel(receivedJSONObject.toString());
@@ -953,7 +960,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else {
-            extractAndDisplayTextFromFrame(rotatedUpperPart);
+            extractAndDisplayTextFromFrame(rotatedUpperPart, new Scalar(255, 0, 0));
         }
 
         return false;
