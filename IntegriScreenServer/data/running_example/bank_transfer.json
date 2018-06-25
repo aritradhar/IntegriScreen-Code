@@ -147,28 +147,6 @@
       "height": "8"
     },
 
-    {
-      "id": "execution_date_l",
-      "type": "label",
-      "editable": "false",
-      "fontsize": "14pt",
-      "initialvalue": "Execution date",
-      "ulc_x": "10",
-      "ulc_y": "86",
-      "width": "30",
-      "height": "8"
-    },
-
-    {
-      "id": "execution_date",
-      "type": "textfield",
-      "editable": "true",
-      "initialvalue": "01.07.2018",
-      "ulc_x": "42",
-      "ulc_y": "86",
-      "width": "23",
-      "height": "8"
-    },
 
     {
       "id": "submit",
