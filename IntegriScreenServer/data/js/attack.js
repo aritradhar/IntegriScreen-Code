@@ -231,6 +231,7 @@ targeted_change = null;
 function change_label(target) {
     if (targeted_change) {
         target.text(targeted_change);
+        log(`change_label_targeted-${targeted_change}`);
     }
     else {
         let value = [...target.text()];
@@ -241,6 +242,7 @@ function change_label(target) {
             value[t_char + idx] = chr;
         });
         target.text(value.join(''));
+        log(`change_label_targeted-${n_char.join('')}-${t_char}`);
     }
 }
 
