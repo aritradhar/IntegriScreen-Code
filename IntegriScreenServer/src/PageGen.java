@@ -145,7 +145,7 @@ public class PageGen {
 
 			else if(type.equalsIgnoreCase("button"))
 			{
-				elementHtmlString.append(String.format("<input type='submit' name='%s' id='%s' value='%s' style='width:%s%%; height:%s%%;  font-family:%s; font-size:%s !important; left:%s%%; top:%s%%; position:absolute;'>", id, id, initialValue, width, height, elemFont, elemFontSize, ulc_x, ulc_y));
+				elementHtmlString.append(String.format("<input type='submit' value='%s' style='width:%s%%; height:%s%%;  font-family:%s; font-size:%s !important; left:%s%%; top:%s%%; position:absolute;'>", initialValue, width, height, elemFont, elemFontSize, ulc_x, ulc_y));
 			}
 
 			else if(type.equalsIgnoreCase("checkbox"))
