@@ -17,7 +17,7 @@ function parallel(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
     if (target_elem) targets[1] = $(`#${target_elem}`)[0];
-    log("Parallel")
+    log("Parallel");
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -30,9 +30,8 @@ function parallel(attack) {
 
 timer = null; attacked = 0;
 function inactive(attack) {
-    target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
-    if (target_elem) target = $(`#${target_elem}`)[0];
-    log("Inactive")
+    let target = target_elem ? $(`#${target_elem}`)[0] : _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    log("Inactive");
     $(document).keypress(function() {
         if (timer != null) clearTimeout(timer);
         if (!attacked) timer = setTimeout(function() {
@@ -44,9 +43,8 @@ function inactive(attack) {
 }
 
 function same(attack) {
-    let target =  _.sample($("textarea,input[type='textfield'],input[type='text']"));
-    if (target_elem) target = $(`#${target_elem}`)[0];
-    log("Same")
+    let target = target_elem ? $(`#${target_elem}`)[0] : _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    log("Same");
     log(`binded-${$(target).attr('name')}-${$(target).val()}`);
     $(target).keydown(function() {
         key_count += 1;
@@ -61,7 +59,7 @@ function change_focus(attack) {
     targets = _.sample($("textarea,input[type='textfield'],input[type='text']"), 2);
     if (trigger_elem) targets[0] = $(`#${trigger_elem}`)[0];
     if (target_elem) targets[1] = $(`#${target_elem}`)[0];
-    log("Focus")
+    log("Focus");
     log(`binded-${$(targets[0]).attr('name')}-${$(targets[0]).val()}`);
     $(targets[0]).keydown(function() {
         key_count += 1;
@@ -102,11 +100,27 @@ function change_focus(attack) {
     });
 }
 
+function fixed_time(attack) {
+    let target = target_elem ? $(`#${target_elem}`)[0] : _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    log("Fixed");
+    setTimeout(function() {
+        attack($(target));
+    }, timing_trigger)
+}
+
+function page_load(attack) {
+    let target = target_elem ? $(`#${target_elem}`)[0] : _.sample($("textarea,input[type='textfield'],input[type='text']"));
+    log("Fixed");
+    attack($(target));
+}
+
 attack_modes = {
     'inactive': inactive,
     'parallel': parallel,
     'same': same,
-    'change_focus': change_focus
+    'change_focus': change_focus,
+    'fixed_time': fixed_time,
+    'page_load': page_load
 };
 
 alphabet = [...'abcdefghijklmnopqrstuvwxyz'];
@@ -170,11 +184,11 @@ function add_bunch(target) {
 function random_same_type(c, num=1)
 {
   new_values = "";
-  if ($.inArray(c, alphabet) != -1)
+  if ($.inArray(c, alphabet) !== -1)
     new_values += _.sample(alphabet, num).join('');
-  else if ($.inArray(c, upper_alphabet) != -1)
+  else if ($.inArray(c, upper_alphabet) !== -1)
       new_values += _.sample(upper_alphabet, num).join('');
-  else if ($.inArray(c, numbers) != -1)
+  else if ($.inArray(c, numbers) !== -1)
     new_values += _.sample(numbers, num).join('');
   else
     new_values += c.repeat(num);
@@ -194,7 +208,7 @@ function replace_bunch(target) {
 
     // Choose a bunch of new values, but make sure that they are of the same type as the original ones!
     new_values = "";
-    for(var i = 0; i < s_chars.length; ++i) {
+    for(let i = 0; i < s_chars.length; ++i) {
         new_values += random_same_type(s_chars[i]);
     }
     if (new_values.length < s_chars.length)
@@ -213,6 +227,23 @@ function replace_bunch(target) {
     log(`replace_bunch-${s_chars.join('')}-${t_char_start}-${new_values}`);
 }
 
+targeted_change = null;
+function change_label(target) {
+    if (targeted_change) {
+        target.text(targeted_change);
+    }
+    else {
+        let value = [...target.text()];
+        const t_char = Math.floor(Math.random() * (value.length - change_amount));
+        const n_char = _.sample(alphabet, change_amount);
+        console.log(value, t_char, n_char);
+        n_char.forEach(function(chr, idx) {
+            value[t_char + idx] = chr;
+        });
+        target.text(value.join(''));
+    }
+}
+
 
 attacks = {
     'replace_char': replace_char,
@@ -221,6 +252,7 @@ attacks = {
     'add_char': add_char,
     'add_bunch': add_bunch,
     'remove_char': remove_char,
+    'change_label': change_label
 };
 
 
@@ -235,6 +267,7 @@ $(document).ready(function() {
     change_amount = parseInt(url.searchParams.get("change_amount"));
     trigger_elem = url.searchParams.get("trigger");
     target_elem = url.searchParams.get("target");
+    targeted_change = url.searchParams.get("change");
 
     if (mode == null) return;
     if (attack === 'random' || attack == null) attack = _.sample(Object.keys(attacks));
@@ -258,7 +291,10 @@ $(document).ready(function() {
     form_elems = $('input');
     text_elems_count = form_elems.toArray().reduce(function(a, b) { return a + (b.type === 'text'); }, 0) + $("textarea").length;
 
-    if (mode === 'parallel' && text_elems_count < 2) log("Less than 2 text inputs -- not attacking");
+    if (mode === 'parallel' && text_elems_count < 2) {
+        log("Less than 2 text inputs -- not attacking");
+        return;
+    }
 
     attack_modes[mode](attacks[attack]);
 
