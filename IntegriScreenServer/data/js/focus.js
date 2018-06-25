@@ -50,7 +50,8 @@ function manageFocus() {
 }
 
 $(document).ready(function () {
-    $("<style>.no-pointer { cursor: none; }</style>").appendTo('head');
+    $("<style>.no-pointer { cursor: none !important; }</style>").appendTo('head');
+    $("<style>label, textarea, input, button {cursor: inherit;}</style>").appendTo('head');
     timer = null;
     $("body").mousemove(function () {
         clearTimeout(timer);
