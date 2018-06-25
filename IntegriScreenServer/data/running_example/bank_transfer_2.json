@@ -1,0 +1,163 @@
+{
+  "ratio": "1080:960",
+"vspace": "72",
+  "page_id": "bank_transfer_2",
+  "border_thickness":"2",
+  "fontsize": "16pt",
+  "font_family": "'Helvetica', sans-serif",
+  "letter_spacing": "normal",
+  "form_action":"/IntegriScreenServer/MainServer",
+  "elements": [
+    {
+      "id": "form_title",
+      "type": "title",
+      "initialvalue": "Bank Transfer 2",
+      "editable": "false",
+      "ulc_x": "2",
+      "ulc_y": "3",
+      "fontsize": "20pt",
+      "width": "55",
+      "height": "8"
+    },
+
+    {
+      "id": "recipient_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Recipient",
+      "fontsize": "18pt",
+      "ulc_x": "5",
+      "ulc_y": "23",
+      "width": "35",
+      "height": "7"
+    },
+
+    {
+      "id": "iban_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "IBAN",
+      "fontsize": "14pt",
+      "ulc_x": "10",
+      "ulc_y": "33",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "iban",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "42",
+      "ulc_y": "33",
+      "width": "50",
+      "height": "8"
+    },
+
+    {
+      "id": "account_name_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Name",
+      "fontsize": "14pt",
+      "ulc_x": "10",
+      "ulc_y": "43",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "account_name",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "42",
+      "ulc_y": "43",
+      "width": "50",
+      "height": "8"
+    },
+
+    {
+      "id": "payment_details_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Payment details",
+      "fontsize": "18pt",
+      "ulc_x": "5",
+      "ulc_y": "55",
+      "width": "40",
+      "height": "7"
+    },
+
+    {
+      "id": "amount_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Amount",
+      "fontsize": "14pt",
+      "ulc_x": "10",
+      "ulc_y": "65",
+      "width": "30",
+      "height": "8"
+    },
+
+        {
+      "id": "currency_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "USD",
+      "ulc_x": "42",
+      "ulc_y": "64.5",
+      "width": "10",
+      "height": "8"
+    },
+
+    {
+      "id": "amount",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "55",
+      "ulc_y": "65",
+      "width": "37",
+      "height": "8"
+    },
+
+    {
+      "id": "ref_no_l",
+      "type": "label",
+      "editable": "false",
+      "initialvalue": "Description",
+      "fontsize": "14pt",
+      "ulc_x": "10",
+      "ulc_y": "76",
+      "width": "30",
+      "height": "8"
+    },
+
+    {
+      "id": "ref_no",
+      "type": "textfield",
+      "editable": "true",
+      "initialvalue": "",
+      "ulc_x": "42",
+      "ulc_y": "76",
+      "width": "50",
+      "height": "8"
+    },
+
+
+    {
+      "id": "submit",
+      "type": "button",
+      "editable": "false",
+      "initialvalue": "Submit Payment",
+      "fontsize": "14pt",
+      "ulc_x": "68",
+      "ulc_y": "86",
+      "width": "24",
+      "height": "8"
+    }
+  ]
+}
