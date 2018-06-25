@@ -711,8 +711,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             ISState.DATA_MISMATCH);
 
     boolean shouldDetectTransformation(ISState currentISState) {
-        // If it's true, try realigning every 4th frame
-        if (liveCheckbox.isChecked() && currentFrameId % realignmentFrequency == 0)
+        // If it's true, try realigning every Nth frame
+        if (liveCheckbox.isChecked() || currentFrameId % realignmentFrequency == 0)
             return true;
 
         if (dontDetectTransformation.contains(currentISState))
