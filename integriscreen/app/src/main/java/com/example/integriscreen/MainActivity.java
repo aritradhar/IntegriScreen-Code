@@ -38,7 +38,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.FpsMeter;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -48,6 +47,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static LogManager LM;
 
     private Mat previousFrameMat;
+    private Size frameSize;
 
     private Point upper_left, lower_right;
 
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static int comparisonFontThickness = 4;
     private static String emptyVal = "[empty]";
 
-
+    private Point touchCenter = null;
 
     // the form created based on specs received from Server
     private HashMap<String, TargetForm> allLoadedForms;
@@ -882,8 +883,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 // If I managed to reload the form, just return
                 if (tryLoadingNewForm(nonRealignedUpperPart))
                     return false;
-
-            } else if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+            }
+            if (targetForm.titleElement != null && currentISState == ISState.SUPERVISING_USER_INPUT) {
                 acceptingInput = superviseUIChanges(rotatedUpperPart, changedLocations);
 
                 // This is a special case which we use to handle handle automated tests
@@ -906,6 +907,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     allDiffAreas += " | " + P.second.toString();
                     Imgproc.rectangle(rotatedUpperPart, P.first.tl(), P.first.br(), new Scalar(255, 0, 255), 2);
                 }
+
+                if (touchCenter != null)
+                    Imgproc.circle(rotatedUpperPart, touchCenter, 100, new Scalar(255, 0, 0), 5);
 
                 // At the moment, we are not outputing this at all
                 if (changedLocations.size() < 0)
@@ -1115,6 +1119,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
         Mat currentFrameMat = inputFrame.rgba();
+        frameSize = currentFrameMat.size();
 //        logF(TAG, "Frame size: " + currentFrameMat.rows() + "x" + currentFrameMat.cols());
 
         if (currentOutputSelection == OutputSelection.INTEGRISCREEN) {
@@ -1535,6 +1540,36 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return texts;
     }
 
+    private void acceptDetectedValue(TargetForm targetForm, float x, float y) {
+        double mxFormX = frameSize.width;
+        double mxFormY = frameSize.height;
+        double mxScreenX = _cameraBridgeViewBase.getWidth();
+        double mxScreenY = _cameraBridgeViewBase.getHeight();
+
+        double offsetX = ( mxScreenX - mxFormX * (mxScreenY / mxFormY) ) / 2;
+
+        double resizedX = (x - offsetX) / ( (mxScreenX - offsetX) / mxFormX );
+        double resizedY = y / (mxScreenY / mxFormY);
+
+        double rotatedX = mxFormY - resizedY;
+        double rotatedY = resizedX;
+
+        touchCenter = new Point(rotatedX, rotatedY);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                touchCenter = null;
+            }
+        }, 1000);
+
+        for(UIElement currentElement: targetForm.allElements) {
+            if (currentElement.dirty && currentElement.box.contains(new Point(rotatedX, rotatedY))) {
+                logR("Snoozed warning", "ID: " + currentElement.id + ", expected: |" + currentElement.lastMismatch.first + "| detected: |" + currentElement.lastMismatch.second + "|");
+                currentElement.currentValue = currentElement.lastMismatch.second;
+            }
+        }
+    }
+
     // get motion events
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -1542,10 +1577,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             float x = event.getX();
             float y = event.getY();
 
-            logF("FocusMode", "Click to: " + x + ", " + y
+            logF("Screen Click", "Coordinates: " + x + ", " + y
                     + ", at: " + event.getEventTime());
 
-            _cameraBridgeViewBase.focusAt(x, y, 100);
+            if (currentISState == ISState.SUPERVISING_USER_INPUT) {
+                acceptDetectedValue(targetForm, x, y);
+            } else {
+                _cameraBridgeViewBase.focusAt(x, y, 100);
+            }
         }
         return false;
     }
