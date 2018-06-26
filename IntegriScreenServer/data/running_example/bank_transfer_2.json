@@ -154,9 +154,9 @@
       "editable": "false",
       "initialvalue": "Submit Payment",
       "fontsize": "14pt",
-      "ulc_x": "68",
+      "ulc_x": "65",
       "ulc_y": "86",
-      "width": "24",
+      "width": "27",
       "height": "8"
     }
   ]

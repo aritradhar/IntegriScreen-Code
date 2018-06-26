@@ -1,7 +1,7 @@
 {
   "ratio": "1080:960",
 "vspace": "72",
-  "page_id": "bank_transfer",
+  "page_id": "bank_transfer_9",
   "border_thickness":"2",
   "fontsize": "16pt",
   "font_family": "'Helvetica', sans-serif",
@@ -11,7 +11,7 @@
     {
       "id": "form_title",
       "type": "title",
-      "initialvalue": "Bank Transfer",
+      "initialvalue": "Bank Transfer 9",
       "editable": "false",
       "ulc_x": "2",
       "ulc_y": "3",

@@ -1,6 +1,6 @@
 lastEditTimestamp = 0;        // track the last input event
 focusTimestamp = 0;
-minTimeFocusOutAfterEdit = 500;     // minimum time to hold focus after last edit event
+minTimeFocusOutAfterEdit = 1000;     // minimum time to hold focus after last edit event
 minTimeStayingFocused = 2000;       // minimu time that one element should be focused if it is edited
 
 window.addEventListener("load", function () {  // add event listeners after the page loads
