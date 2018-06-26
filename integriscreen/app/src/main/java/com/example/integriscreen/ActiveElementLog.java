@@ -29,8 +29,8 @@ public class ActiveElementLog {
         str1 = OCRTrim(str1);
         str2 = OCRTrim(str2);
 
-        Log.d("changeLegit: trim old:", "|" + str1 + "|");
-        Log.d("changeLegit: trim new:", "|" + str2 + "|");
+//        Log.d("changeLegit: trim old:", "|" + str1 + "|");
+//        Log.d("changeLegit: trim new:", "|" + str2 + "|");
 
         // Find the shared prefix of the two strings: this is what the user does not need to edit.
         int sharedPrefixLength = 0;
@@ -44,8 +44,8 @@ public class ActiveElementLog {
         str1 = str1.substring(sharedPrefixLength);
         str2 = str2.substring(sharedPrefixLength);
 
-        Log.d("changeLegit:", "after prefix trim: |" + str1 + "|");
-        Log.d("changeLegit:", "after prefix trim: |" + str2 + "|");
+//        Log.d("changeLegit:", "after prefix trim: |" + str1 + "|");
+//        Log.d("changeLegit:", "after prefix trim: |" + str2 + "|");
 
 
         // Find the shared sufix of the two strings: we can assume that the user does not need to edit this
@@ -59,7 +59,7 @@ public class ActiveElementLog {
         str1 = str1.substring(0, str1.length() - sharedSuffixLength);
         str2 = str2.substring(0, str2.length() - sharedSuffixLength);
 
-        Log.d("changeLegit:", "after suffix trim: |" + str1 + "|");
-        Log.d("changeLegit:", "after suffix trim: |" + str2 + "|");
+//        Log.d("changeLegit:", "after suffix trim: |" + str1 + "|");
+//        Log.d("changeLegit:", "after suffix trim: |" + str2 + "|");
     }
 }
