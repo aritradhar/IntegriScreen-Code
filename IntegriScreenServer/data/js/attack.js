@@ -198,6 +198,8 @@ function random_same_type(c, num=1)
 
 function replace_bunch(target) {
     if (target.val().length < change_amount) {
+      if (target.val().length == 0)
+        target.val("A");
       target.val(target.val() + random_same_type(target.val()[0], change_amount-target.val().length));
     }
 
