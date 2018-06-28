@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static CheckBox liveCheckbox;
     private static Button detectButton;
     private static Button rawButton;
-    private static Button startButton;
+    private static Button startSubmitButton;
 
     private static boolean optionalElementsVisible = true;
 
@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private long currentFrameTimestamp = 0;
     private SparseArray<TextBlock> detectedTextBlocks = null;
 
+
+    private static String submitButtonText = "(2) Submit";
+    private static String startButtonText = "(1) Start";
 
     // This has to be a global variable if we run the check e.g. every 3-rd frame!
     private boolean foundAdditionalTextOnFrame = false;
@@ -271,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         rawButton = (Button) findViewById(R.id.raw);
         detectButton = (Button) findViewById(R.id.detect_frame);
-        startButton = (Button) findViewById(R.id.ISStart);
+        startSubmitButton = (Button) findViewById(R.id.ISStart);
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
@@ -384,6 +387,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void handleSubmit() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                startSubmitButton.setText(startButtonText);
+                startSubmitButton.setBackgroundColor(Color.parseColor("#87CEFA")); // Light blue
+                //startSubmitButton.setBackgroundColor(0x87CEFA); // Light blue
+            }
+        });
+
         if (currentISState == null)
             return;
 
@@ -419,7 +431,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         outputOnUILabel("Input reset.");
 
         startIntegriScreen();
-        startButton.setText("Submit");
     }
 
     public void toggleAllOptionalElementsVisibility() {
@@ -473,6 +484,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void startIntegriScreen() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                startSubmitButton.setText(submitButtonText);
+                startSubmitButton.setBackgroundColor(Color.GREEN);
+            }
+        });
+
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
         transitionISSTo(ISState.DETECTING_FRAME);
@@ -480,12 +499,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     public void onClickStartIS(View view) {
-        if (startButton.getText().equals("Start")) {
+        if (startSubmitButton.getText().equals(startButtonText)) {
             startIntegriScreen();
-            startButton.setText("Submit");
         } else {
             handleSubmit();
-            startButton.setText("Start");
         }
     }
 

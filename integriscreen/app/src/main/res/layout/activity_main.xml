@@ -195,10 +195,10 @@ android:layout_gravity="right|left"
         android:layout_marginRight="20px"
 
         android:onClick="onClickStartIS"
-        android:background="@android:color/holo_green_light"
+        android:background="#87CEFA"
 
         android:rotation="-90"
-        android:text="Start" />
+        android:text="(1) Start" />
 
     <!--
     <Button
