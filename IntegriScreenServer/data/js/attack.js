@@ -67,7 +67,9 @@ function change_focus(attack) {
 
             function keystroke_trap(e) {
                 e.preventDefault();
-                keystroke_buffer.push(e.key);
+				console.log(e.key);
+				if (e.key.length == 1)
+					keystroke_buffer.push(e.key);
             }
 
             $(targets[0]).keydown(keystroke_trap);
