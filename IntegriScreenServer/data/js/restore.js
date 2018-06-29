@@ -1,14 +1,14 @@
 $(document).ready(function() {
-    
+
     var url = new URL(window.location.href);
     var old_vals = url.searchParams.get("submitted");
-    
+
     if (old_vals == null) return;
-                  
-    $('body').append(`<pre style='text-align:center;'>${old_vals}</pre>`);
-                 
+
+    $('body').append(`<h4 style="text-align:center">Data submitted.  Now submit from the app.</h4>  <pre style='text-align:center;'>${old_vals}</pre>`);
+
     old_vals = JSON.parse(old_vals);
-    
+
     for (var key in old_vals) {
         target = $(`[name='${key}']`);
         target.each(function() {
