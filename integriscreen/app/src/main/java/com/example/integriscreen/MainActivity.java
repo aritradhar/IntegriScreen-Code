@@ -581,6 +581,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 //        matPic.release();
     }
 
+
     private static String displayTextBlocksOnFrame(Mat currentFrameMat, SparseArray<TextBlock> detectedTextBlocks, Scalar textColor, boolean drawBox) {
         String concatDelim = "";
         String concatenatedText = "";

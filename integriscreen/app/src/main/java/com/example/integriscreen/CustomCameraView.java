@@ -115,7 +115,8 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             drawingView.setHaveTouch(true, screenRect);
             drawingView.invalidate();
 
-            new Timer().schedule(new TimerTask() {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     drawingView.setHaveTouch(false, new android.graphics.Rect(0, 0, 0, 0));
@@ -124,6 +125,7 @@ public class CustomCameraView extends JavaCameraView implements PictureCallback 
             }, 1000);
         }
     }
+
 
     /**
      * Called from PreviewSurfaceView to set touch focus.
