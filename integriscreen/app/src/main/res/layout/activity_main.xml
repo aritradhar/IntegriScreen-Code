@@ -192,7 +192,7 @@ android:layout_gravity="right|left"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="50px"
         android:layout_toLeftOf="@+id/ISReset"
-        android:layout_marginRight="20px"
+        android:layout_marginRight="0px"
 
         android:onClick="onClickStartIS"
         android:background="#87CEFA"
@@ -228,11 +228,29 @@ android:layout_gravity="right|left"
 
         android:background="@android:color/holo_orange_light"
 
-        android:layout_toLeftOf="@+id/options"
-        android:layout_marginRight="20px"
+        android:layout_toLeftOf="@+id/ISSnooze"
+        android:layout_marginRight="-120px"
         android:onClick="onClickISReset"
         android:rotation="-90"
         android:text="Reset" />
+
+
+    <Button
+        android:id="@+id/ISSnooze"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50px"
+
+        android:background="@android:color/holo_orange_light"
+
+        android:layout_toLeftOf="@+id/options"
+        android:layout_marginRight="-120px"
+        android:onClick="onClickISSnooze"
+        android:rotation="-90"
+        android:text="Snooze" />
+
 
     <Button
         android:id="@+id/options"

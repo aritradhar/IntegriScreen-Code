@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static Button detectButton;
     private static Button rawButton;
     private static Button startSubmitButton;
+    private static Button snoozeButton;
+
 
     private static boolean optionalElementsVisible = true;
 
@@ -124,6 +126,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private static int comparisonFontScale = 2;
     private static int comparisonFontThickness = 4;
     private static String emptyVal = "[empty]";
+
+    private boolean snoozedWarnings;
+    private Vibrator v;
+    private Ringtone r;
+
 
     private Point touchCenter = null;
 
@@ -275,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         rawButton = (Button) findViewById(R.id.raw);
         detectButton = (Button) findViewById(R.id.detect_frame);
         startSubmitButton = (Button) findViewById(R.id.ISStart);
+        snoozeButton = (Button) findViewById(R.id.ISSnooze);
 
         // initialize logs
         activeElementLogs = new ArrayList<>();
@@ -386,13 +394,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         currentOutputSelection = OutputSelection.CANNY;
     }
 
+    public void onClickISSnooze(View view) {
+        if (snoozeButton.getText().equals("Snooze"))
+            snoozeWarnings();
+        else
+            unsnoozeWarnings();
+    }
+
     public void handleSubmit() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 startSubmitButton.setText(startButtonText);
                 startSubmitButton.setBackgroundColor(Color.parseColor("#87CEFA")); // Light blue
-                //startSubmitButton.setBackgroundColor(0x87CEFA); // Light blue
             }
         });
 
@@ -483,6 +497,31 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
     }
 
+    public void unsnoozeWarnings() {
+        snoozedWarnings = false;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+            snoozeButton.setText("Snooze");
+            snoozeButton.setBackgroundColor(Color.parseColor("#ffffbb33")); // Light blue
+            }
+        });
+
+    }
+
+    public void snoozeWarnings() {
+        snoozedWarnings = true;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+            snoozeButton.setText("Snoozed!");
+            snoozeButton.setBackgroundColor(Color.RED); // Light blue
+            }
+        });
+
+
+    }
+
     public void startIntegriScreen() {
         runOnUiThread(new Runnable() {
             @Override
@@ -492,6 +531,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
 
+        unsnoozeWarnings();
         currentOutputSelection = OutputSelection.INTEGRISCREEN;
 
         transitionISSTo(ISState.DETECTING_FRAME);
@@ -1236,13 +1276,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         return null;
     }
 
-    Vibrator v;
-    Ringtone r;
-    private void makeWarningSound(){
+    private void stopWarnings() {
         if (r != null && r.isPlaying()) {
             v.cancel();
             r.stop();
         }
+    }
+
+    private void makeWarningSound(){
+        stopWarnings();
+
+        if (snoozedWarnings)
+            return;
 
         // Get instance of Vibrator from current Context
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
