@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     // This has to be a global variable if we run the check e.g. every 3-rd frame!
     private boolean foundAdditionalTextOnFrame = false;
 
-    private int realignmentFrequency = 10;
+    private int realignmentFrequency = 5;
     private int detectUnspecifiedTextFrequency = 5;
 
     private static int defaultFont = Core.FONT_HERSHEY_SIMPLEX;
@@ -318,8 +318,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         });
 
         //cameraPreview.changeExposureComp(-currentAlphaAngle);
-        drawingView = (DrawingView) findViewById(R.id.drawing_surface);
-        _cameraBridgeViewBase.setDrawingView(drawingView);
+//        drawingView = (DrawingView) findViewById(R.id.drawing_surface);
+//        _cameraBridgeViewBase.setDrawingView(drawingView);
     }
 
     @Override
@@ -967,7 +967,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 }
 
                 if (touchCenter != null)
-                    Imgproc.circle(rotatedUpperPart, touchCenter, 100, new Scalar(255, 0, 0), 5);
+                    Imgproc.circle(rotatedUpperPart, touchCenter, 50, new Scalar(255, 0, 0), 5);
 
                 // At the moment, we are not outputing this at all
                 if (changedLocations.size() < 0)
