@@ -15,3 +15,5 @@ for _i in range(args.min_elem_num, args.max_elem_num + 1):
     for _c in range(forms_per_group):
         generate_form("Random_{}".format(generated_forms), num_elements=_i)
         generated_forms += 1
+
+print "No of forms generated: " + str(generated_forms)

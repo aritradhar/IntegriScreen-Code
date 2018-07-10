@@ -17,14 +17,26 @@ ELEMENT_POOL = [
     "label"
 ]
 
+def random_value(x_space):
+    choice = np.random.randint(0, 2)
+    if choice == 0:
+        return random_word(x_space)
+    else:
+        return random_number(x_space)
 
 def random_word(x_space):
-    max_len = 4 if x_space < 3 else 8 if x_space < 6 else 12
-    word = ''.join(np.random.choice(list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
+    max_len = 6 if x_space < 3 else 8
+    word = np.random.choice(WORDS)
+    while len(word) > max_len:
+        word = np.random.choice(WORDS)
+
+    return word
+
+
+def random_number(x_space):
+    max_len = 6 if x_space < 3 else 8
+    word = ''.join(np.random.choice(list("0123456789"),
                                     np.random.choice(range(3, max_len))))
-    # word = np.random.choice(WORDS)
-    # while len(word) > max_len:
-    #     word = np.random.choice(WORDS)
     return word
 
 
@@ -34,7 +46,7 @@ def find_max_end(x, _i, next_element):
                next_element)
 
 
-def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-serif', randomfont=False):
+def generate_form(title, num_elements=5, font_size="15pt", font='"Times", serif'):
     # Form will have a ratio between 15:12 and 12:15
     min_width, max_width = 12, 15
     ratio_wh = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
@@ -83,7 +95,7 @@ def generate_form(title, num_elements=5, font_size="15pt", font='"Arial", sans-s
         form['elements'].append({
             "id": "{}".format(_i),
             "type": elem_type,
-            "initialvalue": random_word(end - start) if elem_type != 'checkbox' else "",
+            "initialvalue": random_value(end - start) if elem_type != 'checkbox' else "",
             "editable": "true" if elem_type in ["textarea", "textfield", "checkbox"] else "false",
             "ulc_x": (start % 10) * 10 + 1.8,
             "ulc_y": (start / 10) * 10 + 9,
@@ -107,7 +119,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('title')
     parser.add_argument('-n', '--nelems', type=int, default=5)
-    parser.add_argument('-d', '--density', type=int, default=1)
     parser.add_argument('-fs', '--fontsize', type=int, default=10)
     parser.add_argument('-ft', '--font', type=str, default='"Arial", sans-serif')
     parser.add_argument('--randomfont', action='store_true')
@@ -115,5 +126,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     font = args.font if args.randomfont else np.random.choice(FONT_POOL)
-
-    generate_form(args.title, args.nelems, args.fontsize, font, args.randomfont)
+    generate_form(args.title, args.nelems, args.fontsize, font)

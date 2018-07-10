@@ -2,7 +2,7 @@ $(document).ready(function() {
 
 	var serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
 	// var serverUrl = "http://tildem.inf.ethz.ch"
-		
+
     var url = new URL(window.location.href);
     var setup = url.searchParams.get("setup");
     var time = url.searchParams.get("time");
@@ -22,7 +22,7 @@ $(document).ready(function() {
     }
     window.next = next_page;
 
-    $.get(setup, function(data) {
+    $.get("../data/"+setup, function(data) {
 
         page_targets = data.split('\n');
         next_page();
