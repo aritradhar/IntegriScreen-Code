@@ -2,10 +2,12 @@
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -75,7 +77,7 @@ public class MainServer extends HttpServlet {
 		//System.out.println(page_type);
 
 		//show the list
-		
+
 		//page response from the browser
 		if(page_type!= null && page_type.equalsIgnoreCase("input_form"))
 		{
@@ -112,22 +114,61 @@ public class MainServer extends HttpServlet {
 				}
 
 				StringWriter writer = new StringWriter();
-				try {
-					IOUtils.copy(fileContent, writer, StandardCharsets.UTF_8);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				String fileData = writer.toString();
+				String fileData = null;
+				if(fileName.contains(".zip"))
+				{
+					System.out.println("Found zip");
+					byte[] buffer = new byte[fileContent.available()];
+					System.out.println(buffer.length);
+					fileContent.read(buffer);
+					OutputStream outStream = new FileOutputStream(location+ "/" + fileName);	
+					outStream.write(buffer);
+					outStream.close();
+					
+					//unzip
 
-				
+					Process p;
+					String s;
+					try {
+						String cmd = "unzip -o " + location + fileName + " -d " + location;
+						System.out.println("Command : " + cmd);
+						p = Runtime.getRuntime().exec(cmd);
+
+						BufferedReader br = new BufferedReader(
+								new InputStreamReader(p.getInputStream()));
+						while ((s = br.readLine()) != null)
+							System.out.println("line: " + s);
+						p.waitFor();
+						System.out.println ("exit: " + p.exitValue());
+						p.destroy();
+					} catch (Exception e) 
+					{
+						System.err.println("Shit happend!");
+						e.printStackTrace();
+					}		    		
+
+				}
+
+				else
+				{
+					try {
+						IOUtils.copy(fileContent, writer, StandardCharsets.UTF_8);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					fileData = writer.toString();
+				}
+
 
 				FileWriter fw;
 				try {
-					fw = new FileWriter(location+ "/" + fileName);
-					fw.append(fileData);
-					fw.close();
-					
+					if(!fileName.contains(".zip"))
+					{
+						fw = new FileWriter(location+ "/" + fileName);
+						fw.append(fileData);
+						fw.close();
+					}
 					System.out.println("FILENAME:" + fileName + " Received");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -141,6 +182,10 @@ public class MainServer extends HttpServlet {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
+
+
+
 			}
 			//System.out.println("File data : " + fileData);
 			else
@@ -184,12 +229,12 @@ public class MainServer extends HttpServlet {
 							new InputStreamReader(p.getInputStream()));
 					while ((s = br.readLine()) != null)
 						System.out.println("line: " + s);
-					
-					 br = new BufferedReader(
-								new InputStreamReader(p.getErrorStream()));
-						while ((s = br.readLine()) != null)
-							System.out.println("line: " + s);
-						
+
+					br = new BufferedReader(
+							new InputStreamReader(p.getErrorStream()));
+					while ((s = br.readLine()) != null)
+						System.out.println("line: " + s);
+
 					p.waitFor();
 					System.out.println ("exit: " + p.exitValue());
 					p.destroy();
@@ -198,7 +243,7 @@ public class MainServer extends HttpServlet {
 				{
 					System.err.println("Things fucked up");
 				}
-				
+
 				try
 				{
 					String s = null;
@@ -208,12 +253,12 @@ public class MainServer extends HttpServlet {
 							new InputStreamReader(p.getInputStream()));
 					while ((s = br.readLine()) != null)
 						System.out.println("line: " + s);
-					
-					 br = new BufferedReader(
-								new InputStreamReader(p.getErrorStream()));
-						while ((s = br.readLine()) != null)
-							System.out.println("line: " + s);
-						
+
+					br = new BufferedReader(
+							new InputStreamReader(p.getErrorStream()));
+					while ((s = br.readLine()) != null)
+						System.out.println("line: " + s);
+
 					p.waitFor();
 					System.out.println ("exit: " + p.exitValue());
 					p.destroy();
@@ -225,11 +270,11 @@ public class MainServer extends HttpServlet {
 				outJson.put("response", jarray);
 
 				response.getWriter().append(outJson.toString(1));
-				
+
 				FileWriter fw = new FileWriter(manifest);
 				fw.append(outJson.toString(1));
 				fw.close();
-				
+
 			}
 		}
 	}
