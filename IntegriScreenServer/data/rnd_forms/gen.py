@@ -18,11 +18,14 @@ ELEMENT_POOL = [
 ]
 
 def random_value(x_space):
-    choice = np.random.randint(0, 2)
+    choice = np.random.randint(0, 3)
     if choice == 0:
         return random_word(x_space)
-    else:
+    elif choice == 1:
         return random_number(x_space)
+    else:
+        return random_alpha(x_space)
+
 
 def random_word(x_space):
     max_len = 6 if x_space < 3 else 8
@@ -36,6 +39,13 @@ def random_word(x_space):
 def random_number(x_space):
     max_len = 6 if x_space < 3 else 8
     word = ''.join(np.random.choice(list("0123456789"),
+                                    np.random.choice(range(3, max_len))))
+    return word
+
+
+def random_alpha(x_space):
+    max_len = 6 if x_space < 3 else 8
+    word = ''.join(np.random.choice(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
                                     np.random.choice(range(3, max_len))))
     return word
 
