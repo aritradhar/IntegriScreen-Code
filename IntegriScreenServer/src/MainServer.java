@@ -94,7 +94,9 @@ public class MainServer extends HttpServlet {
 		else
 		{
 			System.out.println(request.getParameter("generated"));
-			boolean isGeneratedLoc =  request.getParameter("generated").equalsIgnoreCase("gen") ? true : false; 
+
+
+			boolean isGeneratedLoc =  request.getParameter("generated") == null ? false : true; 
 			Part filePart = null;
 			try {
 				filePart = request.getPart("file");
