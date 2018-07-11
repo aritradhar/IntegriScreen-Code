@@ -93,6 +93,8 @@ public class MainServer extends HttpServlet {
 		//JSON upload and the automated generation of the pages and _specs configurations
 		else
 		{
+			System.out.println(request.getParameter("generated"));
+			boolean isGeneratedLoc =  request.getParameter("generated").equalsIgnoreCase("gen") ? true : false; 
 			Part filePart = null;
 			try {
 				filePart = request.getPart("file");
@@ -117,9 +119,8 @@ public class MainServer extends HttpServlet {
 				String fileData = null;
 				if(fileName.contains(".zip"))
 				{
-					System.out.println("Found zip");
 					byte[] buffer = new byte[fileContent.available()];
-					System.out.println(buffer.length);
+					System.out.println("Found Zip with len: " + buffer.length);
 					fileContent.read(buffer);
 					OutputStream outStream = new FileOutputStream(location+ "/" + fileName);	
 					outStream.write(buffer);
@@ -129,19 +130,22 @@ public class MainServer extends HttpServlet {
 
 					Process p;
 					String s;
-					try {
+					try 
+					{
 						String cmd = "unzip -o " + location + fileName + " -d " + location;
 						System.out.println("Command : " + cmd);
 						p = Runtime.getRuntime().exec(cmd);
 
-						BufferedReader br = new BufferedReader(
-								new InputStreamReader(p.getInputStream()));
+						BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+						
 						while ((s = br.readLine()) != null)
 							System.out.println("line: " + s);
+						
 						p.waitFor();
-						System.out.println ("exit: " + p.exitValue());
+						System.out.println ("exit value: " + p.exitValue());
 						p.destroy();
-					} catch (Exception e) 
+					} 
+					catch (Exception e) 
 					{
 						System.err.println("Shit happend!");
 						e.printStackTrace();
@@ -162,16 +166,19 @@ public class MainServer extends HttpServlet {
 
 
 				FileWriter fw;
-				try {
+				try 
+				{
 					if(!fileName.contains(".zip"))
 					{
-						fw = new FileWriter(location+ "/" + fileName);
+						String loc = isGeneratedLoc ? generatedLocation + "/" + fileName : location + "/" + fileName;
+						fw = new FileWriter(loc);
 						fw.append(fileData);
 						fw.close();
+						System.out.println("FILENAME:" + fileName + " Received, uploaded at : " + loc);
 					}
-					System.out.println("FILENAME:" + fileName + " Received");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+				} 
+				catch (IOException e) 
+				{
 					System.err.println("User just pressed the upload without any file. Total moron!");
 				}
 
