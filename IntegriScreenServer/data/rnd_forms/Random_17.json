@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "68", 
+  "vspace": "51", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:13", 
-  "fontsize": "14pt", 
+  "ratio": "12:12", 
+  "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_17", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,74 +19,54 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "felting", 
+      "width": "17", 
+      "initialvalue": "swipe", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "0", 
-      "ulc_x": "21.8", 
-      "ulc_y": "39"
+      "ulc_x": "81.8", 
+      "ulc_y": "19"
     }, 
     {
       "width": "17", 
-      "initialvalue": "days", 
+      "initialvalue": "093", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "1", 
       "ulc_x": "81.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "lambda", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "41.8", 
       "ulc_y": "39"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "processioned", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "2", 
-      "ulc_x": "21.8", 
-      "ulc_y": "59"
-    }, 
-    {
       "width": "17", 
-      "initialvalue": "roan", 
-      "editable": "true", 
+      "initialvalue": "billet", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "3", 
       "ulc_x": "81.8", 
       "ulc_y": "69"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "fistula", 
+      "width": "17", 
+      "initialvalue": "66833", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
       "id": "4", 
-      "ulc_x": "61.8", 
+      "ulc_x": "21.8", 
       "ulc_y": "79"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "sell", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "5", 
-      "ulc_x": "61.8", 
-      "ulc_y": "89"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "pelt", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "6", 
-      "ulc_x": "81.8", 
-      "ulc_y": "89"
     }
   ]
 }

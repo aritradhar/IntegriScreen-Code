@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "67", 
+  "vspace": "69", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:12", 
-  "fontsize": "14pt", 
+  "ratio": "12:12", 
+  "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_58", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,143 +19,73 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "toot", 
+      "width": "47", 
+      "initialvalue": "799218", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "0", 
-      "ulc_x": "21.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "29"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "fawn", 
+      "width": "77", 
+      "initialvalue": "0872", 
       "editable": "false", 
       "height": "9", 
-      "type": "label", 
+      "type": "button", 
       "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "lube", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "lotuses", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "3", 
       "ulc_x": "21.8", 
       "ulc_y": "39"
     }, 
     {
+      "width": "37", 
+      "initialvalue": "weltered", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "idioms", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
+      "ulc_x": "1.8", 
+      "ulc_y": "59"
+    }, 
+    {
       "width": "17", 
-      "initialvalue": "nape", 
+      "initialvalue": "598", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "4", 
       "ulc_x": "81.8", 
-      "ulc_y": "39"
+      "ulc_y": "59"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "toys", 
-      "editable": "false", 
+      "width": "47", 
+      "initialvalue": "5440878", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
       "id": "5", 
-      "ulc_x": "21.8", 
-      "ulc_y": "49"
+      "ulc_x": "41.8", 
+      "ulc_y": "79"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "foot", 
+      "width": "57", 
+      "initialvalue": "inkiest", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "6", 
       "ulc_x": "41.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "wise", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "7", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "area", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "8", 
-      "ulc_x": "81.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "wars", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "9", 
-      "ulc_x": "1.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "47", 
-      "initialvalue": "torqued", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "10", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "rows", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "11", 
-      "ulc_x": "81.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "doorknob", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "12", 
-      "ulc_x": "41.8", 
-      "ulc_y": "89"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "loin", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "13", 
-      "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ]

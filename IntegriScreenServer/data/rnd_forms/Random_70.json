@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "78", 
+  "vspace": "62", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "12:14", 
-  "fontsize": "14pt", 
+  "ratio": "12:12", 
+  "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_70", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,164 +19,84 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "copulative", 
+      "width": "17", 
+      "initialvalue": "801", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "19"
     }, 
     {
+      "width": "27", 
+      "initialvalue": "DTDO", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
+    }, 
+    {
       "width": "17", 
-      "initialvalue": "aria", 
+      "initialvalue": "1103", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
-      "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "jellying", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
       "id": "2", 
-      "ulc_x": "61.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "find", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "3", 
-      "ulc_x": "21.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "39"
     }, 
     {
       "width": "37", 
-      "initialvalue": "newborns", 
+      "initialvalue": "JJUH", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "infuser", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "4", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
+      "ulc_x": "21.8", 
+      "ulc_y": "59"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "cert", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "UPTKPFC", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "5", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
+      "ulc_x": "61.8", 
+      "ulc_y": "69"
     }, 
     {
       "width": "17", 
-      "initialvalue": "fuse", 
-      "editable": "true", 
+      "initialvalue": "pigs", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "label", 
       "id": "6", 
       "ulc_x": "1.8", 
-      "ulc_y": "49"
+      "ulc_y": "89"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "ground", 
+      "width": "77", 
+      "initialvalue": "97996", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "7", 
       "ulc_x": "21.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "whup", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "8", 
-      "ulc_x": "61.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "antes", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "9", 
-      "ulc_x": "1.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "suit", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "10", 
-      "ulc_x": "61.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "bath", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "11", 
-      "ulc_x": "81.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "eave", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "12", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "reek", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "13", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "burghs", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "14", 
-      "ulc_x": "61.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "happenstance", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "15", 
-      "ulc_x": "41.8", 
-      "ulc_y": "79"
+      "ulc_y": "89"
     }
   ]
 }

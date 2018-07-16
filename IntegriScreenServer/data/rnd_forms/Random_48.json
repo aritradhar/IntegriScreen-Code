@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "70", 
+  "vspace": "60", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:14", 
-  "fontsize": "14pt", 
+  "ratio": "12:12", 
+  "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_48", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,134 +19,74 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "poem", 
-      "editable": "false", 
+      "width": "37", 
+      "initialvalue": "RASC", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "19"
     }, 
     {
       "width": "17", 
-      "initialvalue": "tick", 
+      "initialvalue": "wisp", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "1", 
+      "ulc_x": "61.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "45598", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "81.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "blog", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
       "id": "2", 
-      "ulc_x": "1.8", 
-      "ulc_y": "29"
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
     }, 
     {
       "width": "17", 
-      "initialvalue": "knee", 
-      "editable": "false", 
+      "initialvalue": "290", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "3", 
-      "ulc_x": "21.8", 
-      "ulc_y": "29"
+      "ulc_x": "81.8", 
+      "ulc_y": "39"
     }, 
     {
       "width": "17", 
-      "initialvalue": "rcpt", 
+      "initialvalue": "jump", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "4", 
-      "ulc_x": "1.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "77", 
-      "initialvalue": "allergists", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "5", 
-      "ulc_x": "1.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "obit", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "6", 
-      "ulc_x": "81.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "87", 
-      "initialvalue": "dialect", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "7", 
-      "ulc_x": "1.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "59"
     }, 
     {
       "width": "17", 
-      "initialvalue": "sane", 
+      "initialvalue": "tonal", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "8", 
-      "ulc_x": "1.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "loan", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textarea", 
-      "id": "9", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "executors", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "10", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "farm", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "11", 
-      "ulc_x": "41.8", 
-      "ulc_y": "79"
+      "id": "5", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
     }, 
     {
       "width": "37", 
-      "initialvalue": "acrimony", 
-      "editable": "false", 
+      "initialvalue": "annulled", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "12", 
+      "type": "textarea", 
+      "id": "6", 
       "ulc_x": "61.8", 
-      "ulc_y": "79"
+      "ulc_y": "89"
     }
   ]
 }

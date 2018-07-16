@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "76", 
+  "vspace": "65", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "12:13", 
+  "ratio": "12:12", 
   "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_1", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -19,8 +19,8 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "vendor", 
+      "width": "17", 
+      "initialvalue": "9179", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
@@ -29,53 +29,43 @@
       "ulc_y": "29"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "chapatis", 
-      "editable": "false", 
+      "width": "87", 
+      "initialvalue": "spills", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
       "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "39"
+      "ulc_x": "1.8", 
+      "ulc_y": "59"
     }, 
     {
-      "width": "77", 
-      "initialvalue": "republican", 
+      "width": "37", 
+      "initialvalue": "elliptic", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "2", 
       "ulc_x": "21.8", 
-      "ulc_y": "49"
+      "ulc_y": "69"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "3539803", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "3", 
+      "ulc_x": "61.8", 
+      "ulc_y": "69"
     }, 
     {
       "width": "17", 
-      "initialvalue": "hags", 
-      "editable": "true", 
+      "initialvalue": "7181", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
-      "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "emboldens", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "4", 
-      "ulc_x": "21.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "27", 
-      "initialvalue": "fiftieth", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "5", 
-      "ulc_x": "1.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ]

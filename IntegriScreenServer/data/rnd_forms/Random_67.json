@@ -1,12 +1,12 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "79", 
+  "vspace": "51", 
   "form_action": "/IntegriScreenServer/MainServer", 
-  "ratio": "13:14", 
-  "fontsize": "14pt", 
+  "ratio": "12:12", 
+  "fontsize": "15pt", 
   "border_thickness": "1", 
   "page_id": "Random_67", 
-  "font_family": "\"Arial\", sans-serif", 
+  "font_family": "\"Times\", serif", 
   "elements": [
     {
       "width": "50", 
@@ -20,162 +20,82 @@
     }, 
     {
       "width": "37", 
-      "initialvalue": "tremolos", 
+      "initialvalue": "29106", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "0", 
-      "ulc_x": "61.8", 
+      "ulc_x": "1.8", 
       "ulc_y": "19"
     }, 
     {
       "width": "37", 
-      "initialvalue": "waggish", 
+      "initialvalue": "apprises", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "1", 
-      "ulc_x": "1.8", 
-      "ulc_y": "29"
+      "ulc_x": "41.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "lass", 
+      "width": "37", 
+      "initialvalue": "MOM", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "iamb", 
+      "width": "37", 
+      "initialvalue": "52597", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "3", 
       "ulc_x": "1.8", 
-      "ulc_y": "39"
+      "ulc_y": "69"
     }, 
     {
       "width": "17", 
-      "initialvalue": "fail", 
+      "initialvalue": "07523", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "4", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
+      "ulc_x": "81.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "fuck", 
+      "width": "57", 
+      "initialvalue": "wanness", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "5", 
-      "ulc_x": "61.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "fern", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "6", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "opal", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "7", 
-      "ulc_x": "61.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "rule", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "8", 
-      "ulc_x": "81.8", 
-      "ulc_y": "59"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "corm", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "9", 
       "ulc_x": "1.8", 
-      "ulc_y": "69"
+      "ulc_y": "79"
     }, 
     {
       "width": "17", 
-      "initialvalue": "wend", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "10", 
-      "ulc_x": "21.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "sampler", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "11", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "cuff", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "12", 
-      "ulc_x": "81.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "47", 
-      "initialvalue": "toppled", 
+      "initialvalue": "OQKG", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
-      "id": "13", 
-      "ulc_x": "1.8", 
-      "ulc_y": "89"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "skua", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "14", 
-      "ulc_x": "61.8", 
-      "ulc_y": "89"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "memo", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "15", 
+      "id": "6", 
       "ulc_x": "81.8", 
+      "ulc_y": "79"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "stew", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "7", 
+      "ulc_x": "21.8", 
       "ulc_y": "89"
     }
   ]
