@@ -58,10 +58,10 @@ def find_max_end(x, _i, next_element):
 
 def generate_form(title, num_elements=5, font_size="15pt", font='"Times", serif'):
     # Form will have a ratio between 15:12 and 12:15
-    min_width, max_width = 12, 15
+    min_width, max_width = 12, 13
     ratio_wh = [np.random.randint(min_width, max_width), np.random.randint(min_width, max_width)]
 
-    height_perc = np.random.randint(65, 80)  # Percentage of the total browser height
+    height_perc = np.random.randint(50, 70)  # Percentage of the total browser height
 
     form = {
         "ratio": "{}:{}".format(*ratio_wh),
