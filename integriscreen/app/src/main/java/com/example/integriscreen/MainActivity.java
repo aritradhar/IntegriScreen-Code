@@ -1022,7 +1022,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else {
-            extractAndDisplayTextFromFrame(rotatedUpperPart, new Scalar(255, 0, 0));
+//            extractAndDisplayTextFromFrame(rotatedUpperPart, new Scalar(255, 0, 0));
         }
 
         return false;

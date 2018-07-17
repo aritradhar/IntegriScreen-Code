@@ -77,6 +77,8 @@ public class TargetForm {
     }
 
     public void makeAllDirty() {
+        if (allElements == null)
+            return;
         for(UIElement element: allElements)
             element.dirty = true;
     }
