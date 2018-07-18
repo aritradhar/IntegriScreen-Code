@@ -486,6 +486,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     public void onClickShowRaw(View view) {
         realignCheckbox.setChecked(false);
+
+        startSubmitButton.setText(startButtonText);
+        startSubmitButton.setBackgroundColor(Color.parseColor("#87CEFA")); // Light blue
+
         currentOutputSelection = OutputSelection.RAW;
     }
 
