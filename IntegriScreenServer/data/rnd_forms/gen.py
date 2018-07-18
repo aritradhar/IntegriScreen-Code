@@ -28,7 +28,7 @@ def random_value(x_space):
 
 
 def random_word(x_space):
-    max_len = 6 if x_space < 3 else 8
+    max_len = 3 if x_space < 3 else 8
     word = np.random.choice(WORDS)
     while len(word) > max_len:
         word = np.random.choice(WORDS)
@@ -37,16 +37,16 @@ def random_word(x_space):
 
 
 def random_number(x_space):
-    max_len = 6 if x_space < 3 else 8
+    max_len = 3 if x_space < 3 else 8
     word = ''.join(np.random.choice(list("0123456789"),
-                                    np.random.choice(range(3, max_len))))
+                                    np.random.choice(range(3, max_len + 1))))
     return word
 
 
 def random_alpha(x_space):
-    max_len = 6 if x_space < 3 else 8
+    max_len = 3 if x_space < 3 else 8
     word = ''.join(np.random.choice(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-                                    np.random.choice(range(3, max_len))))
+                                    np.random.choice(range(3, max_len + 1))))
     return word
 
 
