@@ -428,6 +428,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
     private void cleanAllData() {
+        if (allLoadedForms != null)
+            storeAllFormVerificationResults();
+
         // This ensures state machine goes from the beginning
         currentISState = ISState.DETECTING_FRAME;
 
@@ -711,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Vector<Pair<String, String> > elementMismatches = new Vector<>();
         for(String currentUrl: allLoadedForms.keySet()) {
             TargetForm currentForm = allLoadedForms.get(currentUrl);
-            if (currentForm.pageId.equals(stopFormId))
+            if (currentForm == null || !currentForm.isLoaded || currentForm.pageId.equals(stopFormId))
                 continue;
 
             ++formCnt;
@@ -724,6 +727,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 for(UIElement currentElement: currentForm.allElements) {
                     if (!currentElement.everVerified) {
                         elementMismatches.add(currentElement.lastMismatch);
+                        logR("Verification mismatch", "|" + currentElement.lastMismatch.first + "|\n|" + currentElement.lastMismatch.second + "|, form:" + currentForm.formUrl);
                     }
                 }
             }
@@ -937,7 +941,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             boolean acceptingInput = false;
             // Check if title was impacted. If it was, update the form.
-            if (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations)) {
+            if (targetForm.isLoaded == false || (targetForm.titleElement != null && impactedByChanges(targetForm.titleElement.box, changedLocations))) {
                 // If I managed to reload the form, just return
                 if (tryLoadingNewForm(nonRealignedUpperPart))
                     return false;
@@ -1022,7 +1026,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         } else {
-//            extractAndDisplayTextFromFrame(rotatedUpperPart, new Scalar(255, 0, 0));
+            // extractAndDisplayTextFromFrame(rotatedUpperPart, new Scalar(255, 0, 0));
         }
 
         return false;
@@ -1426,7 +1430,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 currentElement.dirty = true;
 
                 allowChanges = false;
-                logF("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
+                // logF("Potential attack", "Non-active element changing from: |" + currentElement.currentValue + "|  ___ to ___ |" + newValue + "|");
 
                 ChangeEventLog activeElementEventLog = new ChangeEventLog(currentFrameTimestamp,
                         currentElement.id,
