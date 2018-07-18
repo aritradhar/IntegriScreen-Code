@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "67", 
+  "vspace": "53", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -20,70 +20,70 @@
     }, 
     {
       "width": "17", 
-      "initialvalue": "topic", 
+      "initialvalue": "nor", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
       "id": "0", 
-      "ulc_x": "61.8", 
-      "ulc_y": "29"
+      "ulc_x": "21.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "94156", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "64179864", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "label", 
       "id": "1", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
     }, 
     {
       "width": "57", 
-      "initialvalue": "weepings", 
-      "editable": "true", 
+      "initialvalue": "OTZ", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "label", 
       "id": "2", 
       "ulc_x": "41.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "4909", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "TUK", 
+      "width": "47", 
+      "initialvalue": "bombards", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
-      "id": "4", 
-      "ulc_x": "21.8", 
-      "ulc_y": "79"
+      "id": "3", 
+      "ulc_x": "41.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "CXXIWTE", 
+      "width": "37", 
+      "initialvalue": "678149", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "4", 
+      "ulc_x": "21.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "UXK", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "5", 
-      "ulc_x": "41.8", 
-      "ulc_y": "79"
+      "ulc_x": "61.8", 
+      "ulc_y": "89"
     }, 
     {
       "width": "17", 
-      "initialvalue": "IFN", 
-      "editable": "true", 
+      "initialvalue": "437", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "6", 
       "ulc_x": "81.8", 
       "ulc_y": "89"

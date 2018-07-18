@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "55", 
+  "vspace": "63", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -20,7 +20,7 @@
     }, 
     {
       "width": "37", 
-      "initialvalue": "COPMAK", 
+      "initialvalue": "wanna", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
@@ -29,44 +29,44 @@
       "ulc_y": "19"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "ZXFKB", 
+      "width": "37", 
+      "initialvalue": "SYTUOAIW", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "1", 
-      "ulc_x": "1.8", 
-      "ulc_y": "39"
+      "ulc_x": "41.8", 
+      "ulc_y": "69"
     }, 
     {
       "width": "17", 
-      "initialvalue": "147", 
-      "editable": "true", 
+      "initialvalue": "OTH", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "button", 
       "id": "2", 
-      "ulc_x": "21.8", 
-      "ulc_y": "39"
+      "ulc_x": "81.8", 
+      "ulc_y": "69"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "1845", 
+      "width": "17", 
+      "initialvalue": "SWE", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "49"
+      "ulc_x": "41.8", 
+      "ulc_y": "89"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "PKC", 
-      "editable": "false", 
+      "width": "37", 
+      "initialvalue": "atropine", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
       "id": "4", 
-      "ulc_x": "81.8", 
-      "ulc_y": "49"
+      "ulc_x": "61.8", 
+      "ulc_y": "89"
     }
   ]
 }

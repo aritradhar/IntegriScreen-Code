@@ -19,74 +19,74 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "sled", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "2540373", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "0", 
-      "ulc_x": "81.8", 
-      "ulc_y": "29"
+      "ulc_x": "1.8", 
+      "ulc_y": "19"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "270734", 
+      "width": "57", 
+      "initialvalue": "JNHNE", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "1", 
+      "ulc_x": "41.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "ZYRMZFQY", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "2", 
+      "ulc_x": "21.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "rating", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
       "ulc_x": "1.8", 
       "ulc_y": "39"
     }, 
     {
       "width": "17", 
-      "initialvalue": "TYWLJ", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "87", 
-      "initialvalue": "DXSHND", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "3", 
-      "ulc_x": "1.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "39867", 
+      "initialvalue": "GDV", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "4", 
-      "ulc_x": "61.8", 
-      "ulc_y": "59"
+      "ulc_x": "81.8", 
+      "ulc_y": "39"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "528811", 
+      "width": "57", 
+      "initialvalue": "reason", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "5", 
-      "ulc_x": "1.8", 
-      "ulc_y": "69"
+      "ulc_x": "41.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "ants", 
+      "width": "27", 
+      "initialvalue": "VXGPC", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "6", 
-      "ulc_x": "81.8", 
-      "ulc_y": "69"
+      "ulc_x": "41.8", 
+      "ulc_y": "59"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "55", 
+  "vspace": "59", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,93 +19,93 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "WWD", 
+      "width": "37", 
+      "initialvalue": "OTYWBQ", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "41.8", 
-      "ulc_y": "19"
+      "ulc_x": "1.8", 
+      "ulc_y": "39"
     }, 
     {
       "width": "57", 
-      "initialvalue": "austere", 
+      "initialvalue": "intercom", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "1", 
       "ulc_x": "41.8", 
-      "ulc_y": "29"
+      "ulc_y": "39"
     }, 
     {
       "width": "17", 
-      "initialvalue": "GLC", 
+      "initialvalue": "XQZ", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "2", 
-      "ulc_x": "81.8", 
-      "ulc_y": "39"
+      "ulc_x": "1.8", 
+      "ulc_y": "59"
     }, 
     {
       "width": "37", 
-      "initialvalue": "141390", 
-      "editable": "true", 
+      "initialvalue": "2743", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "3", 
-      "ulc_x": "61.8", 
-      "ulc_y": "49"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "DBQUPG", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "4", 
       "ulc_x": "21.8", 
       "ulc_y": "59"
     }, 
     {
       "width": "17", 
-      "initialvalue": "CXH", 
-      "editable": "false", 
+      "initialvalue": "032", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
-      "id": "5", 
-      "ulc_x": "1.8", 
-      "ulc_y": "79"
+      "type": "textarea", 
+      "id": "4", 
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
     }, 
     {
       "width": "17", 
-      "initialvalue": "890", 
+      "initialvalue": "may", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "5", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "107", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "6", 
-      "ulc_x": "61.8", 
-      "ulc_y": "79"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "UBW", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "7", 
       "ulc_x": "81.8", 
       "ulc_y": "79"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "9529", 
-      "editable": "false", 
+      "width": "57", 
+      "initialvalue": "LMGDM", 
+      "editable": "true", 
       "height": "9", 
-      "type": "button", 
+      "type": "textfield", 
+      "id": "7", 
+      "ulc_x": "1.8", 
+      "ulc_y": "89"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "LCE", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
       "id": "8", 
-      "ulc_x": "61.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "89"
     }
   ]

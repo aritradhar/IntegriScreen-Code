@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "67", 
+  "vspace": "62", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,61 +19,61 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "27", 
-      "initialvalue": "tampered", 
-      "editable": "false", 
+      "width": "57", 
+      "initialvalue": "retaught", 
+      "editable": "true", 
       "height": "9", 
-      "type": "label", 
+      "type": "textfield", 
       "id": "0", 
-      "ulc_x": "41.8", 
+      "ulc_x": "21.8", 
       "ulc_y": "29"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "AXI", 
+      "width": "37", 
+      "initialvalue": "VHXV", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "1", 
-      "ulc_x": "21.8", 
-      "ulc_y": "49"
+      "ulc_x": "41.8", 
+      "ulc_y": "39"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "MXAHBVG", 
+      "width": "17", 
+      "initialvalue": "484", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
+      "type": "label", 
       "id": "2", 
-      "ulc_x": "61.8", 
+      "ulc_x": "81.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "77", 
-      "initialvalue": "SPRFTVO", 
+      "width": "17", 
+      "initialvalue": "045", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "3", 
-      "ulc_x": "1.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "59"
     }, 
     {
       "width": "17", 
-      "initialvalue": "queer", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "4", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "JZDIVJC", 
+      "initialvalue": "may", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "47", 
+      "initialvalue": "bums", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
       "id": "5", 
       "ulc_x": "21.8", 
       "ulc_y": "89"

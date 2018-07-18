@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "57", 
+  "vspace": "62", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,28 +19,28 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "flanked", 
-      "editable": "true", 
+      "width": "37", 
+      "initialvalue": "1987083", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "1.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "19"
     }, 
     {
       "width": "17", 
-      "initialvalue": "toxin", 
-      "editable": "true", 
+      "initialvalue": "nor", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "button", 
       "id": "1", 
-      "ulc_x": "81.8", 
-      "ulc_y": "19"
+      "ulc_x": "1.8", 
+      "ulc_y": "29"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "XYE", 
+      "width": "17", 
+      "initialvalue": "the", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
@@ -50,63 +50,63 @@
     }, 
     {
       "width": "17", 
-      "initialvalue": "coast", 
+      "initialvalue": "967", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "3", 
-      "ulc_x": "61.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "ZSJ", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "4", 
       "ulc_x": "81.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "YTPJST", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
-      "id": "5", 
-      "ulc_x": "21.8", 
       "ulc_y": "39"
     }, 
     {
+      "width": "17", 
+      "initialvalue": "nor", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textfield", 
+      "id": "4", 
+      "ulc_x": "81.8", 
+      "ulc_y": "49"
+    }, 
+    {
       "width": "37", 
-      "initialvalue": "flywheel", 
+      "initialvalue": "oculists", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
+      "id": "5", 
+      "ulc_x": "21.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "plaited", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
       "id": "6", 
-      "ulc_x": "41.8", 
-      "ulc_y": "49"
+      "ulc_x": "61.8", 
+      "ulc_y": "59"
     }, 
     {
-      "width": "67", 
-      "initialvalue": "5068887", 
+      "width": "17", 
+      "initialvalue": "may", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "7", 
-      "ulc_x": "21.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "69"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "NQLNQU", 
+      "width": "37", 
+      "initialvalue": "5921", 
       "editable": "true", 
       "height": "9", 
-      "type": "textarea", 
+      "type": "textfield", 
       "id": "8", 
-      "ulc_x": "21.8", 
-      "ulc_y": "89"
+      "ulc_x": "61.8", 
+      "ulc_y": "69"
     }
   ]
 }

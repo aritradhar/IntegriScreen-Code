@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "69", 
+  "vspace": "66", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,53 +19,53 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "ZGDSEM", 
+      "width": "17", 
+      "initialvalue": "PLR", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "0", 
-      "ulc_x": "1.8", 
-      "ulc_y": "19"
+      "ulc_x": "21.8", 
+      "ulc_y": "29"
     }, 
     {
       "width": "37", 
-      "initialvalue": "89421", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "label", 
-      "id": "1", 
-      "ulc_x": "61.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "87", 
-      "initialvalue": "64288", 
+      "initialvalue": "outshone", 
       "editable": "false", 
       "height": "9", 
       "type": "button", 
+      "id": "1", 
+      "ulc_x": "41.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "QQA", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "label", 
       "id": "2", 
-      "ulc_x": "1.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "49"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "pastels", 
+      "width": "37", 
+      "initialvalue": "medicaid", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "3", 
-      "ulc_x": "41.8", 
-      "ulc_y": "59"
+      "ulc_x": "61.8", 
+      "ulc_y": "49"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "grassed", 
+      "width": "37", 
+      "initialvalue": "RJI", 
       "editable": "true", 
       "height": "9", 
       "type": "textfield", 
       "id": "4", 
-      "ulc_x": "21.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "89"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "68", 
+  "vspace": "63", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,54 +19,54 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "passerby", 
-      "editable": "true", 
+      "width": "17", 
+      "initialvalue": "may", 
+      "editable": "false", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "label", 
       "id": "0", 
-      "ulc_x": "21.8", 
+      "ulc_x": "41.8", 
       "ulc_y": "19"
     }, 
     {
-      "width": "57", 
-      "initialvalue": "UFTE", 
+      "width": "27", 
+      "initialvalue": "ambition", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "1", 
+      "ulc_x": "61.8", 
+      "ulc_y": "19"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "the", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
-      "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "29"
-    }, 
-    {
-      "width": "47", 
-      "initialvalue": "1180", 
-      "editable": "false", 
-      "height": "9", 
-      "type": "button", 
       "id": "2", 
-      "ulc_x": "41.8", 
-      "ulc_y": "39"
-    }, 
-    {
-      "width": "37", 
-      "initialvalue": "JGOLIST", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "3", 
-      "ulc_x": "21.8", 
+      "ulc_x": "61.8", 
       "ulc_y": "59"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "HEHGQS", 
+      "width": "17", 
+      "initialvalue": "HMM", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
+      "id": "3", 
+      "ulc_x": "81.8", 
+      "ulc_y": "59"
+    }, 
+    {
+      "width": "17", 
+      "initialvalue": "and", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
       "id": "4", 
-      "ulc_x": "61.8", 
-      "ulc_y": "69"
+      "ulc_x": "1.8", 
+      "ulc_y": "79"
     }
   ]
 }

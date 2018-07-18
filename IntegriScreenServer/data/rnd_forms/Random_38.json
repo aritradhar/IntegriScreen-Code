@@ -1,6 +1,6 @@
 {
   "letter_spacing": "normal", 
-  "vspace": "68", 
+  "vspace": "55", 
   "form_action": "/IntegriScreenServer/MainServer", 
   "ratio": "12:12", 
   "fontsize": "15pt", 
@@ -19,61 +19,61 @@
       "ulc_y": "2"
     }, 
     {
-      "width": "37", 
-      "initialvalue": "177", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "0", 
-      "ulc_x": "1.8", 
-      "ulc_y": "19"
-    }, 
-    {
-      "width": "57", 
-      "initialvalue": "solemner", 
+      "width": "17", 
+      "initialvalue": "SPL", 
       "editable": "true", 
       "height": "9", 
       "type": "textarea", 
-      "id": "1", 
-      "ulc_x": "41.8", 
-      "ulc_y": "19"
+      "id": "0", 
+      "ulc_x": "1.8", 
+      "ulc_y": "29"
     }, 
     {
-      "width": "17", 
-      "initialvalue": "muster", 
+      "width": "37", 
+      "initialvalue": "diking", 
+      "editable": "false", 
+      "height": "9", 
+      "type": "button", 
+      "id": "1", 
+      "ulc_x": "21.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "37", 
+      "initialvalue": "KPGDCSK", 
       "editable": "true", 
       "height": "9", 
-      "type": "textfield", 
+      "type": "textarea", 
       "id": "2", 
+      "ulc_x": "61.8", 
+      "ulc_y": "29"
+    }, 
+    {
+      "width": "57", 
+      "initialvalue": "XFMDHSSS", 
+      "editable": "true", 
+      "height": "9", 
+      "type": "textarea", 
+      "id": "3", 
       "ulc_x": "41.8", 
       "ulc_y": "39"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "575476", 
-      "editable": "true", 
-      "height": "9", 
-      "type": "textfield", 
-      "id": "3", 
-      "ulc_x": "41.8", 
-      "ulc_y": "69"
-    }, 
-    {
-      "width": "17", 
-      "initialvalue": "85097", 
+      "width": "57", 
+      "initialvalue": "TKZGQDZ", 
       "editable": "false", 
       "height": "9", 
       "type": "label", 
       "id": "4", 
       "ulc_x": "21.8", 
-      "ulc_y": "89"
+      "ulc_y": "49"
     }, 
     {
-      "width": "47", 
-      "initialvalue": "TMLGWY", 
+      "width": "17", 
+      "initialvalue": "and", 
       "editable": "false", 
       "height": "9", 
-      "type": "button", 
+      "type": "label", 
       "id": "5", 
       "ulc_x": "41.8", 
       "ulc_y": "89"
