@@ -753,15 +753,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         for(String failForm : formFailures)
             allFormFailuresList += failForm + "\n";
 
+        logR("All non-detected forms", allFormFailuresList);
+
+
+
         logR("Overall attack detection success rate", String.valueOf((double)allDetectedAttacks.size() / formCnt) +
                 "(" + String.valueOf(allDetectedAttacks.size()) + "/" + String.valueOf(formCnt) + ")");
 
-        String allFormNotDetectedList = "\n";
-        for(String notDetectedForm : notDetectedAttacks)
-            allFormFailuresList += notDetectedForm + "\n";
-        logR("All not detected forms", allFormNotDetectedList);
 
-        logR("All non-detected attacks", allFormFailuresList);
+        String allNotDetectedAttacksList = "\n";
+        for(String notDetectedForm : notDetectedAttacks)
+            allNotDetectedAttacksList += notDetectedForm + "\n";
+        logR("All not detected attacks", allNotDetectedAttacksList);
+
 
         logR("Overall element success rate", String.valueOf((double)(elementCnt - elementMismatches.size()) / elementCnt) +
             "(" + String.valueOf(elementCnt - elementMismatches.size()) + "/" + String.valueOf(elementCnt) + ")");

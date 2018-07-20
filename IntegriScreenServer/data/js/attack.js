@@ -112,7 +112,7 @@ function fixed_time(attack) {
 
 function page_load(attack) {
     let target = target_elem ? $(`#${target_elem}`)[0] : _.sample($("textarea,input[type='textfield'],input[type='text']"));
-    log("Fixed");
+    log("Page load");
     attack($(target));
 }
 
