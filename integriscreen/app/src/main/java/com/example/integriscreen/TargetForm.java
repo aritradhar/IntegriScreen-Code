@@ -51,6 +51,7 @@ public class TargetForm {
     public boolean isLoaded;
 
     public boolean initiallyVerified;
+    public boolean detectedAttack;
 
     // url to submit the form
 //    private String submitURL;
@@ -64,6 +65,7 @@ public class TargetForm {
         pageId = "";
         isLoaded = false;
         initiallyVerified = false;
+        detectedAttack = false;
         activEl = "";
         activeSince = 0;
         activeElementLastEdit = 0;

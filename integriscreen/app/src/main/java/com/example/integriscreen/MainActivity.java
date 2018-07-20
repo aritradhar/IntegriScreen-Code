@@ -714,6 +714,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Vector<String> formSuccesses = new Vector<>();
         Vector<String> formFailures = new Vector<>();
 
+        Vector<String> allDetectedAttacks = new Vector<>();
+        Vector<String> notDetectedAttacks = new Vector<>();
+
+
         int elementCnt = 0;
         Vector<Pair<String, String> > elementMismatches = new Vector<>();
         for(String currentUrl: allLoadedForms.keySet()) {
@@ -723,6 +727,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
             ++formCnt;
             elementCnt += currentForm.allElements.size();
+            if (currentForm.detectedAttack)
+                allDetectedAttacks.add(currentUrl);
+            else
+                notDetectedAttacks.add(currentUrl);
+
             if (currentForm.initiallyVerified) {
                 formSuccesses.add(currentUrl);
             } else {
@@ -737,15 +746,25 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         }
 
-        logR("Overall form success rate", String.valueOf((double)formSuccesses.size() / formCnt));
+        logR("Overall form success rate", String.valueOf((double)formSuccesses.size() / formCnt) +
+                "(" + String.valueOf(formSuccesses.size()) + "/" + String.valueOf(formCnt) + ")");
+
         String allFormFailuresList = "\n";
         for(String failForm : formFailures)
             allFormFailuresList += failForm + "\n";
 
-        logR("All form failures", allFormFailuresList);
+        logR("Overall attack detection success rate", String.valueOf((double)allDetectedAttacks.size() / formCnt) +
+                "(" + String.valueOf(allDetectedAttacks.size()) + "/" + String.valueOf(formCnt) + ")");
 
+        String allFormNotDetectedList = "\n";
+        for(String notDetectedForm : notDetectedAttacks)
+            allFormFailuresList += notDetectedForm + "\n";
+        logR("All not detected forms", allFormNotDetectedList);
 
-        logR("Overall element success rate", String.valueOf((double)(elementCnt - elementMismatches.size()) / elementCnt));
+        logR("All non-detected attacks", allFormFailuresList);
+
+        logR("Overall element success rate", String.valueOf((double)(elementCnt - elementMismatches.size()) / elementCnt) +
+            "(" + String.valueOf(elementCnt - elementMismatches.size()) + "/" + String.valueOf(elementCnt) + ")");
         String allElementMismatches = "\n";
         for(Pair<String, String> mismatch: elementMismatches)
             allElementMismatches += "|" + mismatch.first + "|\n|" + mismatch.second + "|\n\n";
@@ -1404,7 +1423,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // If anything additional was found, don't allow changes!
         if (foundAdditionalTextOnFrame) {
-            logW("Potential attack", "Unspecified text on the screen");
+            logR("Detected Attack", "Form: " + targetForm.formUrl);
             allowChanges = false;
         }
 
@@ -1547,6 +1566,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             } else {
                 // We beep to the user to indicate that they should not continue editing
                 makeWarningSound();
+                if (!targetForm.detectedAttack)
+                    logR("Act.El. Modified when !OK", targetForm.formUrl);
+                targetForm.detectedAttack = true;
             }
         }
 
