@@ -32,12 +32,12 @@ def test_page():
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "greenBox"))
     )
-    time.sleep(2)  # Wait for a bit, for UI validation
+    time.sleep(4)  # Wait for a bit, for UI validation
     inputs = driver.find_elements_by_css_selector("input[type='text'], textarea")
     for _input in inputs:
         word = _input.text or _input.get_attribute('value')
         # target_word = np.random.choice(WORDS_LENGTHS[len(word)])
-        target_word = ''.join(np.random.choice(list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), len(word)))
+        target_word = ''.join(np.random.choice(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), len(word)))
         _input.clear()
         for l1, l2 in zip(target_word, target_word[1:] + '$'):
             _input.send_keys(l1)
@@ -48,6 +48,9 @@ def test_page():
                 # typing speed should be between 100-200 ms per keypair
                 time.sleep(np.random.normal(120 + 60 * distance / 11.0, 10) / 1000.0)
         time.sleep(args.tab_time)
+
+    # Wait before submitting
+    time.sleep(1);
     driver.find_elements_by_css_selector("input[type='submit']")[0].click()
     for log in driver.get_log('browser'):
         print log['message']
@@ -61,10 +64,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('source')
     parser.add_argument('--attacker', choices=['parallel', 'inactive'])
-    parser.add_argument('--attack_type', choices=['replace_char', 'flip_chars', 'add_char', 'remove_char', 'random'],
+    parser.add_argument('--attack_type', choices=['replace_bunch', 'flip_chars', 'add_char', 'remove_char', 'random'],
                         default='random')
     parser.add_argument('--time', type=float, default=3)
-    parser.add_argument('--tab_time', type=float, default=0.6)
+    parser.add_argument('--tab_time', type=float, default=1)
 
     args = parser.parse_args()
 
