@@ -23,8 +23,8 @@ public class PageGen {
 	}
 
 	public static String[] pageGen(String pageFileName, boolean runLocally) throws IOException {
-		// String serverUrl = "http://tildem.inf.ethz.ch";
-		String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+		String serverUrl = "http://tildem.inf.ethz.ch:8085";
+		//String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
 		
 		String dataLocation;
 		String generatedLocation;
