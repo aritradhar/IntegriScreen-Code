@@ -141,8 +141,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private ArrayList<ChangeEventLog> allChangeLogs;
 
     // static address of the server to fetch list of forms
-    // private static String serverUrl = "http://tildem.inf.ethz.ch";
-    private static String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+    private static String serverUrl = "http://tildem.inf.ethz.ch:8085";
+    // private static String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
 
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
     private static String stopFormId = "STOP"; // The header of the form that we use to stop experiments.
