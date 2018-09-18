@@ -141,8 +141,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private ArrayList<ChangeEventLog> allChangeLogs;
 
     // static address of the server to fetch list of forms
-    private static String serverUrl = "http://tildem.inf.ethz.ch:8085";
+//    private static String serverUrl = "http://tildem.inf.ethz.ch:8085";
     // private static String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
+    private static String serverUrl = "https://punk.cs.ox.ac.uk/IntegriScreenServer";
 
     private static String serverPageTypeURLParam = "?page_type=mobile_form";
     private static String stopFormId = "STOP"; // The header of the form that we use to stop experiments.
@@ -850,7 +851,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 public void run() {
                     // outputOnToast("Sending: " + (new Date()).toString());
                     // This could also be fetched from the form's form_action field (but we don't do it yet)
-                    targetForm.submitFormData(serverUrl + "/IntegriScreenServer/MainServer" + serverPageTypeURLParam);
+                    targetForm.submitFormData(serverUrl + "/MainServer" + serverPageTypeURLParam);
                 }
             };
 

@@ -20,7 +20,8 @@ public class ProcessApplicationForm {
 
 	public static volatile Map<String, HashMap<String, String>> allBrowserResponses = new ConcurrentHashMap<>();
 	
- 	public static final String serverUrl = "http://tildem.inf.ethz.ch:8085";
+ 	public static final String serverUrl = "https://punk.cs.ox.ac.uk/IntegriScreenServer";
+// 	public static final String serverUrl = "http://tildem.inf.ethz.ch:8085";
 //	public static final String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
 	public static final String pageDefaultLoc = serverUrl + "/generated/";
 	/**\
@@ -59,6 +60,8 @@ public class ProcessApplicationForm {
 		// response.getWriter().write("Response recorded: " + KVPair.toString());
 		//	response.flushBuffer();
 		String redirectURL = pageDefaultLoc + pageID + ".html?submitted=" + (new JSONObject(KVPair)).toString();
+		redirectURL = redirectURL.replace("{", "%7B");
+		redirectURL = redirectURL.replace("}", "%7D");
 		if (atkMode != null && atkType != null)
 			redirectURL = redirectURL + "&atk_mode=" + atkMode + "&atk_type=" + atkType;
 		

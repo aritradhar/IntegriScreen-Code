@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -34,10 +35,12 @@ import org.json.JSONObject;
 
 public class MainServer extends HttpServlet {
 
-	public static final String location = "/home/dhara/tomcat/static/data/";
-	public static final String generatedLocation = "/home/dhara/tomcat/static/generated/";
-	public static final String manifest = "/home/dhara/tomcat/static/generated/fileList.txt";
-
+	String corePath = (new File("testFileName")).getAbsolutePath().replace("testFileName", "webapps/IntegriScreenServer/");
+	Logger LOGGER = Logger.getLogger(MainServer.class.getName());
+	
+	public final String dataLocation = corePath + "data/";
+	public final String generatedLocation = corePath + "generated/";
+	public final String manifest = corePath + "generated/fileList.txt";	
 
 	private static final long serialVersionUID = 1L;
 
@@ -47,14 +50,101 @@ public class MainServer extends HttpServlet {
 	public static Set<String> fileString = new HashSet<>();
 	public MainServer() {
 		super();
-		//create the list of json files
-		File[] currentFiles = new File(location).listFiles();
+		
+		try {
+			regenerateAllFiles();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private String regenerateAllFiles() throws IOException {
+		System.out.println("Generate requiest received");
+
+		
+		File[] currentFiles = new File(dataLocation).listFiles();
+		fileString = new HashSet<>();
 		for(File file : currentFiles)
 		{
 			//System.out.println(file);
-			if(file.getName().contains(".json"))
+			if(file.getName().contains(".swp"))
+				continue;
+			else if(file.getName().contains(".json"))
 				fileString.add(file.getName().replaceAll(".json", ""));
 		}
+
+		JSONObject outJson = new JSONObject();
+		JSONArray jarray = new JSONArray();
+		int counter = 0;
+		for(String pageFileName:fileString)
+		{
+			String[] out = PageGen.pageGen(pageFileName, false, dataLocation, generatedLocation);
+			System.out.println("Generated : " + pageFileName);
+
+			JSONObject inJson = new JSONObject();
+			inJson.put("page_id", out[0]);
+			inJson.put("page_title", out[1]);
+			inJson.put("json", out[2]);
+			inJson.put("html", out[3]);
+			inJson.put("unicorn", out[4]);
+			jarray.put(counter++, inJson);
+		}
+		//get permission
+		try
+		{
+			String s = null;
+			//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
+			Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/generated");        
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(p.getInputStream()));
+			while ((s = br.readLine()) != null)
+				System.out.println("line: " + s);
+
+			br = new BufferedReader(
+					new InputStreamReader(p.getErrorStream()));
+			while ((s = br.readLine()) != null)
+				System.out.println("line: " + s);
+
+			p.waitFor();
+			System.out.println ("exit: " + p.exitValue());
+			p.destroy();
+		}
+		catch(Exception ex)
+		{
+			System.err.println("Things fucked up");
+		}
+
+		try
+		{
+			String s = null;
+			//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
+			Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/data");        
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(p.getInputStream()));
+			while ((s = br.readLine()) != null)
+				System.out.println("line: " + s);
+
+			br = new BufferedReader(
+					new InputStreamReader(p.getErrorStream()));
+			while ((s = br.readLine()) != null)
+				System.out.println("line: " + s);
+
+			p.waitFor();
+			System.out.println ("exit: " + p.exitValue());
+			p.destroy();
+		}
+		catch(Exception ex)
+		{
+			System.err.println("Things fucked up");
+		}
+		outJson.put("response", jarray);
+
+		FileWriter fw = new FileWriter(manifest);
+		fw.append(outJson.toString(1));
+		fw.close();
+		
+		return outJson.toString(1);
 	}
 
 	/**
@@ -108,6 +198,8 @@ public class MainServer extends HttpServlet {
 
 			if(filePart != null)
 			{
+				// UPLOAD A FILE
+				
 				String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
 				InputStream fileContent = null;
 				try {
@@ -124,7 +216,7 @@ public class MainServer extends HttpServlet {
 					byte[] buffer = new byte[fileContent.available()];
 					System.out.println("Found Zip with len: " + buffer.length);
 					fileContent.read(buffer);
-					OutputStream outStream = new FileOutputStream(location+ "/" + fileName);	
+					OutputStream outStream = new FileOutputStream(dataLocation+ "/" + fileName);	
 					outStream.write(buffer);
 					outStream.close();
 					
@@ -134,7 +226,7 @@ public class MainServer extends HttpServlet {
 					String s;
 					try 
 					{
-						String cmd = "unzip -o " + location + fileName + " -d " + location;
+						String cmd = "unzip -o " + dataLocation + fileName + " -d " + dataLocation;
 						System.out.println("Command : " + cmd);
 						p = Runtime.getRuntime().exec(cmd);
 
@@ -172,7 +264,7 @@ public class MainServer extends HttpServlet {
 				{
 					if(!fileName.contains(".zip"))
 					{
-						String loc = isGeneratedLoc ? generatedLocation + "/" + fileName : location + "/" + fileName;
+						String loc = isGeneratedLoc ? generatedLocation + "/" + fileName : dataLocation + "/" + fileName;
 						fw = new FileWriter(loc);
 						fw.append(fileData);
 						fw.close();
@@ -185,104 +277,18 @@ public class MainServer extends HttpServlet {
 				}
 
 				try {
-					response.getWriter().append(fileName + " uploaded");
-					response.sendRedirect("/upload.html");
+					response.getWriter().append(regenerateAllFiles());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-
-
-
 			}
 			//System.out.println("File data : " + fileData);
 			else
 			{
-				System.out.println("Generate requiest received");
-
-				File[] currentFiles = new File(location).listFiles();
-				fileString = new HashSet<>();
-				for(File file : currentFiles)
-				{
-					//System.out.println(file);
-					if(file.getName().contains(".swp"))
-						continue;
-					else if(file.getName().contains(".json"))
-						fileString.add(file.getName().replaceAll(".json", ""));
-				}
-
-				JSONObject outJson = new JSONObject();
-				JSONArray jarray = new JSONArray();
-				int counter = 0;
-				for(String pageFileName:fileString)
-				{
-					String[] out = PageGen.pageGen(pageFileName);
-					System.out.println("Generated : " + pageFileName);
-
-					JSONObject inJson = new JSONObject();
-					inJson.put("page_id", out[0]);
-					inJson.put("page_title", out[1]);
-					inJson.put("json", out[2]);
-					inJson.put("html", out[3]);
-					inJson.put("unicorn", out[4]);
-					jarray.put(counter++, inJson);
-				}
-				//get permission
-				try
-				{
-					String s = null;
-					//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
-					Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/generated");        
-					BufferedReader br = new BufferedReader(
-							new InputStreamReader(p.getInputStream()));
-					while ((s = br.readLine()) != null)
-						System.out.println("line: " + s);
-
-					br = new BufferedReader(
-							new InputStreamReader(p.getErrorStream()));
-					while ((s = br.readLine()) != null)
-						System.out.println("line: " + s);
-
-					p.waitFor();
-					System.out.println ("exit: " + p.exitValue());
-					p.destroy();
-				}
-				catch(Exception ex)
-				{
-					System.err.println("Things fucked up");
-				}
-
-				try
-				{
-					String s = null;
-					//Process p = Runtime.getRuntime().exec("chmod 777 /home/dhara/tomcat/static/generated/*");        
-					Process p = Runtime.getRuntime().exec("chmod 777 -R ../static/data");        
-					BufferedReader br = new BufferedReader(
-							new InputStreamReader(p.getInputStream()));
-					while ((s = br.readLine()) != null)
-						System.out.println("line: " + s);
-
-					br = new BufferedReader(
-							new InputStreamReader(p.getErrorStream()));
-					while ((s = br.readLine()) != null)
-						System.out.println("line: " + s);
-
-					p.waitFor();
-					System.out.println ("exit: " + p.exitValue());
-					p.destroy();
-				}
-				catch(Exception ex)
-				{
-					System.err.println("Things fucked up");
-				}
-				outJson.put("response", jarray);
-
-				response.getWriter().append(outJson.toString(1));
-
-				FileWriter fw = new FileWriter(manifest);
-				fw.append(outJson.toString(1));
-				fw.close();
+				System.out.println("Generate request received");
+				response.getWriter().append(regenerateAllFiles());
 
 			}
 		}

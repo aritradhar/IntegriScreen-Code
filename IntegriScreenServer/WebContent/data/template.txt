@@ -64,11 +64,11 @@ html, body, input, select, textarea, button{
 
 </style>
 
-<script type='text/javascript' src='../data/jquery-latest.min.js'></script>
-<script type='text/javascript' src='../data/underscore-min.js'></script>
-<script type='text/javascript' src='../data/restore.js'></script>
-<script type='text/javascript' src='../data/attack.js'></script>
-<script type='text/javascript' src='../data/focus.js'></script>
+<script type='text/javascript' src='./js/jquery-latest.min.js'></script>
+<script type='text/javascript' src='./js/underscore-min.js'></script>
+<script type='text/javascript' src='./js/restore.js'></script>
+<script type='text/javascript' src='./js/attack.js'></script>
+<script type='text/javascript' src='./js/focus.js'></script>
 
 </head>
 

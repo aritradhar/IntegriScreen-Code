@@ -20,8 +20,8 @@ KBD = np.array([
 ])
 
 # serverUrl = "http://tildem.inf.ethz.ch"
-serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
-
+# serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
+serverUrl = "https://punk.cs.ox.ac.uk/IntegriScreenServer"
 
 def spawn_tester(source, atk_mode, atk_type):
     atk_string = "atk_mode={}&atk_type={}".format(atk_mode, atk_type) if atk_mode and atk_type else ''
