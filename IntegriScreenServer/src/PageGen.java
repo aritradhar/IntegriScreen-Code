@@ -12,32 +12,14 @@ import org.json.JSONObject;
 public class PageGen {
 	public static void main(String[] args) throws IOException {
 		// This will load data/NAME.json as input and generate generated/NAME.html as output
-//		pageGen("email_1080_960", true);
-//		pageGen("email_1920_1080", true);
-//		pageGen("secure_email", true);
-//		pageGen("Random_30", true);
-//		pageGen("Consolas_86", true);
-//		pageGen("hard_form", true);
-//		pageGen("medium_form", true);
-//		pageGen("easy_form", true);
+		pageGen("email_1080_960", true, "WebContent/data", "WebContent/generated");
 	}
 
 	public static String[] pageGen(String pageFileName, boolean runLocally, String dataLocation, String generatedLocation) throws IOException {
 //		String serverUrl = "http://tildem.inf.ethz.ch:8085";
 		String serverUrl = "https://punk.cs.ox.ac.uk/IntegriScreenServer/";
 		//String serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085";
-		
-//		String dataLocation;
-//		String generatedLocation;
-//		if (runLocally) {
-//			dataLocation = "data/";
-//			generatedLocation = "generated/";
-//		} else {
-//			dataLocation = MainServer.location;
-//			generatedLocation = MainServer.generatedLocation;
-//		}
-		
-		// String generatedLocation = "./generated/";
+				
 		String jsonData = new String(Files.readAllBytes(new File(dataLocation + pageFileName + ".json").toPath()), StandardCharsets.UTF_8);
 		String htmlFile = new String(Files.readAllBytes(new File(dataLocation + "template.txt").toPath()), StandardCharsets.UTF_8);
 
@@ -185,22 +167,10 @@ public class PageGen {
 
 		System.out.println("----------------Page generated----------------");
 
-		// TODO -=------------!!!!!!!!!!!!!!!!!!!! --- fix this:
-		//		String urlName = generatedLocation.replace("/home/dhara/tomcat/static", serverUrl);
-//		String urlDataName = MainServer.dataLocation.replace("/home/dhara/tomcat/static", serverUrl);	
 		String urlGenerated = serverUrl + "generated/";
 		String urlData = serverUrl + "data/";
 		
-		//return "Generated HTML => " + urlName + pageFileName + ".html" + "\n" + "Generated Unicorn => " + urlName + pageFileName + "_unicorn.html" +
-		//		"\nJSON file => " + urlDataName + pageFileName + ".json";
-
 		return new String[] {pageFileName, page_title_h2, urlData + pageFileName + ".json", urlGenerated + pageFileName + ".html", urlGenerated + pageFileName + "_unicorn.html"};
-
 	}
 
-//	public static String[] pageGen(String pageFileName) throws IOException
-//	{
-//		return pageGen(pageFileName, false);
-//	}
-//
 }

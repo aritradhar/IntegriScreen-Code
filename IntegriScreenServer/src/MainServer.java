@@ -54,7 +54,6 @@ public class MainServer extends HttpServlet {
 		try {
 			regenerateAllFiles();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -191,7 +190,6 @@ public class MainServer extends HttpServlet {
 			try {
 				filePart = request.getPart("file");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} // Retrieves <input type="file" name="file">
 
@@ -205,7 +203,6 @@ public class MainServer extends HttpServlet {
 				try {
 					fileContent = filePart.getInputStream();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -252,7 +249,6 @@ public class MainServer extends HttpServlet {
 					try {
 						IOUtils.copy(fileContent, writer, StandardCharsets.UTF_8);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					fileData = writer.toString();
@@ -279,7 +275,6 @@ public class MainServer extends HttpServlet {
 				try {
 					response.getWriter().append(regenerateAllFiles());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
