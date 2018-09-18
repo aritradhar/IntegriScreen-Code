@@ -1,14 +1,15 @@
 $(document).ready(function() {
 
-	var serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
+	var serverUrl = "https://punk.cs.ox.ac.uk/IntegriScreenServer/"
+	// var serverUrl = "http://idvm-infk-capkun01.inf.ethz.ch:8085"
 	// var serverUrl = "http://tildem.inf.ethz.ch"
 
     var url = new URL(window.location.href);
-    var setup = url.searchParams.get("setup");
+    var fileList = url.searchParams.get("list");
     var time = url.searchParams.get("time");
     var start = url.searchParams.get("start");
 
-    if (setup == null) return;
+    if (fileList == null) return;
     start = start == null ? start = 0 : parseInt(start);
 
     iframe = $('#target');
@@ -22,7 +23,7 @@ $(document).ready(function() {
     }
     window.next = next_page;
 
-    $.get("../data/"+setup, function(data) {
+    $.get("../data/"+fileList, function(data) {
 
         page_targets = data.split('\n');
         next_page();
