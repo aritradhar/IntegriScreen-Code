@@ -1,7 +1,7 @@
 function log(msg) {
     // can be changed if we need to log stuff differently when testing
     console.log(msg);
-    var hiddenLogs = $('#attackLogs').val() + "|" + msg;
+    var hiddenLogs = $('#attackLogs').val() + "%7C" + msg;
     $('#attackLogs').val(hiddenLogs);
 }
 
